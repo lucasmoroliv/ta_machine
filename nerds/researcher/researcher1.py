@@ -3,15 +3,15 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
-import goodtimer2,digger2,asimov1,classification2
+import tourist2,digger2,sculptor1,sorcerer2
 
 def main():
     df_file,object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit = researcher_parameters()
-    goodtimer,digger,asimov,classification = module_version()
-    goodtimes = goodtimer.callable(object_file,timeframe)
+    tourist,digger,sculptor,sorcerer = module_version()
+    goodtimes = tourist.callable(object_file,timeframe)
     candles0_array = digger.callable(goodtimes,df_file)
 
-    info_list = asimov.callable(df_file,candles0_array,start_candle,end_candle)
+    info_list = sculptor.callable(df_file,candles0_array,start_candle,end_candle)
     dict_arrays = arraify(info_list)
 
     profit_array = get_profit_array(dict_arrays,buy_candle,buy_time,end_candle)
@@ -19,17 +19,17 @@ def main():
 # -----------------------------------------------------------------------------------
     info_as_feature = ['rsi']
     lables_list = ['candle_4_high']
-    score = classification.callable(dict_arrays,info_as_feature,lables_list,min_profit)
+    score = sorcerer.callable(dict_arrays,info_as_feature,lables_list,min_profit)
     print(score)
 
-def classification_parameters():
+def sorcerer_parameters():
     features_array = make_features()
     labels_array = make_labels()
 def make_features():
-
+    pass
 # -----------------------------------------------------------------------------------
 # Probably will be better to set up the features and labels array here at researcher1 and through
-# data to classification already done to train the classifier. Or at least done to split the arrays in
+# data to sorcerer already done to train the classifier. Or at least done to split the arrays in
 # training and test data.
 
 
@@ -58,11 +58,11 @@ def general_stats(buy_candle,buy_time):
     pass
 
 def module_version():
-    goodtimer = goodtimer2
+    tourist = tourist2
     digger = digger2
-    asimov = asimov1
-    classification = classification2
-    return goodtimer,digger,asimov,classification
+    sculptor = sculptor1
+    sorcerer = sorcerer2
+    return tourist,digger,sculptor,sorcerer
 
 def arraify(info_list):
     dict_lists = {}
