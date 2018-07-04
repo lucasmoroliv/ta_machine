@@ -15,10 +15,12 @@ def main():
     canldles0_array = callable(goodtimes,df_file)
     pprint(canldles0_array)
 
+def callable(goodtimes,df_file):
 # The callable function receives the goodtimes arary and df_file from the
 # researcher module, and returns to it an one column array containing the
-# timestamp of every candle0 found by digger.
-def callable(goodtimes,df_file):
+# timestamp of every candle0 found by digger. The pattern function will define
+# the criteria for finding the candles 0. We can call any pattern function
+# declared in this module.
     candles0_array = pattern1(30,goodtimes,df_file)
     return candles0_array
 
