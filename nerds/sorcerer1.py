@@ -7,13 +7,13 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 
-def callable(dict_arrays,info_as_feature,labels_list,min_profit):
+def callable(dict_arrays,info_as_feature,labels_list,target):
     # features_list = features_list_maker(info_as_feature,dict_arrays)
     features_array = data_maker(dict_arrays,features_list)
     print(features_list)
 
     # floated_labels_array = data_maker(dict_arrays,labels_list)
-    # labels_array = into_labels(floated_labels_array,min_profit)
+    # labels_array = into_labels(floated_labels_array,target)
     # labels_array = labels_array.ravel()
     # features_train, features_test, labels_train, labels_test = train_test_split(features_array,labels_array, test_size=0.2, random_state=42)
     # print(features_array)
@@ -27,8 +27,8 @@ def callable(dict_arrays,info_as_feature,labels_list,min_profit):
     # score = gaussian_classifier(features_train, labels_train, features_test, labels_test)
     # return score
 
-def into_labels(floated_labels_array,min_profit):
-    return (floated_labels_array>min_profit).astype(int)
+def into_labels(floated_labels_array,target):
+    return (floated_labels_array>target).astype(int)
 
 def data_maker(lists,info_list):
     df = pd.DataFrame(lists)

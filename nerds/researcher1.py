@@ -3,7 +3,9 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
-# import tourist1,digger1,sculptor1,sorcerer1
+# By importing the module "parameters" we define the main variables of the
+# program and add them to the module's scope.
+from parameters import *
 
 def main():
 # This first block of code does a lot of stuff. It initially defines a handfull
@@ -12,21 +14,19 @@ def main():
 # the structure of the data processed through the nerds with the arraify so it
 # becomes suitable for the analysis we will made further on.
 # -----------------------------------------------------------------------------------
-# Below we assign the main variables of the program with the help of a function.
-    path_df_file,path_object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit = researcher_parameters()
-# Using a second function, we choose the versions of the modules we have in
-# order to make our analysis.
+# Using this following function, we choose the versions of the modules we have
+# in order to make our analysis.
     tourist,digger,sculptor,sorcerer = module_version()
 # The goodtimes is a two column array. Each line of it has the inferior and
 # superior limits of the intervals found by our expert tourist.
-    goodtimes = tourist.callable(path_df_file,path_object_file,timeframe)
+    goodtimes = tourist.callable(path_candle_file,path_trendline_file ,timeframe)
 # Next we get a one column array that has the timestamp of each candle0, which
 # are candles digger found with probably some interesting pattern.
-    candles0_array = digger.callable(goodtimes,path_df_file)
+    candles0_array = digger.callable(goodtimes,path_candle_file)
 # The sculptor gives us is a list of dictionaries that have information we
 # choose (like ohlc, etc), of the candles we choose related to candle0, of each
 # single candle0 found by digger.
-    info_list = sculptor.callable(path_df_file,candles0_array,start_candle,end_candle)
+    info_list = sculptor.callable(path_candle_file,candles0_array,start_candle,end_candle)
 # The function gets the data given by info_list and change it so it gets a
 # format more suitable for further processing.
     dict_arrays = arraify(info_list)
@@ -34,7 +34,7 @@ def main():
 
 # Below we find the analysis code block.
 # -----------------------------------------------------------------------------------
-    profit_array = get_profit_array(dict_arrays,buy_candle,buy_time,end_candle)
+    profit_array = get_profit_array(dict_arrays)
     keys_list = list(profit_array.keys())
     sample_amt = profit_array[keys_list[0]].shape[0]
     for key in keys_list:
@@ -48,29 +48,12 @@ def main():
 
 # -----------------------------------------------------------------------------------
 
-
-def researcher_parameters():
-    path_df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    path_object_file = '../warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt'
-    timeframe = ['2014-01-04 00:00:00','2018-04-19 00:00:00']
-    start_candle = -3
-    end_candle = 6
-    buy_candle = 1
-    buy_time = 'open'
-    sell_candle = 4
-    sell_time = 'high'
-    min_profit = 0.01
-    return path_df_file,path_object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit
-
-def get_profit_array(dict_arrays,buy_candle,buy_time,end_candle):
+def get_profit_array(dict_arrays):
     dict_profits = {}
-    price_buy = dict_arrays['candle_{0}_{1}'.format(buy_candle,buy_time)]
-    for candle in range(buy_candle+1,end_candle+1):
-        dict_profits['o{0}_h{1}'.format(buy_candle,candle)] = ( dict_arrays['candle_{0}_{1}'.format(candle,'high')] - price_buy ) / price_buy
+    price_buy = dict_arrays['candle_{0}_{1}'.format(buy['candle'],buy['moment'])]
+    for candle in range(buy['candle']+1,end_candle+1):
+        dict_profits['o{0}_h{1}'.format(buy['candle'],candle)] = ( dict_arrays['candle_{0}_{1}'.format(candle,'high')] - price_buy ) / price_buy
     return dict_profits
-
-def general_stats(buy_candle,buy_time):
-    pass
 
 def module_version():
     import tourist1,digger1,sculptor1,sorcerer1

@@ -4,16 +4,16 @@ import time,calendar,datetime,csv,math,json
 from pprint import pprint
 
 def main():
-    path_object_file  = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
+    path_trendline_file   = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
     timeframe = ['2017-05-10 00:00:00','2018-04-18 00:00:00']
-    goodtimes = callable(path_object_file ,timeframe)
+    goodtimes = callable(path_trendline_file  ,timeframe)
     print(goodtimes)
 
-def callable(path_df_file,path_object_file,timeframe):
-    data = get_data(path_object_file,timeframe)
+def callable(path_candle_file ,path_trendline_file ,timeframe):
+    data = get_data(path_trendline_file ,timeframe)
     big_array = goodtimes_parameters(data)
     small_array = conditions1(big_array)
-    goodtimes = fix_array(small_array,path_df_file)
+    goodtimes = fix_array(small_array,path_candle_file )
     return goodtimes
 
 def conditions1(big_array):
@@ -45,8 +45,8 @@ def fix_array(mess,df_file):
             start = all_unique[i+1]
     return np.array(intervals)
 
-def get_data(path_object_file ,timeframe):
-    with open(path_object_file ) as f:
+def get_data(path_trendline_file  ,timeframe):
+    with open(path_trendline_file  ) as f:
         data = json.load(f)
         # return filterbydate_data(data,timeframe)
         return data
