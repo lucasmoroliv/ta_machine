@@ -15,13 +15,14 @@ def main():
     canldles0_array = callable(goodtimes,df_file)
     pprint(canldles0_array)
 
+# The callable function receives the goodtimes arary and df_file from the
+# researcher module, and returns to it an one column array containing the
+# timestamp of every candle0 found by digger.
 def callable(goodtimes,df_file):
     candles0_array = pattern1(30,goodtimes,df_file)
     return candles0_array
 
 def pattern1(limit,goodtimes,df_file):
-# The function returns a list with the timestamps where we see this pattern happening.
-# First we get the rsi.
     rsi = momentum_indicators.rsi(df_file)
     sample = []
     for index in range(goodtimes.shape[0]):
