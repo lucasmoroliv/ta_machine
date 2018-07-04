@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import time,calendar,datetime,csv,math,json,sys
 from pprint import pprint
-sys.path.append('C:/Users/Lucas/code/projects/git_repos/ta_machine/builders')
+sys.path.append('../builders')
 import momentum_indicators
 import matplotlib.pyplot as plt
 import tourist1

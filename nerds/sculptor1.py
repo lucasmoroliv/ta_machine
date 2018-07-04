@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import time,calendar,datetime,csv,math,json,sys
-sys.path.append('C:/Users/Lucas/code/projects/git_repos/ta_machine/builders')
+sys.path.append('../builders')
 from pprint import pprint
 import momentum_indicators
 import matplotlib.pyplot as plt

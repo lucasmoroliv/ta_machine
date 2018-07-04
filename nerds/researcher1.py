@@ -35,9 +35,13 @@ def main():
 # Below we find the analysis code block.
 # -----------------------------------------------------------------------------------
     profit_array = get_profit_array(dict_arrays,buy_candle,buy_time,end_candle)
-    pprint(profit_array)
-
-
+    keys_list = list(profit_array.keys())
+    sample_amt = profit_array[keys_list[0]].shape[0]
+    for key in keys_list:
+        success_amt = profit_array[key][profit_array[key]>0.007].shape[0]
+# "ros" stands for "rate_of_success"
+        ros = success_amt/sample_amt
+        print(ros)
 
 
 
@@ -61,7 +65,6 @@ def researcher_parameters():
 def get_profit_array(dict_arrays,buy_candle,buy_time,end_candle):
     dict_profits = {}
     price_buy = dict_arrays['candle_{0}_{1}'.format(buy_candle,buy_time)]
-    print(type(price_buy))
     for candle in range(buy_candle+1,end_candle+1):
         dict_profits['o{0}_h{1}'.format(buy_candle,candle)] = ( dict_arrays['candle_{0}_{1}'.format(candle,'high')] - price_buy ) / price_buy
     return dict_profits
