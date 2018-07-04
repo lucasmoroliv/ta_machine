@@ -3,13 +3,19 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
-import tourist1,digger1,sculptor1,sorcerer1
+# import tourist1,digger1,sculptor1,sorcerer1
 
 def main():
+# This first block of code does a lot of stuff. It initially defines a handfull
+# of parameters that will constrain our analysis. Next, we choose the version of
+# the nerds that we will use using module_version function. At last, we change
+# the structure of the data processed through the nerds with the arraify so it
+# becomes suitable for the analysis we will made further on.
+# -----------------------------------------------------------------------------------
 # Below we assign the main variables of the program with the help of a function.
     path_df_file,path_object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit = researcher_parameters()
-# Using a second function, we choose the versions of the modules we have in order to make
-# our analysis.
+# Using a second function, we choose the versions of the modules we have in
+# order to make our analysis.
     tourist,digger,sculptor,sorcerer = module_version()
 # The goodtimes is a two column array. Each line of it has the inferior and
 # superior limits of the intervals found by our expert tourist.
@@ -17,26 +23,27 @@ def main():
 # Next we get a one column array that has the timestamp of each candle0, which
 # are candles digger found with probably some interesting pattern.
     candles0_array = digger.callable(goodtimes,path_df_file)
-# The sculptor gives us is a list of dictionaries that have information we choose
-# (like ohlc, etc), of the candles we choose related to candle0, of each single
-# candle0 found by digger.
+# The sculptor gives us is a list of dictionaries that have information we
+# choose (like ohlc, etc), of the candles we choose related to candle0, of each
+# single candle0 found by digger.
     info_list = sculptor.callable(path_df_file,candles0_array,start_candle,end_candle)
-# The function gets the data given by info_list and change it so it gets a format
-# more suitable for further processing.
+# The function gets the data given by info_list and change it so it gets a
+# format more suitable for further processing.
     dict_arrays = arraify(info_list)
 # -----------------------------------------------------------------------------------
 
-
-
+# Below we find the analysis code block.
+# -----------------------------------------------------------------------------------
     profit_array = get_profit_array(dict_arrays,buy_candle,buy_time,end_candle)
-    pprint(info_list)
+    pprint(profit_array)
+
+
+
+
+
 
 # -----------------------------------------------------------------------------------
-#     info_as_feature = ['rsi']
-#     lables_list = ['candle_4_high']
-#     score = sorcerer.callable(dict_arrays,info_as_feature,lables_list,min_profit)
-#     print(score)
-# -----------------------------------------------------------------------------------
+
 
 def researcher_parameters():
     path_df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
@@ -63,11 +70,8 @@ def general_stats(buy_candle,buy_time):
     pass
 
 def module_version():
-    tourist = tourist1
-    digger = digger1
-    sculptor = sculptor1
-    sorcerer = sorcerer1
-    return tourist,digger,sculptor,sorcerer
+    import tourist1,digger1,sculptor1,sorcerer1
+    return tourist1,digger1,sculptor1,sorcerer1
 
 def arraify(info_list):
     dict_lists = {}
