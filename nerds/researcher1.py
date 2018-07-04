@@ -3,39 +3,44 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
-import tourist2,digger2,sculptor1,sorcerer2
+import tourist1,digger1,sculptor1,sorcerer1
 
 def main():
-    df_file,object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit = researcher_parameters()
+# Below we assign the main variables of the program with the help of a function.
+    path_df_file,path_object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit = researcher_parameters()
+# Using a second function, we choose the versions of the modules we have in order to make
+# our analysis.
     tourist,digger,sculptor,sorcerer = module_version()
-    goodtimes = tourist.callable(object_file,timeframe)
-    candles0_array = digger.callable(goodtimes,df_file)
-
-    info_list = sculptor.callable(df_file,candles0_array,start_candle,end_candle)
+# The goodtimes is a two column array. Each line of it has the inferior and
+# superior limits of the intervals found by our expert tourist.
+    goodtimes = tourist.callable(path_df_file,path_object_file,timeframe)
+# Next we get a one column array that has the timestamp of each candle0, which
+# are candles digger found with probably some interesting pattern.
+    candles0_array = digger.callable(goodtimes,path_df_file)
+# The sculptor gives us is a list of dictionaries that have information we choose
+# (like ohlc, etc), of the candles we choose related to candle0, of each single
+# candle0 found by digger.
+    info_list = sculptor.callable(path_df_file,candles0_array,start_candle,end_candle)
+# The function gets the data given by info_list and change it so it gets a format
+# more suitable for further processing.
     dict_arrays = arraify(info_list)
+# -----------------------------------------------------------------------------------
+
+
 
     profit_array = get_profit_array(dict_arrays,buy_candle,buy_time,end_candle)
+    pprint(info_list)
 
 # -----------------------------------------------------------------------------------
-    info_as_feature = ['rsi']
-    lables_list = ['candle_4_high']
-    score = sorcerer.callable(dict_arrays,info_as_feature,lables_list,min_profit)
-    print(score)
-
-def sorcerer_parameters():
-    features_array = make_features()
-    labels_array = make_labels()
-def make_features():
-    pass
+#     info_as_feature = ['rsi']
+#     lables_list = ['candle_4_high']
+#     score = sorcerer.callable(dict_arrays,info_as_feature,lables_list,min_profit)
+#     print(score)
 # -----------------------------------------------------------------------------------
-# Probably will be better to set up the features and labels array here at researcher1 and through
-# data to sorcerer already done to train the classifier. Or at least done to split the arrays in
-# training and test data.
-
 
 def researcher_parameters():
-    df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
+    path_df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
+    path_object_file = '../warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt'
     timeframe = ['2014-01-04 00:00:00','2018-04-19 00:00:00']
     start_candle = -3
     end_candle = 6
@@ -44,7 +49,7 @@ def researcher_parameters():
     sell_candle = 4
     sell_time = 'high'
     min_profit = 0.01
-    return df_file,object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit
+    return path_df_file,path_object_file,timeframe,start_candle,end_candle,buy_candle,buy_time,sell_candle,sell_time,min_profit
 
 def get_profit_array(dict_arrays,buy_candle,buy_time,end_candle):
     dict_profits = {}
@@ -58,10 +63,10 @@ def general_stats(buy_candle,buy_time):
     pass
 
 def module_version():
-    tourist = tourist2
-    digger = digger2
+    tourist = tourist1
+    digger = digger1
     sculptor = sculptor1
-    sorcerer = sorcerer2
+    sorcerer = sorcerer1
     return tourist,digger,sculptor,sorcerer
 
 def arraify(info_list):

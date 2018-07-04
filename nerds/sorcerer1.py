@@ -3,7 +3,6 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
-import goodtimes1_1, pattern1_1
 from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
 from sklearn.model_selection import train_test_split

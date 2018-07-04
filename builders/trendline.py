@@ -8,10 +8,10 @@ def callable(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, m
 
 def main():
     max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween = parameters()
-    data_file = standardize_name(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween)
+    object_file = standardize_name(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween)
     messed_trendlines_list = get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween)
     trendlines_list = shrink_data(messed_trendlines_list)
-    data = { 'type': { 'df_file': df_file,
+    data = { 'type': {'df_file': df_file,
                       'timeframe': timeframe,
                       'max_span': max_span,
                       'min_span': min_span,
@@ -20,10 +20,10 @@ def main():
                       'min_tests': min_tests,
                       'max_tests': max_tests,
                       'min_inbetween': min_inbetween},
-            'trendlines': trendlines_list
+                      'trendlines': trendlines_list
     }
-    full_data_object = '../warehouse/trendlines/' + data_file
-    with open(full_data_object, 'w') as outfile:
+    path_data_object = '../warehouse/trendlines/' + object_file
+    with open(path_data_object, 'w') as outfile:
         json.dump(data, outfile)
 
 def parameters():

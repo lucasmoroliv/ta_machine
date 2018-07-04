@@ -1,16 +1,17 @@
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json
+import time,calendar,datetime,csv,math,json,sys
 from pprint import pprint
-import momentum_indicators,trendline5
+sys.path.append('C:/Users/Lucas/code/projects/git_repos/ta_machine/builders')
+import momentum_indicators
 import matplotlib.pyplot as plt
-import goodtimer2
+import tourist1
 
 def main():
     object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
     df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
     timeframe = ['2017-05-10 00:00:00','2018-04-20 00:00:00']
-    goodtimes = goodtimer2.callable(object_file,timeframe)
+    goodtimes = tourist1.callable(object_file,timeframe)
     canldles0_array = callable(goodtimes,df_file)
     pprint(canldles0_array)
 

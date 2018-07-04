@@ -4,17 +4,16 @@ import time,calendar,datetime,csv,math,json
 from pprint import pprint
 
 def main():
-    object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
+    path_object_file  = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
     timeframe = ['2017-05-10 00:00:00','2018-04-18 00:00:00']
-    goodtimes = callable(object_file,timeframe)
+    goodtimes = callable(path_object_file ,timeframe)
     print(goodtimes)
 
-def callable(object_file,timeframe):
-    data = get_data(object_file,timeframe)
-    df_file = data['type']['file']
+def callable(path_df_file,path_object_file,timeframe):
+    data = get_data(path_object_file,timeframe)
     big_array = goodtimes_parameters(data)
     small_array = conditions1(big_array)
-    goodtimes = fix_array(small_array,df_file)
+    goodtimes = fix_array(small_array,path_df_file)
     return goodtimes
 
 def conditions1(big_array):
@@ -46,8 +45,8 @@ def fix_array(mess,df_file):
             start = all_unique[i+1]
     return np.array(intervals)
 
-def get_data(object_file,timeframe):
-    with open(object_file) as f:
+def get_data(path_object_file ,timeframe):
+    with open(path_object_file ) as f:
         data = json.load(f)
         # return filterbydate_data(data,timeframe)
         return data
@@ -91,8 +90,8 @@ def goodtimes_parameters(data):
     # return big_list
     return np.array(big_list)
 
-def get_dataframe(file):
-    return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+def get_dataframe(df_file):
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
 
 def filterbydate_data(data,timeframe):
 # The motivation for making the function came from allowing the use of data objects previously created. Now we can create a data

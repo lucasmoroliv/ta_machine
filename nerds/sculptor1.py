@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json
+import time,calendar,datetime,csv,math,json,sys
+sys.path.append('C:/Users/Lucas/code/projects/git_repos/ta_machine/builders')
 from pprint import pprint
-import momentum_indicators,trendline5
+import momentum_indicators
 import matplotlib.pyplot as plt
-import goodtimer2,digger2
 
 def main():
     object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
