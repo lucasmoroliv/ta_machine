@@ -2,37 +2,38 @@ import numpy as np
 import pandas as pd
 import time,calendar,datetime,csv,math,json,importlib
 from pprint import pprint
-import tourist1 as tourist
-import digger1 as digger
-import sculptor1 as sculptor
-import researcher1 as researcher
-# import sorcerer1 as sorcerer
 
 def main():
-    callable()
+    p = {
+    'path_candle_file' : '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
+    'path_trendline_file': '../warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
+    'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
+    'start_candle' : -3,
+    'end_candle' : 6,
+    'buy' : {'candle':1,'moment':'open'},
+    'sell' : {'candle':4,'moment':'high'},
+    'target' : 0.01,
+    'tourist_version': 'tourist1',
+    'digger_version': 'digger1',
+    'sculptor_version': 'sculptor1',
+    'researcher_version': 'researcher1'
+    }
+    callable(p)
 
 def callable(p=None):
-    p = {
-        'path_candle_file' : '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
-        'path_trendline_file': '../warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
-        'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
-        'start_candle' : -3,
-        'end_candle' : 6,
-        'buy' : {'candle':1,'moment':'open'},
-        'sell' : {'candle':4,'moment':'high'},
-        'target' : 0.01
-    }
-
+    tourist,digger,sculptor,researcher = import_module(p)
     goodtimes = tourist.callable(p)
     candles0_array = digger.callable(p,goodtimes)
     info_list = sculptor.callable(p,candles0_array)
     result = researcher.callable(p,info_list)
     pprint(result)
 
-
-
-
-
+def import_module(p):
+    tourist = __import__(p['tourist_version'])
+    digger = __import__(p['digger_version'])
+    sculptor = __import__(p['sculptor_version'])
+    researcher = __import__(p['researcher_version'])
+    return tourist,digger,sculptor,researcher
 
 if __name__ == '__main__':
     time1 = time.time()
