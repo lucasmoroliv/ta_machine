@@ -6,30 +6,21 @@ from pprint import pprint
 import momentum_indicators
 import matplotlib.pyplot as plt
 
-def main():
-    object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
-    df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    timeframe = ['2017-05-10 00:00:00','2018-04-20 00:00:00']
-    goodtimes = goodtimer2.callable(object_file,timeframe)
-    candles0_array = digger2.callable(goodtimes,df_file)
-    info_list = callable(candles0_array,df_file)
-    pprint(info_list)
-
-def callable(df_file,candles0_array,start_candle,end_candle):
-    info_list = get_info_list(df_file,candles0_array,start_candle,end_candle)
+def callable(p,candles0_array):
+    info_list = get_info_list(p,candles0_array)
     return info_list
 
-def get_info_list(df_file,candles0_array,start_candle,end_candle):
-    df_old = get_dataframe(df_file)
+def get_info_list(p,candles0_array):
+    df_old = get_dataframe(p['path_candle_file'])
     df = df_old.set_index('timestamp')
-    rsi = momentum_indicators.rsi(df_file)
+    rsi = momentum_indicators.rsi(p['path_candle_file'])
     df = update_df(df,'rsi',rsi[:,1])
     candle_sec = df_old['timestamp'][1] - df_old['timestamp'][0]
     candles_list = []
     for row in candles0_array:
         candles = {}
         ts_candle0 = row
-        for index in range(start_candle,end_candle+1):
+        for index in range(p['start_candle'],p['end_candle']+1):
             ts = ts_candle0 + candle_sec*index
             candles[index] = {
                 # 'ts': ts,

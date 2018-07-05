@@ -7,25 +7,17 @@ import momentum_indicators
 import matplotlib.pyplot as plt
 import tourist1
 
-def main():
-    object_file = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
-    df_file = '../warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    timeframe = ['2017-05-10 00:00:00','2018-04-20 00:00:00']
-    goodtimes = tourist1.callable(object_file,timeframe)
-    canldles0_array = callable(goodtimes,df_file)
-    pprint(canldles0_array)
-
-def callable(goodtimes,df_file):
+def callable(p,goodtimes):
 # The callable function receives the goodtimes arary and df_file from the
 # researcher module, and returns to it an one column array containing the
 # timestamp of every candle0 found by digger. The pattern function will define
 # the criteria for finding the candles 0. We can call any pattern function
 # declared in this module.
-    candles0_array = pattern1(30,goodtimes,df_file)
+    candles0_array = pattern1(p,30,goodtimes)
     return candles0_array
 
-def pattern1(limit,goodtimes,df_file):
-    rsi = momentum_indicators.rsi(df_file)
+def pattern1(p,limit,goodtimes):
+    rsi = momentum_indicators.rsi(p['path_candle_file'])
     sample = []
     for index in range(goodtimes.shape[0]):
         ts_timeframe = (goodtimes[index,0],goodtimes[index,1])

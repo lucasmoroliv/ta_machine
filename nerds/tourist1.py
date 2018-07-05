@@ -3,25 +3,19 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 
-def main():
-    path_trendline_file   = '../warehouse/trendlines/' + '30min_2017-05-01_2018-04-19_40_100_4_9_0015_001_8.txt'
-    timeframe = ['2017-05-10 00:00:00','2018-04-18 00:00:00']
-    goodtimes = callable(path_trendline_file  ,timeframe)
-    print(goodtimes)
-
-def callable(path_candle_file ,path_trendline_file ,timeframe):
-    data = get_data(path_trendline_file ,timeframe)
+def callable(p):
+    data = get_data(p)
     big_array = goodtimes_parameters(data)
     small_array = conditions1(big_array)
-    goodtimes = fix_array(small_array,path_candle_file )
+    goodtimes = fix_array(p,small_array)
     return goodtimes
 
 def conditions1(big_array):
     small_array = big_array[big_array[:,2]>0]
     return small_array
 
-def fix_array(mess,df_file):
-    df = get_dataframe(df_file)
+def fix_array(p,mess):
+    df = get_dataframe(p['path_candle_file'])
     candle_sec = (df['timestamp'][1] - df['timestamp'][0])
     all_list = []
     for index in range(mess.shape[0]):
@@ -45,11 +39,10 @@ def fix_array(mess,df_file):
             start = all_unique[i+1]
     return np.array(intervals)
 
-def get_data(path_trendline_file  ,timeframe):
-    with open(path_trendline_file  ) as f:
+def get_data(p):
+    with open(p['path_trendline_file']) as f:
         data = json.load(f)
-        # return filterbydate_data(data,timeframe)
-        return data
+        return filterbydate_data(data,p['timeframe'])
 
 def goodtimes_parameters(data):
 # Here we build an huge array, where each row represent a trendline of the data object, and each column is a parameter of them, like number of tests,
