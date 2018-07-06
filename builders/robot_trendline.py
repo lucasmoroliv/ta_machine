@@ -17,8 +17,10 @@ def automate(t_dict):
         try:
             trendline_maker.callable(t_dict[t])
         except:
-            # print('-'*10000000)
+            print('---------------------------------')
             print('No trendlines found.')
+            print(t)
+            print('---------------------------------')
 
 def value_changer(t_dict,amt_t,**kwargs):
     for j in range(amt_t):
