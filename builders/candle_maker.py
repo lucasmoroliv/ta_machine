@@ -18,13 +18,11 @@ def automate():
                       ('2d',2*day),
                       ('3d',3*day),
                       ('4d',4*day),
-                      ('1w',7*day)]      
+                      ('1w',7*day)]
     for chart in candle_str_sec:
-        candle_maker(chart)
+        callable(chart)
 
-
-
-def candle_maker(candle_str_sec):
+def callable(candle_str_sec):
     candle_str = candle_str_sec[0]
     candle_sec = candle_str_sec[1]
     data_file = '../warehouse/historical_data/.bitstampUSD.csv'
@@ -63,7 +61,6 @@ def filter_df(df,candle_file,timestamp_startofthemonth, candle_sec):
 
     with open(candle_file, 'w', newline='') as file:
         spamwriter = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
         for row in df.values:
 # This statement looks for the right "candle_start" variable, which will be the timestamp of the first full candle.
             if checker == 0:
