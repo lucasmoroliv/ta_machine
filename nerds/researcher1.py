@@ -4,16 +4,19 @@ import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import matplotlib.pyplot as plt
 
+# def main(p,info_list):
+#     arraify(p,info_list)
+
 def callable(p,info_list):
     dict_arrays = arraify(info_list)
-    profit_array = get_profit_array(dict_arrays,p['buy'],p['end_candle'])
-    keys_list = list(profit_array.keys())
-    sample_amt = profit_array[keys_list[0]].shape[0]
-    for key in keys_list:
-        success_amt = profit_array[key][profit_array[key]>p['target']].shape[0]
-# "ros" stands for "rate_of_success"
-        ros = success_amt/sample_amt
-    return ros
+#     profit_array = get_profit_array(dict_arrays,p['buy'],p['end_candle'])
+#     keys_list = list(profit_array.keys())
+#     sample_amt = profit_array[keys_list[0]].shape[0]
+#     for key in keys_list:
+#         success_amt = profit_array[key][profit_array[key]>p['target']].shape[0]
+# # "ros" stands for "rate_of_success"
+#         ros = success_amt/sample_amt
+#     return ros
 
 def get_profit_array(dict_arrays,buy,end_candle):
     dict_profits = {}
@@ -34,6 +37,7 @@ def arraify(info_list):
     dict_arrays = {}
     for key in list(dict_lists):
         dict_arrays[key] = np.array(dict_lists[key])
+    print(dict_arrays)
     return dict_arrays
 
 if __name__ == '__main__':

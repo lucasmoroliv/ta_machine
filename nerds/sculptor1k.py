@@ -6,18 +6,6 @@ import digger1k
 
 import matplotlib.pyplot as plt
 
-# def main():
-#     object_file = 'td_setup_30min_bitstamp.csv'
-#     df_file = '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-#     timeframe = ['2017-05-10 00:00:00','2018-04-20 00:00:00']
-#     # df_td = generate_df_td.callable()
-#     df = get_dataframe(df_file)
-#     td_s_array = td_array(object_file,df)
-#     # candles0_array = goodtimertd.callable(object_file,timeframe)
-#     # callable(object_file,timeframe,df)
-#     info_list = callable(object_file, timeframe, df, td_s_array)
-#     pprint(info_list)
-
 def callable(p,candles0_array):
     info_list = get_info_list(p,candles0_array,p['buy'])
     return info_list
@@ -29,7 +17,6 @@ def td_array(td_file,df):
     list1 = []
     list2 = []
     count = 0
-    # df2 = pd.DataFrame()
     td_s_array = np.zeros([df.shape[0],2])
     with open(td_file, newline='') as csvfile:
         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
@@ -62,37 +49,17 @@ def get_info_list(p,candles0_array,buy):
             ts = ts_candle0 + candle_sec*index
             candles[index] = {
                 'ts' : ts,
-                'open': df['open'][ts],#-open_buy_candle)/open_buy_candle,
-                'high': df['high'][ts],#-open_buy_candle)/open_buy_candle,
-                'low': df['low'][ts],#-open_buy_candle)/open_buy_candle,
-                'close': df['close'][ts],#-open_buy_candle)/open_buy_candle,
-                'volume': df['volume'][ts],#-volume_buy_candle)/volume_buy_candle,
-                'amplitude': df['amplitude'][ts],#-amplitude_buy_candle)/amplitude_buy_candle,
+                'open': df['open'][ts],
+                'high': df['high'][ts],
+                'low': df['low'][ts],
+                'close': df['close'][ts],
+                'volume': df['volume'][ts],
+                'amplitude': df['amplitude'][ts],
                 'change': df['change'][ts],
                 'td_s': df['td'][ts],
             }
         candles_list.append(candles)
     return candles_list
-
-
-#
-# def pattern1(big_array):
-#     small_array = big_array[big_array[:,1]==9]
-#     small_array = small_array[:,0]
-#     return small_array
-#
-# def get_data(object_file,timeframe):
-#     with open(object_file, newline='') as csvfile:
-#         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
-#         list = []
-#         big_list = []
-#         for row in data:
-#             ts_start = int(row[0].split(',')[0])
-#             td = int(row[0].split(',')[1])
-#             big_list.append([ts_start,td])
-#         big_array = np.array(big_list)
-#     return big_array
-
 
 if __name__ == '__main__':
     time1 = time.time()
