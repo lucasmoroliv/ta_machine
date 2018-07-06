@@ -3,49 +3,36 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 
-def callable(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, min_inbetween):
-    data = get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, min_inbetween)
-
 def main():
-    max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween = parameters()
-    object_file = standardize_name(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween)
-    messed_trendlines_list = get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween)
-    trendlines_list = shrink_data(messed_trendlines_list)
-    data = { 'type': {'df_file': df_file,
-                      'timeframe': timeframe,
-                      'max_span': max_span,
-                      'min_span': min_span,
-                      'upper_limit': upper_limit,
-                      'lower_limit': lower_limit,
-                      'min_tests': min_tests,
-                      'max_tests': max_tests,
-                      'min_inbetween': min_inbetween},
-                      'trendlines': trendlines_list
+    t = {
+        'candle_file' : '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
+        'timeframe' : ('2018-01-01 00:00:00','2018-06-19 23:30:00'),
+        'max_span' : 100,
+        'min_span' : 40,
+        'upper_limit' : 0.0005,
+        'lower_limit' : 0.001,
+        'min_tests' :  4,
+        'max_tests' : 15,
+        'min_inbetween' : None
     }
-    path_data_object = '../warehouse/trendlines/' + object_file
-    with open(path_data_object, 'w') as outfile:
-        json.dump(data, outfile)
+    t['min_inbetween'] = int(t['min_span']*0.1)
+    callable(t)
 
-def parameters():
-    df_file = '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    timeframe = ('2014-01-01 00:00:00','2018-06-19 23:30:00')
-    max_span = 500
-    min_span = 80
-    upper_limit = 0.0005
-    lower_limit = 0.001
-    min_tests = 3
-    max_tests = 15
-    min_inbetween = int(min_span*0.1)
-    return max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween
+def callable(t):
+    t['trendline_file'] = standard_name(t)
+    messed_trendlines_list = get_trendlines(t)
+    trendlines_list = shrink_data(messed_trendlines_list)
+    trendlines_data = {
+        'type': t,
+        'trendlines': trendlines_list
+    }
+    pprint(trendlines_data)
+    path_trendlines_file = '../warehouse/trendlines/' + t['trendline_file']
+    with open(path_trendlines_file, 'w') as outfile:
+        json.dump(trendlines_data, outfile)
 
-def standardize_name(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween):
-    file_name = df_file.split('_')[0] + '_' + str(timeframe[0].split()[0]) + '_' + str(timeframe[1].split()[0]) + \
-                '_' + str(min_span) + '_' + str(max_span) + '_' + str(min_tests) + '_' + str(max_tests) + '_' + \
-                str(upper_limit).split('.')[1] + '_' + str(lower_limit).split('.')[1] + '_' + str(min_inbetween) + '.txt'
-    return file_name
-
-def shrink_data(messed_data):
-    full_data_df = pd.DataFrame(messed_data)
+def shrink_data(messed_trendlines_list):
+    full_data_df = pd.DataFrame(messed_trendlines_list)
     blacklisted_names = ['tests','a','b']
     allnames_list = list(full_data_df)
     no_blacklisted_names = [i for i in allnames_list if i not in blacklisted_names]
@@ -81,19 +68,19 @@ def take_nan_out(mess):
         [item.pop(i) for i in pop_list]
     return mess
 
-def get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_limit, min_tests, max_tests, min_inbetween):
-    df = get_dataframe('../warehouse/candle_data/' + df_file)
-    df = filterbydate_df(df,timeframe)
+def get_trendlines(t):
+    df = get_dataframe('../warehouse/candle_data/' + t['candle_file'])
+    df = filterbydate_df(df,t['timeframe'])
     low_array = df[['timestamp','low']].copy().values
     trendlines_list = []
 # It will iterate for every candle within timeframe that can be a trendline with the parameters previously defined. It does not need to loop over all the candles because of min_span.
-    for index_point1 in range(low_array.shape[0]-min_span+1):
+    for index_point1 in range(low_array.shape[0]-t['min_span']+1):
 # We need to decide over the inferior and superior limits that will give us the interval of possible point2 values.
-        if (index_point1+max_span) >= (low_array.shape[0]):
+        if (index_point1+t['max_span']) >= (low_array.shape[0]):
             superior_index_point2 = low_array.shape[0]
         else:
-            superior_index_point2 = index_point1+max_span - 1
-        inferior_index_point2 = index_point1+min_span-1
+            superior_index_point2 = index_point1+t['max_span'] - 1
+        inferior_index_point2 = index_point1+t['min_span']-1
 # After finding the interval, we use it to make a section in low_array and call it point2_lows, where there are the timestamp and low price of every candle point2 will be.
         point2_lows = low_array[inferior_index_point2:superior_index_point2+1]
 # This approach of calculating the equation coeficients was chose becuase of its performance.
@@ -112,8 +99,8 @@ def get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_li
             a_value = np.full(ts_values.shape[0],a[equation_index])
             b_value = np.full(ts_values.shape[0],b[equation_index])
             line_values = a_value*ts_values+b_value
-            lower_line = line_values*(1-lower_limit)
-            upper_line = line_values*(1+upper_limit)
+            lower_line = line_values*(1-t['lower_limit'])
+            upper_line = line_values*(1+t['upper_limit'])
             above_lower_limit = low_values>lower_line
 
             first_false_index = np.where(above_lower_limit == False)[0]
@@ -123,12 +110,12 @@ def get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_li
                 first_false_index = first_false_index[0]
             possible_tests = index_array[(low_values<upper_line) & (low_values>lower_line)]
             index_test_list = [0]
-            if first_false_index >= min_span:
+            if first_false_index >= t['min_span']:
                 for cand in possible_tests[1:]:
-                    if index_test_list[-1] < (cand-min_inbetween) and cand < first_false_index:
+                    if index_test_list[-1] < (cand-t['min_inbetween']) and cand < first_false_index:
                         index_test_list.append(cand)
 
-                if len(index_test_list) >= min_tests and len(index_test_list) <= max_tests:
+                if len(index_test_list) >= t['min_tests'] and len(index_test_list) <= t['max_tests']:
                     response_dict = {
                         'tests': len(index_test_list),
                         'candles': int(index_test_list[-1]+1),
@@ -138,8 +125,13 @@ def get_trendlines(max_span, min_span, df_file, timeframe, upper_limit, lower_li
                     for i in range(len(index_test_list)):
                         response_dict['test{0}'.format(i)] = str(datetime.datetime.utcfromtimestamp(ts_values[index_test_list[i]]))
                     trendlines_list.append(response_dict)
-
     return trendlines_list
+
+def standard_name(t):
+    trendline_file = t['candle_file'].split('_')[0] + '_' + str(t['timeframe'][0].split()[0]) + '_' + str(t['timeframe'][1].split()[0]) + \
+                '_' + str(t['min_span']) + '_' + str(t['max_span']) + '_' + str(t['min_tests']) + '_' + str(t['max_tests']) + '_' + \
+                str(t['upper_limit']).split('.')[1] + '_' + str(t['lower_limit']).split('.')[1] + '_' + str(t['min_inbetween']) + '.txt'
+    return trendline_file
 
 def get_dataframe(df_file):
     return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
