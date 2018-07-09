@@ -25,7 +25,7 @@ def automate():
 def callable(candle_str_sec):
     candle_str = candle_str_sec[0]
     candle_sec = candle_str_sec[1]
-    data_file = '../warehouse/historical_data/.bitstampUSD.csv'
+    data_file = '../warehouse/historical_data/bitstampUSD.csv'
     df = get_dataframe(data_file)
     last_timestamp = str(df['timestamp'][df.shape[0]-1])
     last_price_dotted = str(df['price'][df.shape[0]-1])
