@@ -11,7 +11,7 @@ def callable(p):
     return goodtimes
 
 def conditions1(big_array):
-    small_array = big_array[big_array[:,2]>0]
+    small_array = big_array[big_array[:,2]>0.00003]
     return small_array
 
 def fix_array(p,mess):
