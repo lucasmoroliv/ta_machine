@@ -6,12 +6,19 @@ from pprint import pprint
 def callable(p):
     data = get_data(p)
     big_array = goodtimes_parameters(data)
-    small_array = conditions1(big_array)
+    small_array = conditions1(p,big_array)
     goodtimes = fix_array(p,small_array)
     return goodtimes
 
-def conditions1(big_array):
-    small_array = big_array[big_array[:,2]>0.00003]
+def conditions1(p,big_array):
+    if p['tourist']['mode'] == 'greater_than_limit':
+        small_array = big_array[big_array[:,2]>p['tourist']['limit']]
+    elif p['tourist']['mode'] == 'less_than_limit':
+        small_array = big_array[big_array[:,2]<p['tourist']['limit']]
+    elif p['tourist']['mode'] == 'greater_than_limit1_less_than_limit2':
+        small_array = big_array[(big_array[:,2]>p['tourist']['limit1']) & (big_array[:,2]<p['tourist']['limit2'])]
+    elif p['tourist']['mode'] == 'less_than_limit1_greater_than_limit2':
+        small_array = big_array[(big_array[:,2]<p['tourist']['limit1']) | (big_array[:,2]>p['tourist']['limit2'])]
     return small_array
 
 def fix_array(p,mess):

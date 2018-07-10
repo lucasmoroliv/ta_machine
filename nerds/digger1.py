@@ -13,7 +13,9 @@ def callable(p,goodtimes):
 # timestamp of every candle0 found by digger. The pattern function will define
 # the criteria for finding the candles 0. We can call any pattern function
 # declared in this module.
-    candles0_array = pattern1(p,30,goodtimes)
+    threshold = 30
+    p['digger']['rsi_threshold'] = threshold
+    candles0_array = pattern1(p,threshold,goodtimes)
     return candles0_array
 
 def pattern1(p,limit,goodtimes):

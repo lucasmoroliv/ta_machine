@@ -13,10 +13,17 @@ def main():
     'buy' : {'candle':1,'moment':'open'},
     'sell' : {'candle':4,'moment':'high'},
     'target' : 0.007,
-    'tourist_version': 'tourist1',
-    'digger_version': 'digger1',
-    'sculptor_version': 'sculptor3',
-    'researcher_version': 'researcher1'
+    'tourist': {
+        'version': 'tourist1',
+        'mode': 'greater_than_limit',
+        'condition_parameter': 'm',
+        'limit': 0,
+        'limit1': 0,
+        'limit2': 0
+    },
+    'digger': {'version': 'digger1'},
+    'sculptor': {'version': 'sculptor3'},
+    'researcher': {'version': 'researcher1'}
     }
     callable(p)
 
@@ -29,10 +36,10 @@ def callable(p=None):
     pprint(result)
 
 def import_module(p):
-    tourist = __import__(p['tourist_version'])
-    digger = __import__(p['digger_version'])
-    sculptor = __import__(p['sculptor_version'])
-    researcher = __import__(p['researcher_version'])
+    tourist = __import__(p['tourist']['version'])
+    digger = __import__(p['digger']['version'])
+    sculptor = __import__(p['sculptor']['version'])
+    researcher = __import__(p['researcher']['version'])
     return tourist,digger,sculptor,researcher
 
 if __name__ == '__main__':

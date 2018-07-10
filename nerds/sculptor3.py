@@ -24,15 +24,14 @@ def get_info_list(p,candles0_array):
         for index in range(p['buy']['candle'],p['sell']['candle']+1):
             ts = ts_candle0 + candle_sec*index
             candles[index] = {
-                # 'ts': ts,
-                # 'open': df['open'][ts],
                 'frombuytothishigh': ( df['high'][ts] - df['open'][ts_buy] ) / df['open'][ts_buy],
-                # 'low': df['low'][ts],
                 'frombuytothislow': ( df['low'][ts] - df['open'][ts_buy] ) / df['open'][ts_buy],
-                # 'rsi': df['rsi'][ts],
             }
         candles_list.append(candles)
+    p['sculptor']['keys'] = list(candles_list[0][list(candles_list[0])[0]].keys())
     return candles_list
+
+
 
 def update_df(df,name,array):
     serie = pd.Series(array)

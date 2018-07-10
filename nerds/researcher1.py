@@ -5,29 +5,59 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 
 def callable(p,info_list):
-    dict_arrays = arraify(info_list)
-    return x
+    data = output(p,info_list)
+    return data
 
-def output(p,dict_arrays):
-    return {
+def output(p,info_list):
+    data = {
         'sample': {
-            'lowest_candle_array':0,
-            'lowest_amp_array':0,
-            'highest_candle_array':0,
-            'highest_amp_array':0,
-            'profit_array':0
+            'lowest_candle': func1(p,info_list,'frombuytothislow')[0],
+            'lowest_amp': func1(p,info_list,'frombuytothislow')[1],
+            'highest_candle': func1(p,info_list,'frombuytothishigh')[0],
+            'highest_amp': func1(p,info_list,'frombuytothishigh')[1],
             },
-        'event': {
-            'lowest_candle_array':0,
-            'lowest_amp_array':0,
-            'highest_candle_array':0,
-            'highest_amp_array':0,
-            'profit_array':0
-            },
+        'event': {},
         'parameters': p
     }
+    success_array = [data['sample']['highest_amp']>p['target']]
+    # pprint(success_array)
+    # pprint(data['sample']['highest_candle'].shape)
+    # pprint(data['sample']['highest_candle'][success_array].shape)
+    data['event']['lowest_candle'] = data['sample']['lowest_candle'][success_array]
+    data['event']['lowest_amp'] = data['sample']['lowest_amp'][success_array]
+    data['event']['highest_candle'] = data['sample']['highest_candle'][success_array]
+    data['event']['highest_amp'] = data['sample']['highest_amp'][success_array]
+    return data
+
+def func2(p,array,):
+# It gets the highest_candle_array from func1 and finds the boolean array of it
+# where the true values are the ones greater than the target, defined in the
+# parameters dictionary. The boolean array will then filter any array passed by
+# this function.
+    return array[array>p['target']]
+
+def func1(p,info_list,mode):
+# It can receive two mode values, 'frombuytothislow' and 'frombuytothishigh'. If
+# former is the case, it will be returned a tuple of two arrays, the first
+# being a character representing the lowest candle of each unit, and the second
+# being it's respectice change comparing to the buy price. The latter mode case
+# will do the same thing but for the highest candle of each unit.
+    mode_intrade = get_mode_intrade(p,info_list,mode)
+    mode_candle_list = []
+    mode_amp_list = []
+    if mode == 'frombuytothislow':
+        for unit in mode_intrade:
+            mode_candle_list.append(min(unit, key=unit.get))
+            mode_amp_list.append(unit[mode_candle_list[-1]])
+    elif mode == 'frombuytothishigh':
+        for unit in mode_intrade:
+            mode_candle_list.append(max(unit, key=unit.get))
+            mode_amp_list.append(unit[mode_candle_list[-1]])
+    return np.array(mode_candle_list),np.array(mode_amp_list)
 
 def get_mode_intrade(p,info_list,mode):
+# It can receive any key present at info_list as a mode. The function returns
+# the unit by unit, candle by candle, the mode and its value.
     sample_list = []
     for unit in info_list:
         unit_dict = {}
@@ -36,7 +66,7 @@ def get_mode_intrade(p,info_list,mode):
         sample_list.append(unit_dict)
     sample_array = np.array(sample_list)
     return sample_array
-#
+
 # def get_bool_success(p,dict_arrays):
 #     profit_array = get_profit_array(p,dict_arrays)
 #     bool_array = [profit_array>p['target']]
