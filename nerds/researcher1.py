@@ -29,13 +29,6 @@ def output(p,info_list):
     data['event']['highest_amp'] = data['sample']['highest_amp'][success_array]
     return data
 
-def func2(p,array,):
-# It gets the highest_candle_array from func1 and finds the boolean array of it
-# where the true values are the ones greater than the target, defined in the
-# parameters dictionary. The boolean array will then filter any array passed by
-# this function.
-    return array[array>p['target']]
-
 def func1(p,info_list,mode):
 # It can receive two mode values, 'frombuytothislow' and 'frombuytothishigh'. If
 # former is the case, it will be returned a tuple of two arrays, the first

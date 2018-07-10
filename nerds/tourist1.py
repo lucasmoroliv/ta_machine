@@ -5,26 +5,45 @@ from pprint import pprint
 
 def callable(p):
     data = get_data(p)
-    big_array = goodtimes_parameters(data)
-    small_array = conditions1(p,big_array)
-    goodtimes = fix_array(p,small_array)
+    full_trendlines_df = get_full_trendlines_df(data)
+    filtered_trendlines_df = conditions1(p,full_trendlines_df)
+    goodtimes = fix_array(p,filtered_trendlines_df)
     return goodtimes
 
-def conditions1(p,big_array):
+def conditions1(p,full_trendlines_df):
     if p['tourist']['mode'] == 'greater_than_limit':
-        small_array = big_array[big_array[:,2]>p['tourist']['limit']]
+        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['tourist']['condition_parameter']]>p['tourist']['limit']]
     elif p['tourist']['mode'] == 'less_than_limit':
-        small_array = big_array[big_array[:,2]<p['tourist']['limit']]
+        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['tourist']['condition_parameter']]<p['tourist']['limit']]
     elif p['tourist']['mode'] == 'greater_than_limit1_less_than_limit2':
-        small_array = big_array[(big_array[:,2]>p['tourist']['limit1']) & (big_array[:,2]<p['tourist']['limit2'])]
+        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['tourist']['condition_parameter']]>p['tourist']['limit1']) & (full_trendlines_df[p['tourist']['condition_parameter']]<p['tourist']['limit2'])]
     elif p['tourist']['mode'] == 'less_than_limit1_greater_than_limit2':
-        small_array = big_array[(big_array[:,2]<p['tourist']['limit1']) | (big_array[:,2]>p['tourist']['limit2'])]
-    return small_array
+        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['tourist']['condition_parameter']]<p['tourist']['limit1']) | (full_trendlines_df[p['tourist']['condition_parameter']]>p['tourist']['limit2'])]
+    return filtered_trendlines_df
 
-def fix_array(p,mess):
+def get_full_trendlines_df(data):
+    trendlines_df = pd.DataFrame(data['trendlines'])
+    goodtimes_df = pd.DataFrame()
+    goodtimes_df['ts_start'] = trendlines_df['test0'].apply(lambda x: calendar.timegm(time.strptime(x, '%Y-%m-%d %H:%M:%S')))
+    goodtimes_df['m'] = trendlines_df['b']
+    goodtimes_df['num_tests'] = trendlines_df['tests']
+    goodtimes_df['ts_end'] = get_ts_end(trendlines_df)
+    goodtimes_df['num_candles'] = trendlines_df['candles']
+    return goodtimes_df
+
+def get_ts_end(trendlines_df):
+    ts_end_list = []
+    for index, row in trendlines_df.iterrows():
+        ts_end = row['test{0}'.format(row['tests']-1)]
+        ts_end = calendar.timegm(time.strptime(ts_end, '%Y-%m-%d %H:%M:%S'))
+        ts_end_list.append(ts_end)
+    return np.array(ts_end_list)
+
+def fix_array(p,filtered_trendlines_df):
     df = get_dataframe(p['path_candle_file'])
     candle_sec = (df['timestamp'][1] - df['timestamp'][0])
     all_list = []
+    mess = filtered_trendlines_df[['ts_start','ts_end']].copy().values
     for index in range(mess.shape[0]):
         x = list(range(int(mess[index,0]),int(mess[index,1])+1,candle_sec))
         for i in x:
@@ -50,45 +69,6 @@ def get_data(p):
     with open(p['path_trendline_file']) as f:
         data = json.load(f)
         return filterbydate_data(data,p['timeframe'])
-
-def goodtimes_parameters(data):
-# Here we build an huge array, where each row represent a trendline of the data object, and each column is a parameter of them, like number of tests,
-# it's angular coeficient, number of candles, ect. The function therefore receives the data object and returns this big array.
-    df = pd.DataFrame(data['trendlines'])
-    big_list = []
-    for index, row in df.iterrows():
-        # --------------------------------------------------------------
-        # 0. Start of trendine, expressed in timestamp.
-        ts_start = row['test0']
-        ts_start = calendar.timegm(time.strptime(ts_start, '%Y-%m-%d %H:%M:%S'))
-        # --------------------------------------------------------------
-        # 3. Number of price tests on the trendline.
-        num_tests = row['tests']
-        # --------------------------------------------------------------
-        # 1. End of trendline, expressed in timestamp.
-        ts_end = row['test{0}'.format(num_tests-1)]
-        ts_end = calendar.timegm(time.strptime(ts_end, '%Y-%m-%d %H:%M:%S'))
-        # --------------------------------------------------------------
-        # 2. Angular coeficient of the trendline, sometimes represented with the letter 'm'.
-        m = row['a']
-        # --------------------------------------------------------------
-        # 4. Number of candles in which the trendline was respected.
-        num_candles = row['candles']
-        # --------------------------------------------------------------
-        # 5. The standard deviation of the difference in seconds of each tests of the trendline.
-        tests_list = []
-        diff_list = []
-        for i in range(num_tests):
-            tests_list.append(calendar.timegm(time.strptime(row['test{0}'.format(i)],'%Y-%m-%d %H:%M:%S')))
-        for j in range(num_tests-1):
-            diff_list.append(tests_list[j+1] - tests_list[j])
-        std_diff_tests = np.std(diff_list)
-        # --------------------------------------------------------------
-        # Now we need to append the list containing every caracteristic of the current trendline to the 'big_list', where all caracacteristics
-        # of all trendlines will be stored and once the loop is over 'big_list' will be returned as an array.
-        big_list.append([ts_start,ts_end,m,num_tests,num_candles,std_diff_tests])
-    # return big_list
-    return np.array(big_list)
 
 def get_dataframe(df_file):
     return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
