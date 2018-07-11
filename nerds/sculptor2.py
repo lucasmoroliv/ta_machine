@@ -3,7 +3,6 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json
 from pprint import pprint
 import digger2
-
 import matplotlib.pyplot as plt
 
 def callable(p,candles0_array):
@@ -12,7 +11,7 @@ def callable(p,candles0_array):
 
 def get_info_list(p,candles0_array,buy):
     df = get_dataframe(p['path_candle_file'])
-    td_s_array = td_array(p['path_td_file'],df)
+    td_s_array = td_array('../warehouse/td_data/td_setup_30min_bitstamp.csv',df)
     candle_sec = df['timestamp'][1] - df['timestamp'][0]
     df = df.set_index('timestamp')
     df = update_df(df,'td',td_s_array[:,1])
@@ -30,7 +29,6 @@ def get_info_list(p,candles0_array,buy):
         candles_list.append(candles)
     p['sculptor']['keys'] = list(candles_list[0][list(candles_list[0])[0]].keys())
     return candles_list
-
 
 def get_dataframe(file):
     return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])

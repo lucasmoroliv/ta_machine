@@ -5,9 +5,6 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 
 def callable(p,info_list):
-    # print(func1(p,info_list,'frombuytothislow'))
-    # print(get_mode_intrade(p,info_list,'frombuytothishigh'))
-
     data = output(p,info_list)
     return data
 
@@ -23,14 +20,14 @@ def output(p,info_list):
         'parameters': p
     }
     success_array = [data['sample']['highest_amp']>p['target']]
-    # print(len(data['sample']['highest_amp']))
+    print(len(data['sample']['highest_amp']))
     # pprint(data['sample']['highest_candle'].shape)
     # pprint(data['sample']['highest_candle'][success_array].shape)
     data['event']['lowest_candle'] = data['sample']['lowest_candle'][success_array]
     data['event']['lowest_amp'] = data['sample']['lowest_amp'][success_array]
     data['event']['highest_candle'] = data['sample']['highest_candle'][success_array]
     data['event']['highest_amp'] = data['sample']['highest_amp'][success_array]
-    # print(len(data['event']['lowest_candle']))
+    print(len(data['event']['lowest_candle']))
     return data
 
 def func1(p,info_list,mode):
