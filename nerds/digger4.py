@@ -11,7 +11,7 @@ def callable(p):
 
 def get_and_organize_data(p):
 # Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
-    with open('../warehouse/td_data/td_setup_30min_bitstamp.csv', newline='') as csvfile:
+    with open('../warehouse/td_data/td_countdown_30min_bitstamp.csv', newline='') as csvfile:
         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
         list = []
         big_list = []
@@ -24,8 +24,8 @@ def get_and_organize_data(p):
     return big_array
 
 def conditions1(big_array):
-    # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
-    #              : equal to -9 for "normal" td_buy_setup, -80 for minimal_buy_setup or -90 for perfect_sell_setup
+    # For td_countdown : equal to 13 for td_sell_countdown
+    #                  : equal to -13 for td_buy_countdown
     small_array = big_array[big_array[:,1]==9]
     return small_array
 

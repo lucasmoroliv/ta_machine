@@ -116,8 +116,8 @@ def td_countdown(df, df_file, highest, lowest):
     # Here we add a colum(named: dota) which is the subtraction between the current close price and the low price 2 candles earlier
     df['dota'] = df['close'] - df['dif_2th_neg']
 
-    # Here we add a colum(named: dotb) which is the subtraction between the current close price and the high price 2 candles earlier
-    df['dotb'] = df['close'] - df['dif_2th_pos']
+    # Here we add a colum(named: deltb) which is the subtraction between the current close price and the high price 2 candles earlier
+    df['deltb'] = df['close'] - df['dif_2th_pos']
 
     countdown = []
     indexes_full_setup = []
@@ -174,17 +174,17 @@ def td_countdown(df, df_file, highest, lowest):
             counter = 0
             countdown.append(n)
             trigger = 0
-        elif df.dotb[i] >= 0 and counter == 0 and df.td[i] == 9:
+        elif df.deltb[i] >= 0 and counter == 0 and df.td[i] == 9:
             counter = 1
             countdown.append(counter)
-        elif df.dotb[i] >= 0 and counter == 0 and df.td[i] == 90:
+        elif df.deltb[i] >= 0 and counter == 0 and df.td[i] == 90:
             counter = 1
             countdown.append(counter)
-        elif df.dotb[i] < 0 and counter == 0 and df.td[i] == 9:
+        elif df.deltb[i] < 0 and counter == 0 and df.td[i] == 9:
             counter = 0
             countdown.append(counter)
             trigger = 1
-        elif df.dotb[i] < 0 and counter == 0 and df.td[i] == 90:
+        elif df.deltb[i] < 0 and counter == 0 and df.td[i] == 90:
             counter = 0
             countdown.append(counter)
             trigger = 1
@@ -196,10 +196,10 @@ def td_countdown(df, df_file, highest, lowest):
             counter = 0
             countdown.append(aaa)
             trigger = 0
-        elif df.dotb[i] > 0 and counter > 0 and counter < 13:
+        elif df.deltb[i] > 0 and counter > 0 and counter < 13:
             counter += 1
             countdown.append(counter)
-        elif df.dotb[i] > 0 and trigger == 1 and counter < 13:
+        elif df.deltb[i] > 0 and trigger == 1 and counter < 13:
             counter += 1
             countdown.append(counter)
         elif counter > 0 and counter < 13:
@@ -218,7 +218,7 @@ def td_countdown(df, df_file, highest, lowest):
                 trigger = 0
             else:
                 countdown.append(n)
-        elif df.dotb[i] > 0 and counter == 13:
+        elif df.deltb[i] > 0 and counter == 13:
             counter = 0
             countdown.append(n)
             trigger = 0
@@ -235,7 +235,7 @@ def td_countdown(df, df_file, highest, lowest):
         spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(td_c_array.shape[0]):
             spamwriter.writerow([td_c_array[i,0],td_c_array[i,1]])
-    ## Essas linhas vou deixar aqui são apenas para teste, essas primeiras para ver a quantidade de ZERAR, ou de 13, -13, 12, 9's...
+    ## These lines are here for tests, we can check the amounts of ZERAR, 13, -13, 12, 9, etc...
     # for index, row in df.iterrows():
     #     if df.countdown[index] == 'ZERAR':
     #         print(index)
@@ -244,10 +244,6 @@ def td_countdown(df, df_file, highest, lowest):
     #     if df.countdown[index] == 13:
     #         print(index)
     # print('')
-
-    ## Essa linha para ver a row de cada elemento da df.
-    # for index, row in df.iterrows():
-    #     print(row)
 
 if __name__ == '__main__':
     x1 = time.time()
