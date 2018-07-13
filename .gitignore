@@ -1,2 +1,4 @@
-\warehouse
+/warehouse
 */__pycache__
+.vs/
+.vscode/
