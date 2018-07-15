@@ -1,104 +1,94 @@
 import pandas as pd
 import numpy as np
-import csv, time, datetime, calendar
+import csv,time,datetime,calendar,math
+from pprint import pprint
 
-def automate():
-    minute = 60
-    hour = 60*minute
-    day = 24*hour
-    candle_str_sec = [('1min',minute),
-                      ('5min',5*minute),
-                      ('30min',30*minute),
-                      ('1h',hour),
-                      ('2h',2*hour),
-                      ('4h',4*hour),
-                      ('6h',6*hour),
-                      ('12h',12*hour),
-                      ('1d',day),
-                      ('2d',2*day),
-                      ('3d',3*day),
-                      ('4d',4*day),
-                      ('1w',7*day)]
-    for chart in candle_str_sec:
-        callable(chart)
+def main():
+    m = 60
+    h = 60*m
+    d = 24*h
+    w = 7*d
+    c = {
+        'candle_str': '1d',
+        'candle_sec': 1*d,
+        'data_path': 'warehouse/historical_data/bitstampUSD.csv',
+        'ts_reference': 1315785600
+    }
+    callable(c)
 
-def callable(candle_str_sec):
-    candle_str = candle_str_sec[0]
-    candle_sec = candle_str_sec[1]
-    data_file = '../warehouse/historical_data/bitstampUSD.csv'
-    df = get_dataframe(data_file)
-    last_timestamp = str(df['timestamp'][df.shape[0]-1])
-    last_price_dotted = str(df['price'][df.shape[0]-1])
+def callable(c):
+    csv_array = get_dataframe(c)
+    # make_filename(c,csv_array)
+    c['full_path'] = 'bitstampUSD.csv'
+    get_start_ts(c,csv_array)
+    make_csv(c,csv_array)
+
+def make_filename(c,csv_array):
+    c['last_timestamp'] = csv_array[-1,0]
+    last_price_dotted = str(csv_array[-1,1])
     last_price = last_price_dotted.replace('.','-')
-    last_volume_dotted = str(df['volume'][df.shape[0]-1])
+    last_volume_dotted = str(csv_array[-1,2])
     last_volume = last_volume_dotted.replace('.','-')
-    candle_file = '../warehouse/candle_data/' + candle_str + '_' + last_timestamp + '_' + last_price + '_' + last_volume + '_bitstamp.csv'
-    timestamp_startofthemonth = find_startofthemonth(df,data_file, candle_sec)
-    filter_df(df,candle_file,timestamp_startofthemonth, candle_sec)
+    candle_file = c['candle_str'] + '_' + str(c['last_timestamp']) + '_' + last_price + '_' + last_volume + '_bitstamp.csv'
+    c['full_path'] = '../warehouse/candle_data/' + candle_file
 
-def get_dataframe(data_file):
-    df = pd.read_csv(data_file, names=['timestamp','price','volume'])
-    return df
-
-def find_startofthemonth(df,data_file, candle_sec):
-    timestamp_firstcandle = int(df['timestamp'][0])
-    fulldate_firstcandle = str(datetime.datetime.utcfromtimestamp(timestamp_firstcandle))
-    date_startofthemonth = fulldate_firstcandle.split(' ')[0][:-2] + '01'
-    spliting = date_startofthemonth.split('-')
-    dt = datetime.datetime(int(spliting[0]), int(spliting[1]), int(spliting[2]), 0, 0, 0, 0)
-    timestamp_startofthemonth = calendar.timegm(dt.utctimetuple())
-    return timestamp_startofthemonth
-
-def filter_df(df,candle_file,timestamp_startofthemonth, candle_sec):
-    candle_number = 1
+def make_csv(c,csv_array):
     price_open = 0
     price_high = 0
-    price_close = 0
     price_low = 0
-    volume_sum = 0
+    price_close = 0
+    change = 0
     checker = 0
-    candle_start = timestamp_startofthemonth
+    volume = 0
+    candle_index = 0
+    first_ts = next(csv_array[:,0],c['start_ts'])
+    index_first_ts = np.where(csv_array[:,0] == first_ts)[0][0]
 
-    with open(candle_file, 'w', newline='') as file:
+    with open(c['full_path'], 'w', newline='') as file:
         spamwriter = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        for row in df.values:
-# This statement looks for the right "candle_start" variable, which will be the timestamp of the first full candle.
-            if checker == 0:
-                candle_start = candle_start + candle_sec
-                if candle_start > float(row[0]):
-                    checker = 1
-            if ( checker == 1 ) and ( int(row[0]) > candle_start ):
-                price_open = float(row[1])
-                price_low = price_open
-                price_high = price_open
-                checker = 2
-            if checker == 2:
-                if int(row[0]) < ( candle_start + candle_number * candle_sec ):
-                    if float(row[1]) > price_high:
-                        price_high = float(row[1])
-                    if float(row[1]) < price_low:
-                        price_low = float(row[1])
-                    volume_sum = volume_sum + float(row[2])
-                    price_close = float(row[1])
-                else:
-                    change = (price_close - price_open)/price_open
-                    amplitude = (price_high - price_low)/price_low
-                    spamwriter.writerow([datetime.datetime.utcfromtimestamp(candle_start + (candle_number-1) * candle_sec),(candle_start + (candle_number-1) * candle_sec),price_open,price_high, price_close, price_low, volume_sum, change, amplitude])
-                    volume_sum = 0
-                    price_open = float(row[1])
-                    price_low = price_open
-                    price_high = price_open
-                    candle_number = candle_number + 1
 
-                    if float(row[1]) > price_high:
-                        price_high = float(row[1])
-                    if float(row[1]) < price_low:
-                        price_low = float(row[1])
-                    volume_sum = volume_sum + float(row[2])
-                    price_close = float(row[1])
+        for row in csv_array[index_first_ts:]:
+            if checker == 1:
+                if row[0] < (c['start_ts'] + (candle_index + 1) * c['candle_sec']):
+                    volume = volume + row[2]
+                    price_close = row[1]
+                    if row[1] > price_high:
+                        price_high = row[1]
+                        continue
+                    if row[1] < price_low:
+                        price_low = row[1]
+                else:
+                    change = ( price_close - price_open ) / price_open
+                    checker = 0
+                    spamwriter.writerow([str(datetime.datetime.utcfromtimestamp(c['start_ts']+c['candle_sec']*candle_index)),c['start_ts']+c['candle_sec']*candle_index,price_open,price_high,price_low,price_close,volume,change])
+                    candle_index = candle_index + 1
+                    volume = 0
+
+            if checker == 0:
+                while row[0] > (c['start_ts'] + (candle_index + 1) * c['candle_sec']):
+                    spamwriter.writerow([str(datetime.datetime.utcfromtimestamp(c['start_ts']+c['candle_sec']*candle_index)),c['start_ts']+c['candle_sec']*candle_index,price_open,price_high,price_low,price_close,volume,change])
+                    candle_index = candle_index + 1
+
+                price_open = row[1]
+                price_high = price_open
+                price_low = price_open
+                price_close = price_open
+                volume = volume + row[2]
+                checker = 1
+
+def next(array,ts):
+    return array[array>=ts][0]
+
+def get_start_ts(c,csv_array):
+    first_ts_array = csv_array[0,0]
+    c['start_ts'] = math.ceil( ( first_ts_array - c['ts_reference'] ) / c['candle_sec'] ) * c['candle_sec'] + c['ts_reference']
+
+def get_dataframe(c):
+    csv_array = pd.read_csv(c['data_path'], names=['timestamp','price','volume']).values
+    return csv_array
 
 if __name__ == '__main__':
     x1 = time.time()
-    automate()
+    main()
     x2 = time.time()
     print('Run time: ',x2-x1)
