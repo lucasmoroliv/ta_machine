@@ -16,8 +16,8 @@ def main():
     df, highest, lowest = td_setup(df,df_file)
     td_countdown(df, df_file, highest, lowest)
 
-def get_dataframe(file):
-  return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+def get_dataframe(df_file):
+  return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 def td_setup(df,df_file):
     # First we add a column into the dataframe, a column with the close value 4 candles before the current candle.

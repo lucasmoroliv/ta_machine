@@ -9,17 +9,19 @@ def main():
     d = 24*h
     w = 7*d
     c = {
-        'candle_str': '1d',
-        'candle_sec': 1*d,
+        'candle_str': '30min',
+        'candle_sec': 30*m,
         'data_path': 'warehouse/historical_data/bitstampUSD.csv',
         'ts_reference': 1315785600
     }
     callable(c)
 
+def get_all():
+    pass
+
 def callable(c):
-    csv_array = get_dataframe(c)
-    # make_filename(c,csv_array)
-    c['full_path'] = 'bitstampUSD.csv'
+    csv_array = get_array(c)
+    make_filename(c,csv_array)
     get_start_ts(c,csv_array)
     make_csv(c,csv_array)
 
@@ -30,7 +32,7 @@ def make_filename(c,csv_array):
     last_volume_dotted = str(csv_array[-1,2])
     last_volume = last_volume_dotted.replace('.','-')
     candle_file = c['candle_str'] + '_' + str(c['last_timestamp']) + '_' + last_price + '_' + last_volume + '_bitstamp.csv'
-    c['full_path'] = '../warehouse/candle_data/' + candle_file
+    c['output_path'] = 'warehouse/candle_data/' + candle_file
 
 def make_csv(c,csv_array):
     price_open = 0
@@ -44,7 +46,7 @@ def make_csv(c,csv_array):
     first_ts = next(csv_array[:,0],c['start_ts'])
     index_first_ts = np.where(csv_array[:,0] == first_ts)[0][0]
 
-    with open(c['full_path'], 'w', newline='') as file:
+    with open(c['output_path'], 'w', newline='') as file:
         spamwriter = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         for row in csv_array[index_first_ts:]:
@@ -83,7 +85,7 @@ def get_start_ts(c,csv_array):
     first_ts_array = csv_array[0,0]
     c['start_ts'] = math.ceil( ( first_ts_array - c['ts_reference'] ) / c['candle_sec'] ) * c['candle_sec'] + c['ts_reference']
 
-def get_dataframe(c):
+def get_array(c):
     csv_array = pd.read_csv(c['data_path'], names=['timestamp','price','volume']).values
     return csv_array
 

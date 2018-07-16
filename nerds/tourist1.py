@@ -71,7 +71,7 @@ def get_data(p):
         return filterbydate_data(data,p['timeframe'])
 
 def get_dataframe(df_file):
-    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 def filterbydate_data(data,timeframe):
 # The motivation for making the function came from allowing the use of data objects previously created. Now we can create a data

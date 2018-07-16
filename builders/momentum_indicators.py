@@ -90,8 +90,8 @@ def stochastic(file,num_of_candles=14):
     # print(slow_stochastic[x])
     # print(signal_line[x])
 
-def get_dataframe(file):
-    return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+def get_dataframe(df_file):
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 if __name__ == '__main__':
     x1 = time.time()

@@ -37,8 +37,8 @@ def update_df(df,name,array):
     df[name] = array
     return df
 
-def get_dataframe(file):
-    return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+def get_dataframe(df_file):
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 
 if __name__ == '__main__':

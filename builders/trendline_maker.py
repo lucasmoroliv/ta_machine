@@ -133,7 +133,7 @@ def standard_name(t):
     return trendline_file
 
 def get_dataframe(df_file):
-    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 def filterbydate_df(df,timeframe):
     # Input the dataframe and timeframe you want and the function gives you the dataframe filtered by those dates found in the timeframe variable.

@@ -30,8 +30,8 @@ def get_info_list(p,candles0_array,buy):
     p['sculptor']['keys'] = list(candles_list[0][list(candles_list[0])[0]].keys())
     return candles_list
 
-def get_dataframe(file):
-    return pd.read_csv(file, header=None, names=['time','timestamp','open','high','close','low','volume','change','amplitude'])
+def get_dataframe(df_file):
+    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 def td_array(td_file,df):
     list1 = []
