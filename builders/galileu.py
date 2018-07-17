@@ -1,9 +1,10 @@
 import pusherclient,sys,logging,time,csv,json
+
 # Add a logging handler so we can see the raw communication data
-root = logging.getLogger()
-root.setLevel(logging.INFO)
-ch = logging.StreamHandler(sys.stdout)
-root.addHandler(ch)
+# root = logging.getLogger()
+# root.setLevel(logging.INFO)
+# ch = logging.StreamHandler(sys.stdout)
+# root.addHandler(ch)
 
 global pusher
 
