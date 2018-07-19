@@ -25,7 +25,7 @@ def main():
                     getattr(self,act)['moment']['candle'],getattr(self,act)['moment']['feature'] = self.split_num_str(str(half1))
                     getattr(self,act)['moment']['value'] = half2 
                 # '5000','3500','2000'. Yet to think about this one. Letting it here for further investigation.
-                elif isinstance(getattr(self,act)['moment'], numbers.Number):
+                elif getattr(self,act)['moment'].isdigit():
                     value = float(getattr(self,act)['moment'])
                     getattr(self,act)['moment'] = {}
                     getattr(self,act)['moment']['value'] = value
@@ -33,24 +33,61 @@ def main():
                     getattr(self,act)['moment']['candle'] = 'any'
                     getattr(self,act)['moment']['feature'] = 'any'
                 # '1h','2rsi','4c'  
-                elif sum(char.isdigit() for char in getattr(self,act)['moment']) == 1:
+                # elif sum(char.isdigit() for char in getattr(self,act)['moment']) == 1:
+                elif ope_index == -1 and sum(char.isalpha() for char in getattr(self,act)['moment']) >= 1:
                     string = getattr(self,act)['moment']
                     getattr(self,act)['moment'] = {}
                     getattr(self,act)['moment']['candle'],getattr(self,act)['moment']['feature'] = self.split_num_str(string)
                     getattr(self,act)['moment']['mode'] = 'simple'
                     getattr(self,act)['moment']['change'] = 0 
-            # print(getattr(self,act)['moment'])
+
 
         def split_num_str(self,mess):
-            x = np.array(list(mess))
-            y = np.array([item.isdigit() for item in x])
-            number_part = x[y]
-            string_part = x[np.invert(y)]
+            mess = np.array(list(mess))
+            number_part = mess[np.array([item.isdigit() for item in mess])]
+            string_part = mess[np.array([item.isalpha() for item in mess])]
             if len(string_part) > 1:
                 string_part = ''.join(string_part)
             else:
                 string_part = str(string_part[0])    
-            return (str(number_part[0]),string_part)
+            if len(number_part) > 1:
+                number_part = ''.join(number_part)
+            else:
+                number_part = str(number_part[0])    
+            return (number_part,string_part)
+
+        def get_info_list(self,p,candles0_array):
+            df_old = get_dataframe(p['path_candle_file'])
+            df = df_old.set_index('timestamp')
+            rsi = momentum_indicators.rsi(p['path_candle_file'])
+            df = update_df(df,'rsi',rsi[:,1])
+            candle_sec = df_old['timestamp'][1] - df_old['timestamp'][0]
+            candles_list = []
+            for row in candles0_array:
+                candles = {}
+                ts_candle0 = row
+                for index in range(p['start_candle'],p['end_candle']+1):
+                    ts = ts_candle0 + candle_sec*index
+                    candles[index] = {
+                        # 'ts': ts,
+                        'open': df['open'][ts],
+                        'high': df['high'][ts],
+                        'low': df['low'][ts],
+                        'rsi': df['rsi'][ts],
+                    }
+                candles_list.append(candles)
+            return candles_list
+
+        def update_df(self,df,name,array):
+            serie = pd.Series(array)
+            df[name] = array
+            return df
+
+        def get_dataframe(self,df_file):
+            return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+
+
+
 
             # ope = {
             #     '+' : operator.add,
@@ -62,8 +99,8 @@ def main():
     'path_candle_file' : '../builders/warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
     'path_trendline_file': '../builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
     'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
-    'buy' : {'candle':'1','moment':'1rsi*1.03'},
-    'sell' : {'candle':'4-6','moment':'1td_s*1.03'},
+    'buy' : {'candle':'1','moment':'5'},
+    'sell' : {'candle':'4-6','moment':'11c'},
     'tourist': {
         'version': 'tourist1',
         'mode': 'greater_than_limit',
