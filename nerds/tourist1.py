@@ -66,7 +66,7 @@ def fix_array(p,filtered_trendlines_df):
     return np.array(intervals)
 
 def get_data(p):
-    with open(p['path_trendline_file']) as f:
+    with open(p['tourist']['path_trendline_file']) as f:
         data = json.load(f)
         return filterbydate_data(data,p['timeframe'])
 
