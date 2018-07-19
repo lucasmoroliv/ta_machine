@@ -16,16 +16,16 @@ def main():
                     getattr(self,act)['candle'] = getattr(self,act)['candle'].split('-')
 
                 # '1h*1.05','2rsi*1.04','4c-500'.
-                if ('*' in getattr(self,act)['moment']) or ('+' in getattr(self,act)['moment']) or ('-' in getattr(self,act)['moment']):
-                    for mode in ['*','+','-']:
-                        if mode in getattr(self,act)['moment']: # self.buy['moment']
-                            half1,half2 = getattr(self,act)['moment'].split(mode) # self.buy['moment']            
-                            getattr(self,act)['moment'] = {} # self.buy['moment']
-                            getattr(self,act)['moment']['mode'] = mode # self.buy['moment']['mode']
-                            getattr(self,act)['moment']['candle'],getattr(self,act)['moment']['feature'] = self.split_num_str(str(half1))
-                            getattr(self,act)['moment']['value'] = half2 
+                ope_index = max([getattr(self,act)['moment'].find(mode) for mode in ['*','+','-']])
+                if ope_index > 1:
+                    string = getattr(self,act)['moment']
+                    half1,half2 = string.split(string[ope_index])             
+                    getattr(self,act)['moment'] = {} 
+                    getattr(self,act)['moment']['mode'] = string[ope_index]  
+                    getattr(self,act)['moment']['candle'],getattr(self,act)['moment']['feature'] = self.split_num_str(str(half1))
+                    getattr(self,act)['moment']['value'] = half2 
                 # '5000','3500','2000'. Yet to think about this one. Letting it here for further investigation.
-                elif isinstance(float(getattr(self,act)['moment']), numbers.Number):
+                elif isinstance(getattr(self,act)['moment'], numbers.Number):
                     value = float(getattr(self,act)['moment'])
                     getattr(self,act)['moment'] = {}
                     getattr(self,act)['moment']['value'] = value
@@ -77,49 +77,13 @@ def main():
     'researcher': {'version': 'researcher1'}
     }
 
-    p2 = {
-    'path_candle_file' : '../builders/warehouse/candle_data/' + '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
-    'path_trendline_file': '../builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
-    'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
-    'buy' : {'candle':'1-7','moment':'5000'},
-    'sell' : {'candle':'1-3','moment':'3rsi*500'},
-    'tourist': {
-        'version': 'tourist1',
-        'mode': 'greater_than_limit',
-        'condition_parameter': 'm',
-        'limit': 0,
-        'limit1': 0,
-        'limit2': 0
-    },
-    'digger': {'version': 'digger1'},
-    'sculptor': {'version': 'sculptor3'},
-    'researcher': {'version': 'researcher1'}
-    }
+    event1 = event(p1)
 
-    # event1 = bacon.event(p1)
-    event2 = event(p2)
-
-    # print(event1.buy)
-    # print(event1.sell)
-    # print('----------------------')
-    print(event2.buy)
-    print(event2.sell)
-
-
-
-
-
-
-
+    print(event1.buy)
+    print(event1.sell)
 
 if __name__ == '__main__':
     main()         
-
-
-
-
-
-
 
 
 
