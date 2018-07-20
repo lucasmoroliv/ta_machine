@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json,importlib,operator
+import time,calendar,datetime,csv,math,json,importlib,operator,sys
+sys.path.append('../builders')
+import momentum_indicators
 from pprint import pprint
 
 def main():
@@ -15,29 +17,44 @@ def main():
             self.import_module(p)
             self.standard_filter()
             self.candles_df = self.get_dataframe(p['path_candle_file'])
-            self.candle_sec = self.candles_df['timestamp'][1] - self.candles_df['timestamp'][0]
+            self.features_list = [self.buy['moment']['feature'],self.sell['moment']['feature']]
+            self.candle_sec = self.candles_df.index[1] - self.candles_df.index[0]
             if self.toggle_tourist == True:
                 self.goodtimes = self.tourist.callable(p)
-                self.units_list = self.digger.callable(p,self.goodtimes)
+                units_list = self.digger.callable(p,self.goodtimes)
             else: 
-                self.units_list = self.digger.callable(p)
-            # self.make_inits_list()  
-            pprint(units_list)            
+                units_list = self.digger.callable(p)
+            self.fill_unit_list(units_list)  
+            pprint(units_list)
 
+        def get_dataframe(self,df_file):
+            # This function needs improvement. Though functional like this, it could be probably built more elegantly.
+            pre_candles_df = pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+            pre_candles_df = pre_candles_df.set_index('timestamp')
+            rsi = momentum_indicators.rsi(self.path_candle_file)
+            candles_df = self.update_df(pre_candles_df,'rsi',rsi[:,1])
+            return candles_df
 
-        # def make_inits_list(self): 
-        #     for act in ['buy','sell']:
-        #         buy_moment = getattr(self,act)['moment']
-        #         if not '-' in getattr(self,act)['candle']:
-        #             for unit in self.units_list:
-        #                 unit['{0}'.format(buy_moment['candle'])]['ts'] = unit['0']['ts'] + buy_moment['candle'] * self.candle_sec
+        def fill_unit_list(self,units_list): 
+            for act in ['buy','sell']:
+                buy_moment = getattr(self,act)['moment']
+                if not '-' in getattr(self,act)['candle']:
+                    for unit in units_list:
+                        if not buy_moment['candle'] in unit.keys():
+                            unit['{0}'.format(buy_moment['candle'])] = {}
+                            candle_ts = unit['0']['ts'] + int(buy_moment['candle']) * self.candle_sec
+                            unit['{0}'.format(buy_moment['candle'])]['{0}'.format(buy_moment['feature'])] = self.candles_df.loc[candle_ts]['{0}'.format(buy_moment['feature'])]
+
+        def update_df(self,df,name,array):
+            serie = pd.Series(array)
+            df[name] = array
+            return df
 
         def import_module(self,p):
             self.tourist = __import__(p['tourist']['version'])
             self.digger = __import__(p['digger']['version'])
             self.sculptor = __import__(p['sculptor']['version'])
             self.researcher = __import__(p['researcher']['version'])
-            # return self.tourist,self.digger,self.sculptor,self.researcher
 
         def standard_filter(self):
             for act in ['buy','sell']:
@@ -68,9 +85,6 @@ def main():
                     getattr(self,act)['moment']['mode'] = 'simple'
                     getattr(self,act)['moment']['value'] = 0 
 
-        def get_dataframe(self,df_file):
-            return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
-
         def split_num_str(self,mess):
             mess = np.array(list(mess))
             number_part = mess[np.array([item.isdigit() for item in mess])]
@@ -85,10 +99,6 @@ def main():
                 number_part = str(number_part[0])    
             return (number_part,string_part)
 
-        
-
-
-
             # ope = {
             #     '+' : operator.add,
             #     '-' : operator.sub,
@@ -98,8 +108,8 @@ def main():
     p1 = {
     'path_candle_file' : '../builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
-    'buy' : {'candle':'1','moment':'5'},
-    'sell' : {'candle':'4-6','moment':'11c'},
+    'buy' : {'candle':'1','moment':'1open'},
+    'sell' : {'candle':'4','moment':'4high'},
     'toggle_tourist': True,
     'tourist': {
         'version': 'tourist1',
@@ -116,14 +126,12 @@ def main():
     }
 
     event1 = event(p1)
-    # print(event1.df)
-    # print(event1.buy)
-    # print(event1.sell)
-    # print(event1.__dict__)
 
 if __name__ == '__main__':
-    main()         
-
+    time1 = time.time()
+    main()
+    time2 = time.time()
+    print('Time to run the program: ',time2-time1)
 
 
 
