@@ -22,13 +22,13 @@ def main():
             if self.toggle_tourist == True:
                 self.goodtimes = self.tourist.callable(p)
                 units_list = self.digger.callable(p,self.goodtimes)
-            else: 
+            elif self.toggle_tourist == False: 
                 units_list = self.digger.callable(p)
             self.fill_unit_list(units_list)  
             pprint(units_list)
 
         def get_dataframe(self,df_file):
-            # This function needs improvement. Though functional like this, it could be probably built more elegantly.
+            # This function needs improvement. Though functional, it could be built more elegantly.
             pre_candles_df = pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
             pre_candles_df = pre_candles_df.set_index('timestamp')
             rsi = momentum_indicators.rsi(self.path_candle_file)
@@ -36,14 +36,43 @@ def main():
             return candles_df
 
         def fill_unit_list(self,units_list): 
+            ope = {
+            '+': operator.add,
+            '-': operator.sub,
+            '*': operator.mul,
+            'simple': operator.add,
+            'absolute': operator.add,
+            }
             for act in ['buy','sell']:
                 buy_moment = getattr(self,act)['moment']
-                if not '-' in getattr(self,act)['candle']:
+                # The following statement splits the section in two. Firstly we handle every mode but 'absolute', and secondly we deal with only that. At first look it seems to be a good decision.
+                if buy_moment['mode'] in ['*','+','-']:
+                    key_name = buy_moment['feature'] + buy_moment['mode'] + getattr(self,act)['moment']['value'] 
+                else:
+                    key_name = buy_moment['feature']
+                if not buy_moment['mode'] == 'absolute':
                     for unit in units_list:
-                        if not buy_moment['candle'] in unit.keys():
-                            unit['{0}'.format(buy_moment['candle'])] = {}
+                        # We start by dealing with the single candles. Intervals are handled later.
+                        if not '-' in getattr(self,act)['candle']:
+                            if not buy_moment['candle'] in unit.keys():
+                                unit[buy_moment['candle']] = {}
                             candle_ts = unit['0']['ts'] + int(buy_moment['candle']) * self.candle_sec
-                            unit['{0}'.format(buy_moment['candle'])]['{0}'.format(buy_moment['feature'])] = self.candles_df.loc[candle_ts]['{0}'.format(buy_moment['feature'])]
+                            if not buy_moment['feature'] in ['open','high','low','close']:
+                                unit[buy_moment['candle']][buy_moment['feature']] = self.candles_df.loc[candle_ts][buy_moment['feature']]  
+                                if buy_moment['mode'] in ['*','+','-']:
+                                    unit[buy_moment['candle']]['close{0}{1}'.format(buy_moment['mode'],getattr(self,act)['moment']['value'] )] = ope[buy_moment['mode']](self.candles_df.loc[candle_ts]['close'],float(buy_moment['value'])) 
+                                else:
+                                    unit[buy_moment['candle']]['close'] = ope[buy_moment['mode']](self.candles_df.loc[candle_ts]['close'],float(buy_moment['value'])) 
+                            else:
+                                unit[buy_moment['candle']][key_name] = ope[buy_moment['mode']](self.candles_df.loc[candle_ts][buy_moment['feature']],float(buy_moment['value'])) 
+                        else:                   
+                            pass       
+                # Now the second part where we deal with the 'absolute' mode. 
+                # else:
+                #     for unit in units_list:
+                #         if not '-' in getattr(self,act)['candle']:
+                #                 unit[buy_moment['candle']] = {}
+
 
         def update_df(self,df,name,array):
             serie = pd.Series(array)
@@ -99,17 +128,13 @@ def main():
                 number_part = str(number_part[0])    
             return (number_part,string_part)
 
-            # ope = {
-            #     '+' : operator.add,
-            #     '-' : operator.sub,
-            #     '*' : operator.mul
-            # }
+
 
     p1 = {
     'path_candle_file' : '../builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
-    'buy' : {'candle':'1','moment':'1open'},
-    'sell' : {'candle':'4','moment':'4high'},
+    'buy' : {'candle':'1','moment':'1open*1.01'},
+    'sell' : {'candle':'1','moment':'1rsi*1.10'},
     'toggle_tourist': True,
     'tourist': {
         'version': 'tourist1',
