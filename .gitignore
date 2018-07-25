@@ -4,3 +4,4 @@ builders/warehouse/trendlines
 */__pycache__
 .vs/
 .vscode/
+__pycache__
