@@ -29,6 +29,7 @@ def main():
     
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes) 
+    # pprint(units_list)
     report = scheme1(p,units_list)
     pprint(report)
     # plt.hist(values,50)

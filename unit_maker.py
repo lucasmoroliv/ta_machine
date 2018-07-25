@@ -11,9 +11,11 @@ def main():
 def callable(p,goodtimes=None):
     candle_df = get_dataframe(p) 
     rsi_df = get_rsi_df(p)
-    units_list = pattern1(p,goodtimes)
-    fill_units_list(units_list,p,candle_df,rsi_df)
-    
+    td_s_df = get_td_s_df(p)
+    td_c_df = get_td_c_df(p)
+    units_list = pattern2(p,goodtimes)
+    fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df)
+
     return units_list
 
 # ---------------------------------------------------------------------------------
@@ -38,11 +40,33 @@ def pattern1(p,goodtimes):
                 units_list.append({'0': {'ts': mini_rsi[i,0]}})
     return units_list
 
+def pattern2(p,goodtimes=None):
+    # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
+    #              : equal to -9 for "normal" td_buy_setup, -80 for minimal_buy_setup or -90 for perfect_sell_setup
+    td_s_df = get_td_s_df(p)
+    td_s_pattern = td_s_df[td_s_df['td_s']==9]
+    units_list =[]  
+    candles0_array = td_s_pattern.index.tolist()
+    for i in candles0_array:
+        units_list.append({'0': {'ts': i}})
+    return units_list
+
+def pattern3(p,goodtimes=None):
+    # For td_countdown : equal to 13 for td_sell_countdown
+    #                  : equal to -13 for td_buy_countdown
+    td_c_df = get_td_c_df(p)
+    td_c_pattern = td_c_df[td_c_df['td_c']==13]
+    units_list =[]
+    candles0_array = td_c_pattern.index.tolist()
+    for i in candles0_array:
+        units_list.append({'0': {'ts': i}})
+    return units_list
+
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
 # Add details of relevant candles to units_list for further analysis.
 
-def fill_units_list(units_list,p,candle_df,rsi_df):
+def fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df):
     candle_sec = candle_df.index[1] - candle_df.index[0]
 
     for act in ['buy','sell']:
@@ -57,9 +81,11 @@ def fill_units_list(units_list,p,candle_df,rsi_df):
                     'close': candle_df.loc[candle_ts]['close'],
                     'volume': candle_df.loc[candle_ts]['volume'],
                     'change': candle_df.loc[candle_ts]['change'],
-                    'rsi': rsi_df.loc[candle_ts]['rsi']
+                    'rsi': rsi_df.loc[candle_ts]['rsi'],
+                    'td_s': td_s_df.loc[candle_ts]['td_s'],
+                    'td_c': td_c_df.loc[candle_ts]['td_c']
                 }
-    
+
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *
 # Here is a space to store all sorts of auxiliary functions that will help the pattern
@@ -78,6 +104,38 @@ def get_rsi_df(p):
     pre_rsi_df = pd.DataFrame(rsi_array, columns = ['timestamp','rsi'])
     rsi_df = pre_rsi_df.set_index('timestamp')
     return rsi_df
+
+def get_td_s_df(p):
+# Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
+    with open('builders/warehouse/td_data/td_setup_30min_bitstamp.csv', newline='') as csvfile:
+        data = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        list = []
+        big_list = []
+        for row in data:
+            ts_start = float(row[0].split(',')[0])
+            td = float(row[0].split(',')[1])
+            big_list.append([ts_start,td])
+        td_s_data = np.array(big_list)
+        td_s_data.astype(int)
+    td_s_df = pd.DataFrame(td_s_data, columns = ['timestamp','td_s'])
+    td_s_df = td_s_df.set_index('timestamp')
+    return td_s_df
+
+def get_td_c_df(p):
+# Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
+    with open('builders/warehouse/td_data/td_countdown_30min_bitstamp.csv', newline='') as csvfile:
+        data = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        list = []
+        big_list = []
+        for row in data:
+            ts_start = float(row[0].split(',')[0])
+            td = float(row[0].split(',')[1])
+            big_list.append([ts_start,td])
+        td_c_data = np.array(big_list)
+        td_c_data.astype(int)
+    td_c_df = pd.DataFrame(td_c_data, columns = ['timestamp','td_c'])
+    td_c_df = td_c_df.set_index('timestamp')
+    return td_c_df
 
 if __name__ == '__main__':
     time1 = time.time()
