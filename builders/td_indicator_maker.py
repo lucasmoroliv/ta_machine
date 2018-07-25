@@ -2,17 +2,17 @@ import pandas as pd
 import time, datetime, sys, csv
 import numpy as np
 from pprint import pprint
-from json_tricks import dump, dumps, load, loads, strip_comments
 import json
+
 def callable():
-    df_file = '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    df = get_dataframe('../warehouse/candle_data/' + df_file)
+    df_file = '30min_bitstamp.csv'
+    df = get_dataframe('warehouse/candle_data/' + df_file)
     df, highest, lowest = td_setup(df,df_file)
     return td_countdown(df, highest, lowest)
 
 def main():
-    df_file = '30min_1529921395_6183-2_0-40432139_bitstamp.csv'
-    df = get_dataframe('../warehouse/candle_data/' + df_file)
+    df_file = '30min_bitstamp.csv'
+    df = get_dataframe('warehouse/candle_data/' + df_file)
     df, highest, lowest = td_setup(df,df_file)
     td_countdown(df, df_file, highest, lowest)
 
@@ -92,7 +92,7 @@ def td_setup(df,df_file):
     td_s_array[:,1] = df['td']
     td_s_array = td_s_array.astype(int)
 
-    path_data_object = '../warehouse/td_data/' + 'td_setup_' + df_file.split('_')[0] + '_bitstamp.csv'
+    path_data_object = 'warehouse/td_data/' + 'td_setup_' + df_file.split('_')[0] + '_bitstamp.csv'
     with open(path_data_object, 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(td_s_array.shape[0]):
@@ -102,7 +102,7 @@ def td_setup(df,df_file):
 def td_countdown(df, df_file, highest, lowest):
     # How Td Buy Countdown works in a bear market:
     # Starts after the finish of a buy setup. The close of bar 9 should be less than the low two bars earlier. If satisfied bar 9 of the setup,
-    # becomer bar 1 of the countdown. If the conditions is not met, then bar 1 of the countdown is postponed until the conditions is satisfied
+    # becomer bar 1 of the countdwn. If the conditions is not met, then bar 1 of the countdown is postponed until the conditions is satisfied
     # and you continue to count until there are a total of thirthen closes, each one less than, or equal to the low two bars earlier.
     ## OBS: The Td Buy Countdown might be cancelled under these two conditions:
     ## 1 - If a Td Sell Setup completes before recording a 13 count, then TD Buy Countdown is cancelled.
@@ -230,7 +230,7 @@ def td_countdown(df, df_file, highest, lowest):
     td_c_array[:,1] = df['countdown']
     td_c_array = td_c_array.astype(int)
 
-    path_data_object = '../warehouse/td_data/' + 'td_countdown_' + df_file.split('_')[0] + '_bitstamp.csv'
+    path_data_object = 'warehouse/td_data/' + 'td_countdown_' + df_file.split('_')[0] + '_bitstamp.csv'
     with open(path_data_object, 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(td_c_array.shape[0]):
