@@ -11,9 +11,9 @@ def main():
         'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
         'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
         'buy' : {'trigger': ['1'],'moment_index':'open'},
-        'sell' : {'trigger': ['5'],'moment_index':'high'},
+        'sell' : {'trigger': ['6'],'moment_index':'high'},
         'chart_filter': {
-            'toggle': True,
+            'toggle': False,
             'condition': '1',
             'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
             'mode': 'greater_than_limit',
@@ -30,7 +30,7 @@ def main():
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes) 
     report = scheme1(p,units_list)
-    # pprint(report)
+    pprint(report)
     # plt.hist(values,50)
     # plt.show()
 
@@ -66,9 +66,7 @@ def scheme1(p,units_list):
             }
     }
 
-    plt.hist(unit_lowest,50)
-    plt.show()
-    # return report
+    return report
 
 
 if __name__ == '__main__':

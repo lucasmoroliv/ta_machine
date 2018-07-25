@@ -4,11 +4,16 @@ import time,calendar,datetime,csv,math,json
 from pprint import pprint
 
 def callable(p):
-    data = get_data(p)
-    full_trendlines_df = get_full_trendlines_df(data)
-    filtered_trendlines_df = conditions1(p,full_trendlines_df)
-    goodtimes = fix_array(p,filtered_trendlines_df)
-    return goodtimes
+    # There are two possible ways we can go through this function, the first is the case we opt 
+    # to no choose this module to filter the candles and the second is the case we do opt for it. 
+    if p['chart_filter']['toggle'] == False:
+        return [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
+    elif p['chart_filter']['toggle'] == True: 
+        data = get_data(p)
+        full_trendlines_df = get_full_trendlines_df(data)
+        filtered_trendlines_df = conditions1(p,full_trendlines_df)
+        goodtimes = fix_array(p,filtered_trendlines_df)
+        return goodtimes
 
 # ---------------------------------------------------------------------------------
 # * SECTION 1 *
