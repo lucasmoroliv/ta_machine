@@ -24,7 +24,7 @@ def main():
             'limit2': 0
         },
         'unit_maker': {
-            'threshold' : 30,
+            'threshold' : 0,
         },
         }
     export_multiple_events(p)
@@ -36,6 +36,7 @@ def main():
 def print_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
+    print(units_list)
     report = scheme1(p,units_list)
     pprint(report)
 
@@ -83,7 +84,7 @@ def scheme1(p,units_list):
         # 'rsi_threshold' : p['unit_maker']['threshold'],
         'profit_stats': {
             'target': p['target'],
-            'overtarget': stats.percentileofscore(unit_profit,float(p['target'])),
+            'overtarget': percentileofscore(unit_profit,float(p['target'])),
             'unit_amount': len(unit_profit)
         }
     }
@@ -121,6 +122,32 @@ def scheme1(p,units_list):
 def histogram(array,resolution):
     plt.hist(array,resolution)
     plt.show()
+
+def percentileofscore(a, score, kind='rank'):
+
+    if np.isnan(score):
+        return np.nan
+    a = np.asarray(a)
+    n = len(a)
+    if n == 0:
+        return 0
+        # return 100.0
+
+    if kind == 'rank':
+        left = np.count_nonzero(a < score)
+        right = np.count_nonzero(a <= score)
+        pct = (right + left + (1 if right > left else 0)) * 50.0/n
+        return pct
+    elif kind == 'strict':
+        return np.count_nonzero(a < score) / float(n) * 100
+    elif kind == 'weak':
+        return np.count_nonzero(a <= score) / float(n) * 100
+    elif kind == 'mean':
+        pct = (np.count_nonzero(a < score) + np.count_nonzero(a <= score)) / float(n) * 50
+        return pct
+    else:
+        raise ValueError("kind can only be 'rank', 'strict', 'weak' or 'mean'")
+
 
 if __name__ == '__main__':
     time1 = time.time()
