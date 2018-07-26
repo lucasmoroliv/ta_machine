@@ -13,7 +13,7 @@ def callable(p,goodtimes):
     rsi_df = get_rsi_df(p)
     td_s_df = get_td_s_df(p)
     td_c_df = get_td_c_df(p)
-    units_list = pattern1(p,goodtimes)
+    units_list = pattern3(p,goodtimes)
     fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df)
 
     return units_list
@@ -40,26 +40,49 @@ def pattern1(p,goodtimes):
                 units_list.append({'0': {'ts': mini_rsi[i,0]}})
     return units_list
 
-def pattern2(p,goodtimes=None):
+def pattern2(p,goodtimes):
+    # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
     # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
     #              : equal to -9 for "normal" td_buy_setup, -80 for minimal_buy_setup or -90 for perfect_sell_setup
     td_s_df = get_td_s_df(p)
-    td_s_pattern = td_s_df[td_s_df['td_s']==9]
-    units_list =[]  
-    candles0_array = td_s_pattern.index.tolist()
-    for i in candles0_array:
-        units_list.append({'0': {'ts': i}})
+    td_s_df = td_s_df.reset_index()
+    td = td_s_df.values
+    units_list = []
+    if isinstance(goodtimes, np.ndarray):
+        for index in range(goodtimes.shape[0]):
+            ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
+            mini_td = filter_td(td,ts_timeframe)
+            for i in range(mini_td.shape[0])[:-1]:
+                if mini_td[i,1]==9:
+                    units_list.append({'0': {'ts': mini_td[i,0]}})
+    else:
+        ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
+        mini_td = filter_td(td,ts_timeframe)
+        for i in range(mini_td.shape[0])[:-1]:
+            if mini_td[i,1]==9:
+                units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
-def pattern3(p,goodtimes=None):
+def pattern3(p,goodtimes):
     # For td_countdown : equal to 13 for td_sell_countdown
     #                  : equal to -13 for td_buy_countdown
     td_c_df = get_td_c_df(p)
-    td_c_pattern = td_c_df[td_c_df['td_c']==13]
-    units_list =[]
-    candles0_array = td_c_pattern.index.tolist()
-    for i in candles0_array:
-        units_list.append({'0': {'ts': i}})
+    td_c_df = td_c_df.reset_index()
+    td = td_c_df.values
+    units_list = []
+    if isinstance(goodtimes, np.ndarray):
+        for index in range(goodtimes.shape[0]):
+            ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
+            mini_td = filter_td(td,ts_timeframe)
+            for i in range(mini_td.shape[0])[:-1]:
+                if mini_td[i,1]==13:
+                    units_list.append({'0': {'ts': mini_td[i,0]}})
+    else:
+        ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
+        mini_td = filter_td(td,ts_timeframe)
+        for i in range(mini_td.shape[0])[:-1]:
+            if mini_td[i,1]==13:
+                units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
 # ---------------------------------------------------------------------------------
@@ -93,6 +116,9 @@ def fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df):
 
 def filter_rsi(rsi,timeframe):
     return rsi[(rsi[:,0] >= timeframe[0]) & (rsi[:,0] <= timeframe[1])]
+
+def filter_td(td,timeframe):
+    return td[(td[:,0] >= timeframe[0]) & (td[:,0] <= timeframe[1])]
 
 def get_dataframe(p):
     pre_candles_df = pd.read_csv(p['path_candle_file'], header=None, names=['time','timestamp','open','high','low','close','volume','change'])
