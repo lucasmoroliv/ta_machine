@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 def main():
     pass
 
-def callable(p,goodtimes=None):
+def callable(p,goodtimes):
     candle_df = get_dataframe(p) 
     rsi_df = get_rsi_df(p)
     td_s_df = get_td_s_df(p)
     td_c_df = get_td_c_df(p)
-    units_list = pattern2(p,goodtimes)
+    units_list = pattern1(p,goodtimes)
     fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df)
 
     return units_list

@@ -26,7 +26,7 @@ def callable(t):
         'type': t,
         'trendlines': trendlines_list
     }
-    path_trendlines_file = '../warehouse/trendlines/' + t['trendline_file']
+    path_trendlines_file = 'warehouse/trendlines/' + t['trendline_file']
     with open(path_trendlines_file, 'w') as outfile:
         json.dump(trendlines_data, outfile)
 

@@ -14,7 +14,7 @@ def main():
         'sell' : {'trigger': ['6'],'moment_index':'high'},
         'target': '0.01',
         'chart_filter': {
-            'toggle': False,
+            'toggle': True,
             'condition': '1',
             'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
             'mode': 'greater_than_limit',
@@ -27,22 +27,43 @@ def main():
             'threshold' : 30,
         },
         }
-    single_event(p)
+    export_multiple_events(p)
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 1 *
 # Here is the place we have functions that manages event creation. 
 
-def single_event(p):
-    
+def print_event(p):
     goodtimes = chart_filter.callable(p)
-    units_list = unit_maker.callable(p,goodtimes) 
+    units_list = unit_maker.callable(p,goodtimes)
     report = scheme1(p,units_list)
     pprint(report)
 
-def multiple_events(p):
-    pass
+def print_multiple_events(p):
+    print('---------------------------------------------------------------------------')
+    iter_list = [i for i in range(0,100+1)]  
+    for item in iter_list:
+        p['unit_maker']['threshold'] = item
+        single_event(p)
+        print('---------------------------------------------------------------------------')
 
+def return_event(p):
+    goodtimes = chart_filter.callable(p)
+    units_list = unit_maker.callable(p,goodtimes)
+    report = scheme1(p,units_list)
+    return report
+
+def export_multiple_events(p):
+    iter_data = {}
+    iter_data['p'] = p
+    iter_list = [i for i in range(0,100+1)]  
+    for item in iter_list:
+        p['unit_maker']['threshold'] = item
+        report = return_event(p)
+        iter_data[str(p['unit_maker']['threshold'])] = report
+    path = 'builders/warehouse/experiment_data/' + 'rsi_threshold1.txt'    
+    with open(path, 'w') as outfile:
+        json.dump(iter_data, outfile)
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 2 *
@@ -59,7 +80,7 @@ def scheme1(p,units_list):
         unit_profit.append(profit)
 
     report = {
-        'rsi_threshold' : p['unit_maker']['threshold'],
+        # 'rsi_threshold' : p['unit_maker']['threshold'],
         'profit_stats': {
             'target': p['target'],
             'overtarget': stats.percentileofscore(unit_profit,float(p['target'])),
