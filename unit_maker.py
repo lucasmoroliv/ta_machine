@@ -13,7 +13,7 @@ def callable(p,goodtimes):
     rsi_df = get_rsi_df(p)
     td_s_df = get_td_s_df(p)
     td_c_df = get_td_c_df(p)
-    units_list = pattern3(p,goodtimes)
+    units_list = pattern1(p,goodtimes)
     fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df)
 
     return units_list
@@ -84,6 +84,9 @@ def pattern3(p,goodtimes):
             if mini_td[i,1]==13:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
+
+def pattern4(p,goodtimes):
+    pass
 
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
