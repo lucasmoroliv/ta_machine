@@ -11,7 +11,7 @@ def callable(p):
     elif p['chart_filter']['toggle'] == True: 
         data = get_data(p)
         full_trendlines_df = get_full_trendlines_df(data)
-        filtered_trendlines_df = conditions1(p,full_trendlines_df)
+        filtered_trendlines_df = globals()[p['chart_filter']['condition']](p,full_trendlines_df)
         goodtimes = fix_array(p,filtered_trendlines_df)
         return goodtimes
 
@@ -19,15 +19,18 @@ def callable(p):
 # * SECTION 1 *
 # Each one of the functions in this section must return a filtered_trendlines_df. 
 
-def conditions1(p,full_trendlines_df):
+def condition1(p,full_trendlines_df):
+    limit = float(p['chart_filter']['limit'])
+    limit1 = float(p['chart_filter']['limit1'])
+    limit2 = float(p['chart_filter']['limit2'])
     if p['chart_filter']['mode'] == 'greater_than_limit':
-        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['chart_filter']['condition_parameter']]>p['chart_filter']['limit']]
+        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['chart_filter']['condition_parameter']]>limit]
     elif p['chart_filter']['mode'] == 'less_than_limit':
-        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['chart_filter']['condition_parameter']]<p['chart_filter']['limit']]
+        filtered_trendlines_df = full_trendlines_df[full_trendlines_df[p['chart_filter']['condition_parameter']]<limit]
     elif p['chart_filter']['mode'] == 'greater_than_limit1_less_than_limit2':
-        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['chart_filter']['condition_parameter']]>p['chart_filter']['limit1']) & (full_trendlines_df[p['chart_filter']['condition_parameter']]<p['chart_filter']['limit2'])]
+        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['chart_filter']['condition_parameter']]>limit1) & (full_trendlines_df[p['chart_filter']['condition_parameter']]<limit2)]
     elif p['chart_filter']['mode'] == 'less_than_limit1_greater_than_limit2':
-        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['chart_filter']['condition_parameter']]<p['chart_filter']['limit1']) | (full_trendlines_df[p['chart_filter']['condition_parameter']]>p['chart_filter']['limit2'])]
+        filtered_trendlines_df = full_trendlines_df[(full_trendlines_df[p['chart_filter']['condition_parameter']]<limit1) | (full_trendlines_df[p['chart_filter']['condition_parameter']]>limit2)]
     return filtered_trendlines_df
 
 # ---------------------------------------------------------------------------------

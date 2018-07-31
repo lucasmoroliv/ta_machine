@@ -15,25 +15,24 @@ def main():
         'target': '0.007',
         'chart_filter': {
             'toggle': False,
-            'condition': '1',
+            'condition': 'condition1',
             'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt', 
             'mode': 'less_than_limit',
             'condition_parameter': 'm',
-            'limit': 0,
-            'limit1': 0,
-            'limit2': 0
+            'limit': '0',
+            'limit1': '0',
+            'limit2': '0'
         },
         'unit_maker': {
-            'threshold' : 30,
-            'td_s': 4
+            'threshold' : '30',
+            'pattern': 'pattern1'
         },
         }
-    # print_event(p)
-    # export_multiple_events(p)
-    # superbot(p)
     
-    report = return_event(p)
-    write_json(report)
+    # report = return_event(p)
+    # write_json(report)
+    print_event(p)
+
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 1 *
@@ -42,8 +41,9 @@ def main():
 def print_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    report = scheme3(p,units_list)
-    pprint(report)
+    pprint(units_list)
+    # report = scheme3(p,units_list)
+    # pprint(report)
 
 def print_multiple_events(p):
     print('---------------------------------------------------------------------------')

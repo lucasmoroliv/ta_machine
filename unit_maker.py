@@ -13,9 +13,8 @@ def callable(p,goodtimes):
     rsi_df = get_rsi_df(p)
     td_s_df = get_td_s_df(p)
     td_c_df = get_td_c_df(p)
-    units_list = pattern1(p,goodtimes)
+    units_list = globals()[p['unit_maker']['pattern']](p,goodtimes)
     fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df)
-
     return units_list
 
 # ---------------------------------------------------------------------------------
@@ -25,18 +24,19 @@ def callable(p,goodtimes):
 def pattern1(p,goodtimes):
     rsi = momentum_indicators.rsi(p['path_candle_file'])
     units_list = []
+    threshold = float(p['unit_maker']['threshold'])
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
             ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
             mini_rsi = filter_rsi(rsi,ts_timeframe)
             for i in range(mini_rsi.shape[0])[:-1]:
-                if mini_rsi[i,1] < p['unit_maker']['threshold'] and mini_rsi[i-1,1] > p['unit_maker']['threshold']:
+                if mini_rsi[i,1] < threshold and mini_rsi[i-1,1] > threshold:
                     units_list.append({'0': {'ts': mini_rsi[i,0]}})
     else:       
         ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
         mini_rsi = filter_rsi(rsi,ts_timeframe) 
         for i in range(mini_rsi.shape[0])[:-1]:
-            if mini_rsi[i,1] < p['unit_maker']['threshold'] and mini_rsi[i-1,1] > p['unit_maker']['threshold']:
+            if mini_rsi[i,1] < threshold and mini_rsi[i-1,1] > threshold:
                 units_list.append({'0': {'ts': mini_rsi[i,0]}})
     return units_list
 
