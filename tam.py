@@ -172,6 +172,8 @@ def write_json(data):
     path = half1_path + half2_path + '.txt'
     while os.path.exists(path):
         time.sleep(1)
+        half2_path = str(int(time.time()))
+        path = half1_path + half2_path + '.txt'
     with open(path, 'w') as outfile:
         json.dump(data, outfile)  
 
