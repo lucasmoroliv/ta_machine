@@ -11,12 +11,12 @@ def main():
         'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
         'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
         'buy' : {'trigger': ['1'],'moment_index':'open'},
-        'sell' : {'trigger': ['4'],'moment_index':'high'},
+        'sell' : {'trigger': ['10'],'moment_index':'high'},
         'target': '0.007',
         'chart_filter': {
-            'toggle': True,
+            'toggle': False,
             'condition': '1',
-            'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
+            'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt', 
             'mode': 'less_than_limit',
             'condition_parameter': 'm',
             'limit': 0,
@@ -28,8 +28,12 @@ def main():
             'td_s': 4
         },
         }
-
-    export_multiple_events(p)
+    # print_event(p)
+    # export_multiple_events(p)
+    # superbot(p)
+    
+    report = return_event(p)
+    write_json(report)
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 1 *
@@ -38,7 +42,7 @@ def main():
 def print_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    report = scheme1(p,units_list)
+    report = scheme3(p,units_list)
     pprint(report)
 
 def print_multiple_events(p):
@@ -52,7 +56,7 @@ def print_multiple_events(p):
 def return_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    report = scheme1(p,units_list)
+    report = scheme3(p,units_list)
     return report
 
 def export_multiple_events(p):
@@ -68,9 +72,16 @@ def export_multiple_events(p):
 def superbot(p):
     # This function run the function export_multiple_events changing some of the "p" parameters
     # it receives as argument.
-    iter_list = [['3'],['4'],['5'],['6'],['8'],['9'],['10'],['11'],['12'],['13'],['14']]
+    iter_list = [
+        'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt',
+        'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_400_4_15_0015_001_8.txt',
+        'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_80_400_4_15_001_001_8.txt',
+        'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_80_500_3_15_0005_001_8.txt'
+    ]
+    export_multiple_events(p)
+    p['chart_filter']['toggle'] = True
     for item in iter_list:
-        p['sell']['trigger'] = item 
+        p['chart_filter']['path_trendline_file'] = item 
         export_multiple_events(p)
 
 # --------------------------------------------------------------------------------------------------------
@@ -83,18 +94,69 @@ def scheme1(p,units_list):
 
     for unit in units_list:
         profit = (unit[p['sell']['trigger'][0]]['high'] - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open']
-        lowest = (min(unit[item]['high'] for item in unit.keys() if item != '0') - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open']
+        lowest = (min(unit[item]['low'] for item in unit.keys() if item != '0') - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open']
         unit_lowest.append(lowest)
         unit_profit.append(profit)
 
     report = {
-        'target': p['target'],
         'overtarget': 100 - stats.percentileofscore(unit_profit,float(p['target'])),
-        'unit_amount': len(unit_profit),
+        'unit_amount': len(units_list),
     }
     
     return report
 
+def scheme2(p,units_list):
+    
+    unit_highest = []
+    unit_lowest = []
+    highest_candle_list = []
+    lowest_candle_list = []
+
+    for unit in units_list:
+        high_list = [(unit[str(candle)]['high'] - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open'] for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1)]
+        highest = max(high_list) 
+        highest_candle = int(p['buy']['trigger'][0]) + high_list.index(highest)  
+        low_list = [(unit[str(candle)]['low'] - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open'] for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1)]
+        lowest = min(low_list)
+        lowest_candle = int(p['buy']['trigger'][0]) + low_list.index(lowest)
+        unit_highest.append(highest)
+        unit_lowest.append(lowest)
+        highest_candle_list.append(str(highest_candle))
+        lowest_candle_list.append(str(lowest_candle))
+        
+    report = {
+        'overtarget': 100 - stats.percentileofscore(unit_highest,float(p['target'])),
+        'unit_amount': len(units_list),
+        'lowest_candle': {},
+        'highest_candle': {}
+    }
+
+    for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1):
+        report['lowest_candle'][candle] = lowest_candle_list.count(str(candle))
+        report['highest_candle'][candle] = highest_candle_list.count(str(candle))
+
+    return report
+
+def scheme3(p,units_list):
+    
+    omega_highest = []
+    omega_lowest = []
+
+    for unit in units_list:
+        high_list = [(unit[str(candle)]['high'] - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open'] for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1)]
+        highest = max(high_list) 
+        low_list = [(unit[str(candle)]['low'] - unit[p['buy']['trigger'][0]]['open']) / unit[p['buy']['trigger'][0]]['open'] for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1)]
+        lowest = min(low_list)
+        omega_highest.append(highest)
+        omega_lowest.append(lowest)
+    report = {
+        'omega_highest': omega_highest,
+        'omega_lowest': omega_lowest,
+        'unit_amount': len(units_list),
+        'p': p
+    }
+    return report
+    
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 3 *
 # Place for random functions that may or may not be called somewhere in the code.
