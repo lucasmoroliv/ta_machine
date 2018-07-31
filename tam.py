@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 def main():
+# --------------------------------------------------------------------------------------------------------
+# * MAIN *
+# In order to create an event you must fill in the parameters dictionary below. 
+    
     p = {
         'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
         'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
@@ -27,12 +31,16 @@ def main():
             'threshold' : '30',
             'pattern': 'pattern1'
         },
+        'tam': {
+            'scheme': 'scheme3'
+        }
         }
     
-    # report = return_event(p)
-    # write_json(report)
-    print_event(p)
+# --------------------------------------------------------------------------------------------------------
+# * MAIN *
+# This is the place you call the function to create the event report. 
 
+    print_event(p)
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 1 *
@@ -41,9 +49,8 @@ def main():
 def print_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    pprint(units_list)
-    # report = scheme3(p,units_list)
-    # pprint(report)
+    report = globals()[p['tam']['scheme']](p,units_list)
+    pprint(report)
 
 def print_multiple_events(p):
     print('---------------------------------------------------------------------------')
@@ -56,7 +63,7 @@ def print_multiple_events(p):
 def return_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    report = scheme3(p,units_list)
+    report = globals()[p['tam']['scheme']](p,units_list)
     return report
 
 def export_multiple_events(p):
