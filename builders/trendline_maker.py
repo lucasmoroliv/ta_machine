@@ -5,15 +5,15 @@ from pprint import pprint
 
 def main():
     t = {
-        'candle_file' : '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
-        'timeframe' : ('2018-01-01 00:00:00','2018-06-19 23:30:00'),
-        'max_span' : 100,
-        'min_span' : 40,
-        'upper_limit' : 0.0005,
-        'lower_limit' : 0.001,
-        'min_tests' :  4,
-        'max_tests' : 15,
-        'min_inbetween' : None
+        'candle_file': '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
+        'timeframe': ('2018-01-01 00:00:00','2018-06-19 23:30:00'),
+        'max_span': 100,
+        'min_span': 40,
+        'upper_limit': 0.0005,
+        'lower_limit': 0.001,
+        'min_tests': 4,
+        'max_tests': 15,
+        'min_inbetween': None
     }
     t['min_inbetween'] = int(t['min_span']*0.1)
     callable(t)

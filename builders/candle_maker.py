@@ -36,7 +36,7 @@ def make_list(c,csv_array):
     checker = 0
     volume = 0
     candle_index = 0
-    first_ts = next(csv_array[:,0],c['start_ts'])
+    first_ts = next_item(csv_array[:,0],c['start_ts'])
     index_first_ts = np.where(csv_array[:,0] == first_ts)[0][0]
     candles_list = []
 
@@ -81,7 +81,7 @@ def make_csv(c,csv_array):
     checker = 0
     volume = 0
     candle_index = 0
-    first_ts = next(csv_array[:,0],c['start_ts'])
+    first_ts = next_item(csv_array[:,0],c['start_ts'])
     index_first_ts = np.where(csv_array[:,0] == first_ts)[0][0]
 
     with open(c['output_path'], 'w', newline='') as file:
@@ -116,7 +116,7 @@ def make_csv(c,csv_array):
                 volume = volume + row[2]
                 checker = 1
 
-def next(array,ts):
+def next_item(array,ts):
     return array[array>=ts][0]
 
 def get_start_ts(c,csv_array):
