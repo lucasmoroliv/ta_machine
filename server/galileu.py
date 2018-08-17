@@ -51,7 +51,7 @@ def main():
             # overload the server by trying to reconnect straight away.
             else:
                 ts_first_error = ts_error
-                with open('egg.csv', 'a', newline='') as csvfile:
+                with open('lattest.csv', 'a', newline='') as csvfile:
                     spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     spamwriter.writerow(['BREAK at {}, {}.'.format(ts_first_error,datetime.datetime.utcfromtimestamp(time.time()))])
             ts_last_error = ts_error
