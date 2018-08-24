@@ -14,6 +14,7 @@ def main():
     p = {
         'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
         'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
+        'candle_sec': '1800',
         'buy' : {'trigger': ['1'],'moment_index':'open'},
         'sell' : {'trigger': ['10'],'moment_index':'high'},
         'target': '0.007',
@@ -29,13 +30,18 @@ def main():
         },
         'unit_maker': {
             'threshold' : '30',
-            'pattern': 'pattern1'
+            'pattern': 'pattern1',
+            'start_candle': '0',
+            'end_candle': '20',
+            'candle_features': ['open','high']
         },
         'tam': {
-            'scheme': 'scheme3'
+            'scheme': 'scheme4',
+            'min_volume_over_target': '10',
+            'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv'
         }
         }
-    
+
 # --------------------------------------------------------------------------------------------------------
 # * MAIN *
 # This is the place you call the function to create the event report. 
@@ -44,7 +50,7 @@ def main():
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 1 *
-# Here is the place we have functions that manages event creation. 
+# Here is the place we put functions that manage event creation. 
 
 def print_event(p):
     goodtimes = chart_filter.callable(p)
@@ -163,10 +169,34 @@ def scheme3(p,units_list):
         'p': p
     }
     return report
-    
+
+def scheme4(p,units_list):
+    target_candle_allunits = []
+    candle_sec = int(p['candle_sec'])
+
+    for unit in units_list:
+        target_candle = []
+        target_price = unit[p['buy']['trigger'][0]]['open'] * (1 + float(p['target']))
+        for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1):
+            if unit[str(candle)]['high'] > target_price:
+                target_candle.append(str(candle))
+        target_candle_allunits.append(target_candle)
+    return target_candle_allunits
+
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 3 *
 # Place for random functions that may or may not be called somewhere in the code.
+
+def get_volume_over_price(df,candle_sec,ts_candle0,candle,price):
+    # This function gets the volume over the price of the specified candle.
+    candle_start = ts_candle0 + candle * candle_sec 
+    candle_end = candle_start + candle_sec
+    candle_section = df.loc[candle_start:candle_end]
+    print(candle_section)
+
+def get_raw(p):
+    pre_df = pd.read_csv(p['tam']['path_historical_data'], header=None, names=['timestamp','price','volume'])
+    return pre_df.set_index('timestamp')
 
 def histogram(array,resolution):
     plt.hist(array,resolution)
