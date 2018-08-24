@@ -87,32 +87,22 @@ def pattern3(p,goodtimes):
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
-def pattern4(p,goodtimes):
-    pass
-
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
 # Add details of relevant candles to units_list for further analysis.
 
 def fill_units_list(units_list,p,candle_df,rsi_df,td_s_df,td_c_df):
     candle_sec = candle_df.index[1] - candle_df.index[0]
+    candle_features = p['unit_maker']['candle_features'] 
 
-    for act in ['buy','sell']:
-        for unit in units_list:
-            # for candle in p[act]['trigger']:
-            for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][-1])+1):
-                candle_ts = unit['0']['ts'] + candle * candle_sec
-                unit[str(candle)] = {
-                    'open': candle_df.loc[candle_ts]['open'],
-                    'high': candle_df.loc[candle_ts]['high'],
-                    'low': candle_df.loc[candle_ts]['low'],
-                    'close': candle_df.loc[candle_ts]['close'],
-                    'volume': candle_df.loc[candle_ts]['volume'],
-                    'change': candle_df.loc[candle_ts]['change'],
-                    'rsi': rsi_df.loc[candle_ts]['rsi'],
-                    'td_s': td_s_df.loc[candle_ts]['td_s'],
-                    'td_c': td_c_df.loc[candle_ts]['td_c']
-                }
+    for unit in units_list:
+        unit_ts = unit['0']['ts']
+        for candle in range(int(p['unit_maker']['start_candle']),int(p['unit_maker']['end_candle'])+1):
+            candle_ts = unit_ts + candle * candle_sec
+            if candle != 0:
+                unit[str(candle)] = {}
+            for feature in candle_features:
+                unit[str(candle)][feature] = candle_df.loc[candle_ts][feature]
 
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *
@@ -140,7 +130,6 @@ def get_td_s_df(p):
 # Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
     with open('builders/warehouse/td_data/td_setup_30min_bitstamp.csv', newline='') as csvfile:
         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
-        list = []
         big_list = []
         for row in data:
             ts_start = float(row[0].split(',')[0])
@@ -173,3 +162,4 @@ if __name__ == '__main__':
     main()
     time2 = time.time()
     print('Runtime: ',time2-time1)
+
