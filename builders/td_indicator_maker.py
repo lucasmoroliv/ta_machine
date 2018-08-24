@@ -24,8 +24,8 @@ def td_setup(df,df_file):
     df = df[['timestamp','close','low','high']].copy()
     df['dif_4th'] = list(pd.Series(df.loc[:3, 'close']))+list(df.loc[:df.shape[0]-5, 'close'])
     df['dif_4th'] = list(df.loc[:3, 'close'])+list(df.loc[:df.shape[0]-5, 'close'])
-    # Here we add a colum(named: delta) which is the subtraction between the current close price and close price 4 candles before
-    df['delta'] = df['close'] - df['dif_4th']
+    # Here we add a colum(named: close_minus_4th) which is the subtraction between the current close price and close price 4 candles before
+    df['close_minus_4th'] = df['close'] - df['dif_4th']
 #     # How TD Setup works in a Bear Market:
 #     # TD Buy Setup, The buy setup bar 1 starts to count when the close of the current bar is lower than the close four bars earlier,
 #     # the 2 counts if the bar next to the 1 closes lower than the close four bars earlier, and so on... The count needs to be back to back.
@@ -45,10 +45,10 @@ def td_setup(df,df_file):
     min_sell_setup = 80
     perfect_sell_setup = 90
     for i in range(df.shape[0]):
-        if df.delta[i] < 0 and count >= 0:
+        if df.close_minus_4th[i] < 0 and count >= 0:
             count = -1
             tdlist.append(count)
-        elif df.delta[i] <= 0 and count > -9 and count < 0:
+        elif df.close_minus_4th[i] <= 0 and count > -9 and count < 0:
             if count == -7 and df.low[i] <= min(df.low[i-1], df.low[i-2]):
                 count -= 1
                 tdlist.append(min_buy_setup)
@@ -61,13 +61,13 @@ def td_setup(df,df_file):
                 tdlist.append(count)
                 if count == -9:
                     highest.append(i-8)
-        elif df.delta[i] <= 0 and count == -9:
+        elif df.close_minus_4th[i] <= 0 and count == -9:
             count = -1
             tdlist.append(count)
-        elif df.delta[i] > 0 and count <= 0:
+        elif df.close_minus_4th[i] > 0 and count <= 0:
             count = 1
             tdlist.append(count)
-        elif df.delta[i] >= 0 and count < 9 and count > 0:
+        elif df.close_minus_4th[i] >= 0 and count < 9 and count > 0:
             if count == 7 and df.high[i] > max(df.high[i-1], df.high[i-2]):
                 count += 1
                 tdlist.append(min_sell_setup)
@@ -80,7 +80,7 @@ def td_setup(df,df_file):
                 tdlist.append(count)
                 if count == 9:
                     lowest.append(i-8)
-        elif df.delta[i] >= 0 and count == 9:
+        elif df.close_minus_4th[i] >= 0 and count == 9:
             count = 1
             tdlist.append(count)
         else:
@@ -123,31 +123,31 @@ def td_countdown(df, df_file, highest, lowest):
     indexes_full_setup = []
     counter = 0 # is used to put the number in those candles which fit in the countdown requirements
     trigger = 0 # if the bar 9 of the setup is not the 1 of the countdown at the same time, trigger activate the number 1 of the countdown, when the close of the current candle is lower than the low two candles earlier(for td_buy_countdown)
-    n = np.nan # all those candles that doens't receive any countdown number are NaN.
+    n = 0 # all those candles that doens't receive any countdown number are NaN.
     aaa = 0 # In the middle of a countdown a cancel might happen and the count start over, if 0 appears is because one of the cancelattion conditions is contemplated
     for i in range(df.shape[0]):
-        if df.dota[i] <= 0 and counter == 0 and df.td[i] == -9:
+        if df.dota[i] <= 0 and counter == 0 and df.td[i] == -9 or df.td[i] == -90:
             counter = -1
             countdown.append(counter)
-        elif df.dota[i] <= 0 and counter == 0 and df.td[i] == -90:
-            counter = -1
-            countdown.append(counter)
-        elif df.dota[i] > 0 and counter == 0 and df.td[i] == -9:
+        # elif df.dota[i] <= 0 and counter == 0 and df.td[i] == -90:
+        #     counter = -1
+        #     countdown.append(counter)
+        elif df.dota[i] > 0 and counter == 0 and df.td[i] == -9 or df.td[i] == -90:
             counter = 0
             countdown.append(counter)
             trigger = -1
-        elif df.dota[i] > 0 and counter == 0 and df.td[i] == -90:
-            counter = 0
-            countdown.append(counter)
-            trigger = -1
-        elif counter < 0 and counter > -13 and df.td[i] == 9:
-            counter = 0
-            countdown.append(aaa)
-            trigger = 0
-        elif counter < 0 and counter > -13 and df.td[i] == 90:
+        # elif df.dota[i] > 0 and counter == 0 and df.td[i] == -90:
+        #     counter = 0
+        #     countdown.append(counter)
+        #     trigger = -1
+        elif counter < 0 and counter > -13 and df.td[i] == 9 or df.td[i] == 90:
             counter = 0
             countdown.append(aaa)
             trigger = 0
+        # elif counter < 0 and counter > -13 and df.td[i] == 90:
+        #     counter = 0
+        #     countdown.append(aaa)
+        #     trigger = 0
         elif df.dota[i] < 0 and counter < 0 and counter > -13:
             counter -= 1
             countdown.append(counter)
@@ -244,6 +244,8 @@ def td_countdown(df, df_file, highest, lowest):
     #     if df.countdown[index] == 13:
     #         print(index)
     # print('')
+    # for index, row in df.iterrows():
+        # print(row)
 
 if __name__ == '__main__':
     x1 = time.time()

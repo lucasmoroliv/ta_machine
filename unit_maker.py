@@ -6,6 +6,7 @@ from builders import momentum_indicators
 import matplotlib.pyplot as plt
 
 def main():
+    pprint(globals())    
     pass
 
 def callable(p,goodtimes):
@@ -42,24 +43,24 @@ def pattern1(p,goodtimes):
 
 def pattern2(p,goodtimes):
     # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
-    # For td_setup : equal to 9 for "normal" td_sell_setup, 80 for minimal_sell_setup or 90 for perfect_sell_setup
     #              : equal to -9 for "normal" td_buy_setup, -80 for minimal_buy_setup or -90 for perfect_sell_setup
     td_s_df = get_td_s_df(p)
     td_s_df = td_s_df.reset_index()
     td = td_s_df.values
+    td_s = int(p['unit_maker']['td_s'])
     units_list = []
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
             ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
             mini_td = filter_td(td,ts_timeframe)
             for i in range(mini_td.shape[0])[:-1]:
-                if mini_td[i,1]==9:
+                if mini_td[i,1]==td_s:
                     units_list.append({'0': {'ts': mini_td[i,0]}})
     else:
         ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
         mini_td = filter_td(td,ts_timeframe)
         for i in range(mini_td.shape[0])[:-1]:
-            if mini_td[i,1]==9:
+            if mini_td[i,1]==td_s:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
@@ -69,19 +70,20 @@ def pattern3(p,goodtimes):
     td_c_df = get_td_c_df(p)
     td_c_df = td_c_df.reset_index()
     td = td_c_df.values
+    td_c = int(p['unit_maker']['td_c'])
     units_list = []
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
             ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
             mini_td = filter_td(td,ts_timeframe)
             for i in range(mini_td.shape[0])[:-1]:
-                if mini_td[i,1]==13:
+                if mini_td[i,1]==td_c:
                     units_list.append({'0': {'ts': mini_td[i,0]}})
     else:
         ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
         mini_td = filter_td(td,ts_timeframe)
         for i in range(mini_td.shape[0])[:-1]:
-            if mini_td[i,1]==13:
+            if mini_td[i,1]==td_c:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
@@ -145,7 +147,7 @@ def get_td_s_df(p):
             td = float(row[0].split(',')[1])
             big_list.append([ts_start,td])
         td_s_data = np.array(big_list)
-        td_s_data.astype(int)
+        td_s_data = td_s_data.astype(int)
     td_s_df = pd.DataFrame(td_s_data, columns = ['timestamp','td_s'])
     td_s_df = td_s_df.set_index('timestamp')
     return td_s_df
@@ -161,7 +163,7 @@ def get_td_c_df(p):
             td = float(row[0].split(',')[1])
             big_list.append([ts_start,td])
         td_c_data = np.array(big_list)
-        td_c_data.astype(int)
+        td_c_data = td_c_data.astype(int)
     td_c_df = pd.DataFrame(td_c_data, columns = ['timestamp','td_c'])
     td_c_df = td_c_df.set_index('timestamp')
     return td_c_df
