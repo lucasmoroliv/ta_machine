@@ -194,13 +194,16 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
 # raw_section2 is a dataframe with all the rows of raw_section that has the value price greater than of or equal 
 # unit['buy']['price'].
     raw_section2 = raw_section[raw_section.price>=unit['buy']['price']]
-
+    if raw_section2.empty:
+        unit['type'] = 'nothing-bought'
+        return
 # A new column named 'acc_volume' is added to raw_section2.
     pd.options.mode.chained_assignment = None
     raw_section2['acc_volume'] = raw_section2['volume'].cumsum(axis = 0)
 # It checks if raw_section2 has once an accumulated volume of at least float(p['tam']['max_order']). 
     if (raw_section2.acc_volume >= float(p['tam']['max_order'])).any():
     # 'row' is the first row of raw_section2 that has accumulated volume greater than or equal to float(p['tam']['max_order']).
+        unit['type'] = 'all-bought'
         row = raw_section2[raw_section2.acc_volume >= float(p['tam']['max_order'])]
         row = row.iloc[0]
         unit['buy']['first_executed'] = {
@@ -211,6 +214,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
             'ts': row.timestamp,
             'index': row.name
         }
+    else:
+        unit['type'] = 'partially-bought'
+
 
 def find_sell(p,unit,candle_df,raw_df):
 # In order to find raw_section at this function we can't simple get the first timestamp of the buy candle,
@@ -235,9 +241,11 @@ def find_sell(p,unit,candle_df,raw_df):
     # raw_sorted.reset_index(inplace=True,drop=True)
 # Iterate through the rows until executed_sofar is greater than or equal to p['tam']['max_order'].
     i = 0
+    unit['type'] = 'not-all-sold'
     for index,row in raw_sorted.iterrows():
         executed_sofar = executed_sofar + row.volume
         if executed_sofar >= float(p['tam']['max_order']):
+            unit['type'] = 'all-sold'
 # The following condition was added because the units that have the previous condition met at the first iteration
 # can't create 'until_i' correctly, because 'i' in such case has value 0 and raw_sorted.iloc[0:0] gives error.
 # With that said, when 'i' is equal to 0 (first iteration) greater_ts_row is created differently.   
