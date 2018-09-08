@@ -27,11 +27,9 @@ def main():
         'threshold' : '30',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
-    },
-    'tam': {
-        'scheme': 'scheme4',
         'max_order': '5',
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
+        'add': ['buy','sell','lowest'] 
     }
     }
 
@@ -42,20 +40,17 @@ def main():
 def callable(p,goodtimes):
     candle_df = get_dataframe(p)
     raw_df = get_raw(p)
-    rsi_df = get_rsi_df(p)
-    td_s_df = get_td_s_df(p)
-    td_c_df = get_td_c_df(p)
+    # rsi_df = get_rsi_df(p)
+    # td_s_df = get_td_s_df(p)
+    # td_c_df = get_td_c_df(p)
     units_list = globals()[p['unit_maker']['pattern']](p,goodtimes)
-    
-    add_buy(p,units_list,candle_df,raw_df)
-    # add_candles(p,units_list,candle_df,rsi_df,td_s_df,td_c_df)
-    add_sell(p,units_list,candle_df,raw_df)
-    add_lowest(p,units_list,candle_df,raw_df)
+    for item in p['unit_maker']['add']:
+        globals()['add_{0}'.format(item)](p,units_list,candle_df,raw_df)
     return units_list
 
 # ---------------------------------------------------------------------------------
 # * SECTION 1 *
-# Each one of the functions in this section must return a units_list. 
+# Every function in this section must return a units_list, with the timestamp of the candle 0 of each unit. 
 
 def pattern1(p,goodtimes):
     rsi = momentum_indicators.rsi(p['path_candle_file'])
@@ -124,7 +119,7 @@ def pattern3(p,goodtimes):
 
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
-# Add details of relevant candles to units_list for further analysis.
+# Add details to units_list for further analysis.
 
 def add_candles(p,units_list,candle_df,rsi_df,td_s_df,td_c_df):
     candle_features = p['unit_maker']['candle_features'] 
@@ -161,13 +156,13 @@ def add_sell(p,units_list,candle_df,raw_df):
         'moment': moment
     }
     for unit in units_list:
-        if 'first_executed' in unit['buy']:
+        if 'last_executed' in unit['buy']:
             unit['sell'] = {}
             find_sell(p,unit,candle_df,raw_df)
 
 def add_lowest(p,units_list,candle_df,raw_df):
     for unit in units_list:
-        if 'first_executed' in unit['buy']:
+        if 'last_executed' in unit['buy']:
             if 'last_executed' in unit['sell']:
                 unit['lowest'] = {}
                 find_lowest(p,unit,candle_df,raw_df)
@@ -201,10 +196,10 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     pd.options.mode.chained_assignment = None
     raw_section2['acc_volume'] = raw_section2['volume'].cumsum(axis = 0)
 # It checks if raw_section2 has once an accumulated volume of at least float(p['tam']['max_order']). 
-    if (raw_section2.acc_volume >= float(p['tam']['max_order'])).any():
+    if (raw_section2.acc_volume >= float(p['unit_maker']['max_order'])).any():
     # 'row' is the first row of raw_section2 that has accumulated volume greater than or equal to float(p['tam']['max_order']).
         unit['type'] = 'all-bought'
-        row = raw_section2[raw_section2.acc_volume >= float(p['tam']['max_order'])]
+        row = raw_section2[raw_section2.acc_volume >= float(p['unit_maker']['max_order'])]
         row = row.iloc[0]
         unit['buy']['first_executed'] = {
             'ts': raw_section2.iloc[0].timestamp,
@@ -244,7 +239,7 @@ def find_sell(p,unit,candle_df,raw_df):
     unit['type'] = 'not-all-sold'
     for index,row in raw_sorted.iterrows():
         executed_sofar = executed_sofar + row.volume
-        if executed_sofar >= float(p['tam']['max_order']):
+        if executed_sofar >= float(p['unit_maker']['max_order']):
             unit['type'] = 'all-sold'
 # The following condition was added because the units that have the previous condition met at the first iteration
 # can't create 'until_i' correctly, because 'i' in such case has value 0 and raw_sorted.iloc[0:0] gives error.
@@ -308,7 +303,7 @@ def translate_order(mode,input):
         return candle,moment
 
 def get_raw(p):
-    return pd.read_csv(p['tam']['path_historical_data'], header=None, names=['timestamp','price','volume'])
+    return pd.read_csv(p['unit_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
 
 def filter_rsi(rsi,timeframe):
     return rsi[(rsi[:,0] >= timeframe[0]) & (rsi[:,0] <= timeframe[1])]
