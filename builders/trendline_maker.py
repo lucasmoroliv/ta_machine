@@ -5,12 +5,12 @@ from pprint import pprint
 
 def main():
     t = {
-        'candle_file': '30min_1529921395_6183-2_0-40432139_bitstamp.csv',
-        'timeframe': ('2018-01-01 00:00:00','2018-06-19 23:30:00'),
-        'max_span': 100,
+        'candle_file': '30min_bitstamp.csv',
+        'timeframe': ('2014-01-01 00:00:00','2018-08-15 23:30:00'),
+        'max_span': 200,
         'min_span': 40,
-        'upper_limit': 0.0005,
-        'lower_limit': 0.001,
+        'upper_limit': 0.0015,
+        'lower_limit': 0.0015,
         'min_tests': 4,
         'max_tests': 15,
         'min_inbetween': None
@@ -68,7 +68,7 @@ def take_nan_out(mess):
     return mess
 
 def get_trendlines(t):
-    df = get_dataframe('../warehouse/candle_data/' + t['candle_file'])
+    df = get_dataframe('warehouse/candle_data/' + t['candle_file'])
     df = filterbydate_df(df,t['timeframe'])
     low_array = df[['timestamp','low']].copy().values
     trendlines_list = []

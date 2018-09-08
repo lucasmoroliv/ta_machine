@@ -3,8 +3,6 @@ import pandas as pd
 import time,calendar,datetime,csv,math,json,importlib,operator,sys,os
 from pprint import pprint
 import chart_filter, unit_maker
-import matplotlib.pyplot as plt
-from scipy import stats
 
 def main():
 # --------------------------------------------------------------------------------------------------------
@@ -13,15 +11,17 @@ def main():
     
     p = {
         'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-        'timeframe' : ['2014-01-04 00:00:00','2018-04-19 00:00:00'],
+        'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
         'candle_sec': '1800',
-        'buy' : {'trigger': ['1'],'moment_index':'open'},
-        'sell' : {'trigger': ['10'],'moment_index':'high'},
-        'target': '0.007',
+        # 'buy' : {'trigger': ['1'],'moment_index':'open'},
+        # 'sell' : {'trigger': ['10'],'moment_index':'high'},
+        # 'target': '0.007',
+        'buy': '1_1open',
+        'sell': 'realHighest',
         'chart_filter': {
             'toggle': False,
             'condition': 'condition1',
-            'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_200_4_15_0015_001_4.txt', 
+            'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
             'mode': 'less_than_limit',
             'condition_parameter': 'm',
             'limit': '0',
@@ -33,12 +33,13 @@ def main():
             'pattern': 'pattern1',
             'start_candle': '0',
             'end_candle': '20',
-            'candle_features': ['open','high']
+            # 'candle_features': ['open','high']
+            'candle_features': []
         },
         'tam': {
             'scheme': 'scheme4',
             'min_volume_over_target': '10',
-            'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv'
+            'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         }
         }
 
@@ -55,8 +56,9 @@ def main():
 def print_event(p):
     goodtimes = chart_filter.callable(p)
     units_list = unit_maker.callable(p,goodtimes)
-    report = globals()[p['tam']['scheme']](p,units_list)
-    pprint(report)
+    # report = globals()[p['tam']['scheme']](p,units_list)
+    # pprint(report)
+    pprint(units_list)
 
 def print_multiple_events(p):
     print('---------------------------------------------------------------------------')
@@ -171,17 +173,19 @@ def scheme3(p,units_list):
     return report
 
 def scheme4(p,units_list):
-    target_candle_allunits = []
-    candle_sec = int(p['candle_sec'])
+    pass
+    # for unit in units_list:
+    #     ts_reference = unit['0']['ts']
+    #     start_unit =     
+    
+    
+    
+    
+    
+    
+    
 
-    for unit in units_list:
-        target_candle = []
-        target_price = unit[p['buy']['trigger'][0]]['open'] * (1 + float(p['target']))
-        for candle in range(int(p['buy']['trigger'][0]),int(p['sell']['trigger'][0])+1):
-            if unit[str(candle)]['high'] > target_price:
-                target_candle.append(str(candle))
-        target_candle_allunits.append(target_candle)
-    return target_candle_allunits
+
 
 # --------------------------------------------------------------------------------------------------------
 # * SECTION 3 *
