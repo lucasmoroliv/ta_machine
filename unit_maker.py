@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json,sys,operator
+import time,calendar,datetime,csv,math,json,sys,operator,os
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
@@ -10,8 +10,7 @@ def main():
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
     'candle_sec': '1800',
-    # 'buy': '1-2-3-4-5_0high',
-    'buy': '1_1open*1.0001',
+    'buy': '1-3_0high*1.0001',
     'sell': 'buy-10_realHighest',
     'chart_filter': {
         'toggle': False,
@@ -36,6 +35,7 @@ def main():
     goodtimes = chart_filter.callable(p)
     units_list = callable(p,goodtimes)
     pprint(units_list)
+    write_json((p,units_list))
 
 def callable(p,goodtimes):
     candle_df = get_dataframe(p)
@@ -156,16 +156,15 @@ def add_sell(p,units_list,candle_df,raw_df):
         'moment': moment
     }
     for unit in units_list:
-        if 'last_executed' in unit['buy']:
+        if unit['type'] == 'all-bought':
             unit['sell'] = {}
             find_sell(p,unit,candle_df,raw_df)
 
 def add_lowest(p,units_list,candle_df,raw_df):
     for unit in units_list:
-        if 'last_executed' in unit['buy']:
-            if 'last_executed' in unit['sell']:
-                unit['lowest'] = {}
-                find_lowest(p,unit,candle_df,raw_df)
+        if unit['type'] == 'all-sold':
+            unit['lowest'] = {}
+            find_lowest(p,unit,candle_df,raw_df)
 
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *
@@ -195,19 +194,19 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
 # A new column named 'acc_volume' is added to raw_section2.
     pd.options.mode.chained_assignment = None
     raw_section2['acc_volume'] = raw_section2['volume'].cumsum(axis = 0)
-# It checks if raw_section2 has once an accumulated volume of at least float(p['tam']['max_order']). 
+# It checks if raw_section2 has once an accumulated volume of at least float(p['unit_maker']['max_order']). 
     if (raw_section2.acc_volume >= float(p['unit_maker']['max_order'])).any():
-    # 'row' is the first row of raw_section2 that has accumulated volume greater than or equal to float(p['tam']['max_order']).
+    # 'row' is the first row of raw_section2 that has accumulated volume greater than or equal to float(p['unit_maker']['max_order']).
         unit['type'] = 'all-bought'
         row = raw_section2[raw_section2.acc_volume >= float(p['unit_maker']['max_order'])]
         row = row.iloc[0]
         unit['buy']['first_executed'] = {
-            'ts': raw_section2.iloc[0].timestamp,
-            'index': raw_section2.iloc[0].name
+            'ts': int(raw_section2.iloc[0].timestamp),
+            'index': int(raw_section2.iloc[0].name)
         }
         unit['buy']['last_executed'] = {
-            'ts': row.timestamp,
-            'index': row.name
+            'ts': int(row.timestamp),
+            'index': int(row.name)
         }
     else:
         unit['type'] = 'partially-bought'
@@ -236,7 +235,11 @@ def find_sell(p,unit,candle_df,raw_df):
     # raw_sorted.reset_index(inplace=True,drop=True)
 # Iterate through the rows until executed_sofar is greater than or equal to p['tam']['max_order'].
     i = 0
-    unit['type'] = 'not-all-sold'
+    if raw_sorted.empty:
+        unit['type'] = 'nothing-sold'
+    else:
+        unit['type'] = 'partially-sold'
+
     for index,row in raw_sorted.iterrows():
         executed_sofar = executed_sofar + row.volume
         if executed_sofar >= float(p['unit_maker']['max_order']):
@@ -256,10 +259,10 @@ def find_sell(p,unit,candle_df,raw_df):
 # This price is lower than or equal to this value. The concept of realHighest is quite hard to explain it here with
 # some few words, but essentially is: The higher price target we can add to the order book that will execute the
 # p['tam']['max_order'] amount of bitcoins.
-            unit['sell']['realHighest'] = row.price
+            unit['sell']['realHighest'] = float(row.price)
             unit['sell']['last_executed'] = {
-                'ts': greater_ts_row.timestamp, 
-                'index': greater_ts_row.name 
+                'ts': int(greater_ts_row.timestamp), 
+                'index': int(greater_ts_row.name) 
             }
             break 
         i = i + 1
@@ -273,9 +276,9 @@ def find_lowest(p,unit,candle_df,raw_df):
     raw_section = raw_df[start_index:end_index]    
 # The variable min_row receives the row with the lowest price within raw_section.
     min_row = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
-    unit['lowest']['price'] = min_row.price
-    unit['lowest']['ts'] = min_row.timestamp
-    unit['lowest']['index'] = min_row.name
+    unit['lowest']['price'] = float(min_row.price)
+    unit['lowest']['ts'] = int(min_row.timestamp)
+    unit['lowest']['index'] = int(min_row.name)
 
 def translate_order(mode,input):
 # This function receives as input a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
@@ -353,10 +356,23 @@ def get_td_c_df(p):
     td_c_df = td_c_df.set_index('timestamp')
     return td_c_df
 
+def write_json(data):
+    # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
+    half1_path = 'builders/warehouse/setup_data/setup'
+    half2_path = str(int(time.time()))
+    path = half1_path + half2_path + '.txt'
+    while os.path.exists(path):
+        time.sleep(1)
+        half2_path = str(int(time.time()))
+        path = half1_path + half2_path + '.txt'
+    with open(path, 'w') as outfile:
+        json.dump(data, outfile)
+
 if __name__ == '__main__':
     time1 = time.time()
     main()
     time2 = time.time()
+    print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
 
