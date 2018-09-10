@@ -10,7 +10,7 @@ def main():
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
     'candle_sec': '1800',
-    'buy': '1-3_0high*1.0001',
+    'buy': '1_1open*1.0001',
     'sell': 'buy-10_realHighest',
     'chart_filter': {
         'toggle': False,
@@ -220,23 +220,22 @@ def find_sell(p,unit,candle_df,raw_df):
 # where the sell event can happen), should be one value that represents the very moment we get our whole order 
 # executed and are in trade. This value can't be a timestamp though, because it can indicate lots of moments since 
 # raw_df shows us that in a single second we can see different trades. If we want to get some value that 
-# represents this moment where we are fully in trade, we need to grab the index of this row. And by the way, it
-# out that the start_index should be unit['buy']['last_executed']['index'], because if we do that we are allowing
+# represents this moment where we are fully in trade, we need to grab the index of this row. Moreover, it turns
+# out that the start_index should be unit['buy']['last_executed']['index'] + 1, because if we do that we are allowing
 # the sell event to happen at this moment too.  
     start_index = unit['buy']['last_executed']['index'] + 1
 # The end_interval value is going to be in this case the first timestamp of the candle after p['buy']['candle'][-1].
-    end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1)
+    end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
     raw_section = raw_df[(raw_df.index>=start_index) & (raw_df.timestamp<end_interval)]    
     executed_sofar = 0
 # Sort the raw_section in a way the row with the highest price is on top and row with lowest price in on the
 # bottom. Also, in case of rows with same price, the ones with smaller indexes will be on top. That's important,
 # because the rows with lower indexes will be executed first than the ones with higher indexes.
     raw_sorted = raw_section.sort_values(by=['price'],ascending=False,kind='mergesort')
-    # raw_sorted.reset_index(inplace=True,drop=True)
-# Iterate through the rows until executed_sofar is greater than or equal to p['tam']['max_order'].
     i = 0
     if raw_sorted.empty:
         unit['type'] = 'nothing-sold'
+        return
     else:
         unit['type'] = 'partially-sold'
 
@@ -252,14 +251,14 @@ def find_sell(p,unit,candle_df,raw_df):
             else:
 # This next dataframe is a partition of raw_sorted that represents the part of it the program covered up to this
 # iteration.
-                until_i = raw_sorted.iloc[0:i]
+                until_i = raw_sorted.iloc[0:i+1]
 # Next, we get the row with highest value of timestamp in until_i.
                 greater_ts_row = until_i[until_i.timestamp == until_i.timestamp.max()].iloc[-1]
 # Attention, that's not the price paid by the last execution order that happens at unit['sell']['last_executed'].
 # This price is lower than or equal to this value. The concept of realHighest is quite hard to explain it here with
 # some few words, but essentially is: The higher price target we can add to the order book that will execute the
 # p['tam']['max_order'] amount of bitcoins.
-            unit['sell']['realHighest'] = float(row.price)
+            unit['sell']['realHighest'] = (float(row.price) - unit['buy']['price'])/unit['buy']['price']
             unit['sell']['last_executed'] = {
                 'ts': int(greater_ts_row.timestamp), 
                 'index': int(greater_ts_row.name) 
@@ -273,10 +272,10 @@ def find_lowest(p,unit,candle_df,raw_df):
 # represent them is to use indexes, which can be thought as rows IDs.
     start_index = unit['buy']['first_executed']['index']
     end_index = unit['sell']['last_executed']['index']
-    raw_section = raw_df[start_index:end_index]    
+    raw_section = raw_df.loc[start_index:end_index]    
 # The variable min_row receives the row with the lowest price within raw_section.
     min_row = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
-    unit['lowest']['price'] = float(min_row.price)
+    unit['lowest']['price'] = (float(min_row.price) - unit['buy']['price'])/unit['buy']['price']
     unit['lowest']['ts'] = int(min_row.timestamp)
     unit['lowest']['index'] = int(min_row.name)
 
@@ -296,7 +295,7 @@ def translate_order(mode,input):
                 break
         moment['candle'] = moment['string'][0:index]
         moment['ohlc'] = [i for i in ['open','high','low','close'] if i in moment['string']][0]
-        ope = [i for i in ['+','-','-'] if i in moment['string']]
+        ope = [i for i in ['+','-','*'] if i in moment['string']]
         if ope != []:
             moment['operator'] = ope[0]
             moment['change'] = moment['string'][moment['string'].find(moment['operator'])+1:]
