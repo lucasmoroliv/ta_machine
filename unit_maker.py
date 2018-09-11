@@ -26,7 +26,7 @@ def main():
         'threshold' : '30',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
-        'max_order': '5',
+        'max_order': '0.5',
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         'add': ['buy','sell','lowest'] 
     }
@@ -134,6 +134,9 @@ def add_candles(p,units_list,candle_df,rsi_df,td_s_df,td_c_df):
             for feature in candle_features:
                 unit[str(candle)][feature] = candle_df.loc[candle_ts][feature]
 
+def add_buy_data(p,units_list,candle_df,raw_df):
+    pass
+
 def add_buy(p,units_list,candle_df,raw_df):
     operator_dict = {
         '+': operator.add,
@@ -168,41 +171,27 @@ def add_lowest(p,units_list,candle_df,raw_df):
 
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *
-# Here is a space to store all sorts of auxiliary functions that will help the pattern
-# funcions to find their units_list.
+# Here is a space to store all sorts of auxiliary functions.
 
 def find_buy(p,unit,candle_df,raw_df,operator_dict):
-# Getting the price from the dataframe candle_df.
     unit['buy']['price'] = candle_df.loc[int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['moment']['candle'])][p['buy']['moment']['ohlc']]
-# Altering the unit['buy']['price'] with the p['buy']['moment']['change'] in case p['buy']['moment']['operator'] exists.
     if 'operator' in p['buy']['moment']:
         unit['buy']['price'] = operator_dict[p['buy']['moment']['operator']](float(unit['buy']['price']),float(p['buy']['moment']['change']))  
-# start_interval value is equal the first timestamp of p['buy']['candle'][0]. The buy event can start from here on.
     start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['candle'][0])
-# end_interval value is equal the first timestamp of p['buy']['candle'][-1] + 1. 
     end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1) 
-# raw_section is a dataframe that has all the rows of raw_df that are within the start_interval and end_interval 
-# limits. It is worth it pointing out that the first statement is >= and the second is only < because the latter 
-# doesn't want to include the rows with timestamp of end_interval in the dataframe. 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
-# raw_section2 is a dataframe with all the rows of raw_section that has the value price greater than of or equal 
-# unit['buy']['price'].
-    raw_section2 = raw_section[raw_section.price>=unit['buy']['price']]
-    if raw_section2.empty:
+    raw_partition = raw_section[raw_section.price>=unit['buy']['price']]
+    if raw_partition.empty:
         unit['type'] = 'nothing-bought'
         return
-# A new column named 'acc_volume' is added to raw_section2.
     pd.options.mode.chained_assignment = None
-    raw_section2['acc_volume'] = raw_section2['volume'].cumsum(axis = 0)
-# It checks if raw_section2 has once an accumulated volume of at least float(p['unit_maker']['max_order']). 
-    if (raw_section2.acc_volume >= float(p['unit_maker']['max_order'])).any():
-    # 'row' is the first row of raw_section2 that has accumulated volume greater than or equal to float(p['unit_maker']['max_order']).
+    raw_partition['acc_volume'] = raw_partition['volume'].cumsum(axis = 0)
+    if (raw_partition.acc_volume >= float(p['unit_maker']['max_order'])).any():
         unit['type'] = 'all-bought'
-        row = raw_section2[raw_section2.acc_volume >= float(p['unit_maker']['max_order'])]
-        row = row.iloc[0]
+        row = raw_partition[raw_partition.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
         unit['buy']['first_executed'] = {
-            'ts': int(raw_section2.iloc[0].timestamp),
-            'index': int(raw_section2.iloc[0].name)
+            'ts': int(raw_partition.iloc[0].timestamp),
+            'index': int(raw_partition.iloc[0].name)
         }
         unit['buy']['last_executed'] = {
             'ts': int(row.timestamp),
@@ -211,60 +200,37 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     else:
         unit['type'] = 'partially-bought'
 
-
 def find_sell(p,unit,candle_df,raw_df):
-# In order to find raw_section at this function we can't simple get the first timestamp of the buy candle,
-# or more precisely p['buy']['candle'][0], because we didn't buy anything there! That value only indicated
-# that we could have our buy event FROM that time, and that event should happens only until p['buy']['candle'][1].
-# The inferior limit to define the raw_section of this function (raw_section here is the partition of each unit 
-# where the sell event can happen), should be one value that represents the very moment we get our whole order 
-# executed and are in trade. This value can't be a timestamp though, because it can indicate lots of moments since 
-# raw_df shows us that in a single second we can see different trades. If we want to get some value that 
-# represents this moment where we are fully in trade, we need to grab the index of this row. Moreover, it turns
-# out that the start_index should be unit['buy']['last_executed']['index'] + 1, because if we do that we are allowing
-# the sell event to happen at this moment too.  
     start_index = unit['buy']['last_executed']['index'] + 1
-# The end_interval value is going to be in this case the first timestamp of the candle after p['buy']['candle'][-1].
     end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
     raw_section = raw_df[(raw_df.index>=start_index) & (raw_df.timestamp<end_interval)]    
     executed_sofar = 0
-# Sort the raw_section in a way the row with the highest price is on top and row with lowest price in on the
-# bottom. Also, in case of rows with same price, the ones with smaller indexes will be on top. That's important,
-# because the rows with lower indexes will be executed first than the ones with higher indexes.
-    raw_sorted = raw_section.sort_values(by=['price'],ascending=False,kind='mergesort')
-    i = 0
+    raw_sorted = raw_section.sort_values(by=['price'],ascending=False)
+    
     if raw_sorted.empty:
         unit['type'] = 'nothing-sold'
         return
     else:
         unit['type'] = 'partially-sold'
+        raw_sorted['acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)
 
-    for index,row in raw_sorted.iterrows():
-        executed_sofar = executed_sofar + row.volume
-        if executed_sofar >= float(p['unit_maker']['max_order']):
-            unit['type'] = 'all-sold'
-# The following condition was added because the units that have the previous condition met at the first iteration
-# can't create 'until_i' correctly, because 'i' in such case has value 0 and raw_sorted.iloc[0:0] gives error.
-# With that said, when 'i' is equal to 0 (first iteration) greater_ts_row is created differently.   
-            if i == 0:
-                greater_ts_row = row
-            else:
-# This next dataframe is a partition of raw_sorted that represents the part of it the program covered up to this
-# iteration.
-                until_i = raw_sorted.iloc[0:i+1]
-# Next, we get the row with highest value of timestamp in until_i.
-                greater_ts_row = until_i[until_i.timestamp == until_i.timestamp.max()].iloc[-1]
-# Attention, that's not the price paid by the last execution order that happens at unit['sell']['last_executed'].
-# This price is lower than or equal to this value. The concept of realHighest is quite hard to explain it here with
-# some few words, but essentially is: The higher price target we can add to the order book that will execute the
-# p['tam']['max_order'] amount of bitcoins.
-            unit['sell']['realHighest'] = (float(row.price) - unit['buy']['price'])/unit['buy']['price']
-            unit['sell']['last_executed'] = {
-                'ts': int(greater_ts_row.timestamp), 
-                'index': int(greater_ts_row.name) 
-            }
-            break 
-        i = i + 1
+    if (raw_sorted.acc_volume >= float(p['unit_maker']['max_order'])).any():
+        unit['type'] = 'all-sold'
+        realHighest_price = raw_sorted[raw_sorted.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0].price
+        unit['sell']['realHighest_price'] = realHighest_price
+        unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
+
+        raw_partition = raw_section[raw_section.price>=realHighest_price]
+        raw_partition['acc_volume'] = raw_partition['volume'].cumsum(axis = 0)
+        last_row = raw_partition[raw_partition.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
+        unit['sell']['first_executed'] = {
+            'ts': int(raw_partition.iloc[0].timestamp), 
+            'index': int(raw_partition.iloc[0].name) 
+        }
+        unit['sell']['last_executed'] = {
+            'ts': int(last_row.timestamp), 
+            'index': int(last_row.name) 
+        }
 
 def find_lowest(p,unit,candle_df,raw_df):
 # The inferior and superior limits to define the unit_section dataframe will be both indexes. This is because
@@ -374,4 +340,3 @@ if __name__ == '__main__':
     print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
-

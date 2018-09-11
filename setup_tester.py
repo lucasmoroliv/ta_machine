@@ -4,15 +4,17 @@ import pandas as pd
 import numpy as np
 
 def main():
-    # setup_file = 'setup1536585998.txt'
-    setup_file = 'setup1536586748.txt'
+    # setup_file = 'setup1536659994.txt'
+    # setup_file = 'setup1536660097.txt'
+    setup_file = 'setup1536660752.txt'
+    setup_file = 'setup1536666288.txt'
     p,units_list = get_setup(setup_file)
     # pprint(p)
-    # pprint(units_list)
+    pprint(units_list)
     # raw_df= get_raw(p)
     raw_df = 5
     result = test_setup(units_list,raw_df,0.007,-0.0035)
-    pprint(result)
+    # pprint(result)
 
 def test_setup(units_list,raw_df,target,stop):
 
@@ -34,7 +36,6 @@ def test_setup(units_list,raw_df,target,stop):
             result['all_units'][unit['type']] = 0
         result['all_units'][unit['type']] = result['all_units'][unit['type']] + 1 
 # Next we need to assign the units with type 'all_sold' as 'winner', 'loser', or 'consolidation'.
-
         if unit['type'] == 'all-sold':
             if unit['sell']['realHighest'] >= target and unit['lowest']['price'] > stop:
                 result['traded_units']['winner'] = result['traded_units']['winner'] + 1
@@ -49,9 +50,8 @@ def test_setup(units_list,raw_df,target,stop):
             #     start_index = unit['buy']['last_executed']['index'] + 1
             #     end_index = unit['sell']['last_executed']['index']
             #     raw_unit = raw_df.loc[start_index:end_index]                
-            #     index_target_hit = raw_df[] 
+            #     index_target_hit = raw_df[]
             #     index_stop_hit = raw_df[]
-
     return result
 
 
