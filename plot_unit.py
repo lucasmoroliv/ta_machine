@@ -11,7 +11,7 @@ from pprint import pprint
 def main():
     # candle0_time = '2014-01-04 00:00:00'
     # candle0_ts = calendar.timegm(time.strptime(candle0_time, '%Y-%m-%d %H:%M:%S'))
-    candle0_ts = '1414585800'
+    candle0_ts = '1389022200'
     candles = ['0','10']
     callable(candle0_ts,candles)
 

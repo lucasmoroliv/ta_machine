@@ -4,6 +4,8 @@ import time,calendar,datetime,csv,math,json,sys,operator,os
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
+pd.options.mode.chained_assignment = None
+
 
 def main():
     p = {
@@ -13,10 +15,10 @@ def main():
     'buy': '1_1open*1.0001',
     'sell': 'buy-10_realHighest',
     'chart_filter': {
-        'toggle': False,
+        'toggle': True,
         'condition': 'condition1',
         'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
-        'mode': 'less_than_limit',
+        'mode': 'greater_than_limit',
         'condition_parameter': 'm',     
         'limit': '0',
         'limit1': '0',
@@ -26,7 +28,7 @@ def main():
         'threshold' : '30',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
-        'max_order': '0.5',
+        'max_order': '500', # in USD
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         'add': ['buy','sell','lowest'] 
     }
@@ -159,15 +161,16 @@ def add_sell(p,units_list,candle_df,raw_df):
         'moment': moment
     }
     for unit in units_list:
-        if unit['type'] == 'all-bought':
+        if unit['buy']['type'] == 'all-bought':
             unit['sell'] = {}
             find_sell(p,unit,candle_df,raw_df)
 
 def add_lowest(p,units_list,candle_df,raw_df):
     for unit in units_list:
-        if unit['type'] == 'all-sold':
-            unit['lowest'] = {}
-            find_lowest(p,unit,candle_df,raw_df)
+        if unit['buy']['type'] == 'all-bought':
+            if unit['sell']['type'] == 'all-sold':
+                unit['lowest'] = {}
+                find_lowest(p,unit,candle_df,raw_df)
 
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *
@@ -180,49 +183,62 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['candle'][0])
     end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1) 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
+    lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
+    unit['buy']['lowest'] = {
+        'ts': int(lowest_of_section.timestamp), 
+        'index': int(lowest_of_section.name),
+        'price': (float(lowest_of_section.price) - unit['buy']['price'])/unit['buy']['price']
+    }
     raw_partition = raw_section[raw_section.price>=unit['buy']['price']]
     if raw_partition.empty:
-        unit['type'] = 'nothing-bought'
+        unit['buy']['type'] = 'nothing-bought'
         return
-    pd.options.mode.chained_assignment = None
-    raw_partition['acc_volume'] = raw_partition['volume'].cumsum(axis = 0)
-    if (raw_partition.acc_volume >= float(p['unit_maker']['max_order'])).any():
-        unit['type'] = 'all-bought'
-        row = raw_partition[raw_partition.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
-        unit['buy']['first_executed'] = {
-            'ts': int(raw_partition.iloc[0].timestamp),
-            'index': int(raw_partition.iloc[0].name)
-        }
+    raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
+    unit['buy']['first_executed'] = {
+        'ts': int(raw_partition.iloc[0].timestamp),
+        'index': int(raw_partition.iloc[0].name)
+    }
+    if (raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])).any():
+        unit['buy']['type'] = 'all-bought'
+        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
         unit['buy']['last_executed'] = {
-            'ts': int(row.timestamp),
-            'index': int(row.name)
+            'ts': int(last_executed_row.timestamp),
+            'index': int(last_executed_row.name)
+        }
+        start_interval_to_last_executed = raw_section.loc[:unit['buy']['last_executed']['index']]
+        lowest_row = start_interval_to_last_executed[start_interval_to_last_executed.price == start_interval_to_last_executed.price.min()].iloc[0]
+        unit['buy']['lowest'] = {
+            'ts': int(lowest_row.timestamp), 
+            'index': int(lowest_row.name),
+            'price': (float(lowest_row.price) - unit['buy']['price'])/unit['buy']['price']
         }
     else:
-        unit['type'] = 'partially-bought'
+        unit['buy']['type'] = 'partially-bought'
+
+    
 
 def find_sell(p,unit,candle_df,raw_df):
-    start_index = unit['buy']['last_executed']['index'] + 1
+    start_index = unit['buy']['last_executed']['index']
     end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
-    raw_section = raw_df[(raw_df.index>=start_index) & (raw_df.timestamp<end_interval)]    
-    executed_sofar = 0
+    raw_section = raw_df[(raw_df.index>start_index) & (raw_df.timestamp<end_interval)]    
     raw_sorted = raw_section.sort_values(by=['price'],ascending=False)
     
     if raw_sorted.empty:
-        unit['type'] = 'nothing-sold'
+        unit['sell']['type'] = 'nothing-sold'
         return
     else:
-        unit['type'] = 'partially-sold'
-        raw_sorted['acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)
+        unit['sell']['type'] = 'partially-sold'
+        raw_sorted['USD_acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)*raw_sorted['price']
 
-    if (raw_sorted.acc_volume >= float(p['unit_maker']['max_order'])).any():
-        unit['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0].price
+    if (raw_sorted.USD_acc_volume >= float(p['unit_maker']['max_order'])).any():
+        unit['sell']['type'] = 'all-sold'
+        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0].price
         unit['sell']['realHighest_price'] = realHighest_price
         unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realHighest_price]
-        raw_partition['acc_volume'] = raw_partition['volume'].cumsum(axis = 0)
-        last_row = raw_partition[raw_partition.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
+        raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
+        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
         unit['sell']['first_executed'] = {
             'ts': int(raw_partition.iloc[0].timestamp), 
             'index': int(raw_partition.iloc[0].name) 
@@ -233,13 +249,9 @@ def find_sell(p,unit,candle_df,raw_df):
         }
 
 def find_lowest(p,unit,candle_df,raw_df):
-# The inferior and superior limits to define the unit_section dataframe will be both indexes. This is because
-# timestamp information can't represent the exact order executed for the buy or sell event. The good way to 
-# represent them is to use indexes, which can be thought as rows IDs.
-    start_index = unit['buy']['first_executed']['index']
+    start_index = unit['buy']['last_executed']['index'] + 1
     end_index = unit['sell']['last_executed']['index']
     raw_section = raw_df.loc[start_index:end_index]    
-# The variable min_row receives the row with the lowest price within raw_section.
     min_row = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
     unit['lowest']['price'] = (float(min_row.price) - unit['buy']['price'])/unit['buy']['price']
     unit['lowest']['ts'] = int(min_row.timestamp)
