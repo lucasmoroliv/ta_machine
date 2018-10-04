@@ -7,22 +7,24 @@ pd.options.mode.chained_assignment = None
 
 def main():
     setup_file = 'setup1538609561.txt'
+    space = 0.01
     p,units_list = get_setup(setup_file)
-    ite_list = get_iterList(units_list,0.003) 
+    triplets_list = get_triplets(units_list,space) 
     raw_df = get_raw(p)
 
-    setup_dict = {
+    triplets_events = {
         'file': setup_file,
         'p': p,
-        'triplets_list': []
+        'space': str(space),
+        'triplets_result': []
     }
 
-    for item in tqdm(ite_list):
-        setup_dict['triplets_list'].append(get_triplets_list(p,raw_df,units_list,item[0],item[1],item[2]))
+    for item in tqdm(triplets_list):
+        triplets_events['triplets_result'].append(get_triplet_probabilities(p,raw_df,units_list,item[0],item[1],item[2]))
 
-    write_json(setup_dict)
+    write_json(triplets_events)
 
-def get_iterList(units_list,space):
+def get_triplets(units_list,space):
     buyLowest_list = []
     lowest_list = []
     realHighest_list = []
@@ -55,39 +57,13 @@ def get_iterList(units_list,space):
     stop_ite = list(np.arange(lowest_lowest,highest_lowest,space))
     buyStop_ite = list(np.arange(lowest_buyLowest,highest_buyLowest,space))
 
-    ite_list = [target_ite,stop_ite,buyStop_ite]
-    return list(itertools.product(*ite_list))
+    triplets_list = [target_ite,stop_ite,buyStop_ite]
+    return list(itertools.product(*triplets_list))
 
-def get_iterList2(units_list,space,buyStop):
-    lowest_list = []
-    realHighest_list = []
-    
-    for unit in units_list:
-        if unit['buy']['type'] == 'all-bought':
-            realHighest_list.append(unit['sell']['realHighest'])
-            lowest_list.append(unit['lowest']['price'])
-        else:
-            realHighest_list.append(None)
-            lowest_list.append(None)
-
-    lowest_list = [x for x in lowest_list if x is not None]
-    realHighest_list = [x for x in realHighest_list if x is not None]
-
-    lowest_lowest = min(lowest_list)
-    highest_lowest = max(lowest_list)
-    highest_realHighest = max(realHighest_list)
-
-    target_ite = list(np.arange(0.006,highest_realHighest,space))
-    stop_ite = list(np.arange(lowest_lowest,highest_lowest,space))
-    buyStop_ite = [buyStop]
-
-    ite_list = [target_ite,stop_ite,buyStop_ite]
-    return list(itertools.product(*ite_list))
-
-def get_triplets_list(p,raw_df,units_list,target,stop,buyStop):
+def get_triplet_probabilities(p,raw_df,units_list,target,stop,buyStop):
     setup = {
         'events': {},
-        'info': {
+        'triplet': {
             'target': target,
             'stop': stop,
             'buyStop': buyStop,
@@ -138,15 +114,15 @@ def get_triplets_list(p,raw_df,units_list,target,stop,buyStop):
 
 def write_json(data):
     # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
-    half1_path = 'builders/warehouse/setup_data/setup_events'
-    half2_path = str(int(time.time()))
-    path = half1_path + half2_path + '.txt'
-    while os.path.exists(path):
-        time.sleep(1)
-        half2_path = str(int(time.time()))
-        path = half1_path + half2_path + '.txt'
-    with open(path, 'w') as outfile:
-        json.dump(data, outfile)
+    firstPart = 'builders/warehouse/setup_data/triplets'
+    secondPart = data['file'].split('.')[0]
+    thirdPart = data['space']
+    path = firstPart + '_' + secondPart + '_' + thirdPart + '.txt'
+    if os.path.exists(path):
+        print('This setup has already been tested.')
+    else:
+        with open(path, 'w') as outfile:
+            json.dump(data, outfile)
 
 def get_raw(p):
     return pd.read_csv(p['unit_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
