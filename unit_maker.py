@@ -12,7 +12,7 @@ def main():
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
     'candle_sec': '1800',
-    'buy': '1_1open*1.0001',
+    'buy': '1-sellEnd_1open*1.0001',
     'sell': 'buy-10_realHighest',
     'chart_filter': {
         'toggle': True,
@@ -123,22 +123,6 @@ def pattern3(p,goodtimes):
 # * SECTION 2 *
 # Add details to units_list for further analysis.
 
-def add_candles(p,units_list,candle_df,rsi_df,td_s_df,td_c_df):
-    candle_features = p['unit_maker']['candle_features'] 
-
-    for unit in units_list:
-        unit_ts = unit['0']['ts']
-        for candle in range(0,5+1):
-        # for candle in range(int(unit['buy']['candle'][0]),5+1):
-            candle_ts = unit_ts + candle * int(p['candle_sec'])
-            if candle != 0:
-                unit[str(candle)] = {}
-            for feature in candle_features:
-                unit[str(candle)][feature] = candle_df.loc[candle_ts][feature]
-
-def add_buy_data(p,units_list,candle_df,raw_df):
-    pass
-
 def add_buy(p,units_list,candle_df,raw_df):
     operator_dict = {
         '+': operator.add,
@@ -150,16 +134,16 @@ def add_buy(p,units_list,candle_df,raw_df):
         'candle': candle,
         'moment': moment
     }
-    for unit in units_list:
-        unit['buy'] = {}
-        find_buy(p,unit,candle_df,raw_df,operator_dict)
-
-def add_sell(p,units_list,candle_df,raw_df):
     candle,moment = translate_order('sell',p['sell'])
     p['sell'] = {
         'candle': candle,
         'moment': moment
     }
+    for unit in units_list:
+        unit['buy'] = {}
+        find_buy(p,unit,candle_df,raw_df,operator_dict)
+
+def add_sell(p,units_list,candle_df,raw_df):
     for unit in units_list:
         if unit['buy']['type'] == 'all-bought':
             unit['sell'] = {}
@@ -181,7 +165,10 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     if 'operator' in p['buy']['moment']:
         unit['buy']['price'] = operator_dict[p['buy']['moment']['operator']](float(unit['buy']['price']),float(p['buy']['moment']['change']))  
     start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['candle'][0])
-    end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1) 
+    if p['buy']['candle'][-1] == 'sellEnd':
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
+    else:
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1) 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
     lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
     unit['buy']['lowest'] = {

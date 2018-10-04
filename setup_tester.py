@@ -6,9 +6,9 @@ from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
 def main():
-    setup_file = 'setup1538182481.txt'
+    setup_file = 'setup1538609561.txt'
     p,units_list = get_setup(setup_file)
-    ite_list = get_iterList(units_list,0.001) 
+    ite_list = get_iterList(units_list,0.003) 
     raw_df = get_raw(p)
 
     setup_dict = {
