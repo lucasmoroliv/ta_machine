@@ -7,7 +7,7 @@ pd.options.mode.chained_assignment = None
 
 def main():
     setup_file = 'setup1538609561.txt'
-    space = 0.02
+    space = 0.005
     p,units_list = get_setup(setup_file)
     triplets_list = get_triplets(units_list,space) 
     raw_df = get_raw(p)
@@ -19,8 +19,8 @@ def main():
         'tripletsResult': []
     }
 
-    for item in tqdm(triplets_list):
-        testedSetup['tripletsResult'].append(get_tripletsResult(p,raw_df,units_list,item[0],item[1],item[2]))
+    for triplet in tqdm(triplets_list):
+        testedSetup['tripletsResult'].append(get_tripletsResult(p,raw_df,units_list,triplet[0],triplet[1],triplet[2]))
 
     write_json(testedSetup)
 
