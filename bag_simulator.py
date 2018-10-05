@@ -1,6 +1,7 @@
 from pprint import pprint
 import json
 import secrets
+import numpy as np
 
 def main():
 
@@ -19,11 +20,10 @@ def main():
         for event in list(P):
             P[event] = P[event]/omega
 
-        bag = bagPrediction(P,triplet,initialBag,bagPercentage,games,samples)
-        print(triplet,': ',bag)
+        average_bag = bagPrediction(P,triplet,initialBag,bagPercentage,games,samples)
+        print(triplet,': ',average_bag)
 
-
-def bagPrediction(P,triplet,bag,bagPercentage,games,samples):
+def bagPrediction(P,triplet,initialBag,bagPercentage,games,samples):
     target = triplet['target']     
     stop = triplet['stop']     
     buyStop = triplet['buyStop']  
@@ -39,9 +39,13 @@ def bagPrediction(P,triplet,bag,bagPercentage,games,samples):
         'TP': 0,
         'FP': 0,
     }
-    for _ in range(1,games+1):
-        bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + bagChange[roll(P)])
-    return bag
+    simulated_bags = []
+    for _ in range(samples):
+        bag = initialBag
+        for _ in range(games):
+            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + bagChange[roll(P)])
+            simulated_bags.append(bag)
+    return np.mean(simulated_bags)
     
 def roll(P):
     randRoll = secrets.SystemRandom().random() # in [0,1)
