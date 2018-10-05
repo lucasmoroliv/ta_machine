@@ -12,6 +12,8 @@ def main():
     samples = 50
     bagPercentage = 0.05
     initialBag = 10000
+    entryFee = -0.00075
+    exitFee = 0.00025
 
     for tripletResult in testedSetup['tripletsResult']:
         P = tripletResult['events']
@@ -20,10 +22,10 @@ def main():
         for event in list(P):
             P[event] = P[event]/omega
 
-        average_bag = bagPrediction(P,triplet,initialBag,bagPercentage,games,samples)
+        average_bag = bagPrediction(P,triplet,initialBag,bagPercentage,games,samples,entryFee,exitFee)
         print(triplet,': ',average_bag)
 
-def bagPrediction(P,triplet,initialBag,bagPercentage,games,samples):
+def bagPrediction(P,triplet,initialBag,bagPercentage,games,samples,entryFee,exitFee):
     target = triplet['target']     
     stop = triplet['stop']     
     buyStop = triplet['buyStop']  
@@ -43,7 +45,7 @@ def bagPrediction(P,triplet,initialBag,bagPercentage,games,samples):
     for _ in range(samples):
         bag = initialBag
         for _ in range(games):
-            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + bagChange[roll(P)])
+            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + bagChange[roll(P)]) + bag*bagPercentage*entryFee + bag*bagPercentage*exitFee
             simulated_bags.append(bag)
     return np.mean(simulated_bags)
     
