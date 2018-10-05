@@ -7,22 +7,22 @@ pd.options.mode.chained_assignment = None
 
 def main():
     setup_file = 'setup1538609561.txt'
-    space = 0.01
+    space = 0.02
     p,units_list = get_setup(setup_file)
     triplets_list = get_triplets(units_list,space) 
     raw_df = get_raw(p)
 
-    triplets_events = {
+    testedSetup = {
         'file': setup_file,
         'p': p,
         'space': str(space),
-        'triplets_result': []
+        'tripletsResult': []
     }
 
     for item in tqdm(triplets_list):
-        triplets_events['triplets_result'].append(get_triplet_probabilities(p,raw_df,units_list,item[0],item[1],item[2]))
+        testedSetup['tripletsResult'].append(get_tripletsResult(p,raw_df,units_list,item[0],item[1],item[2]))
 
-    write_json(triplets_events)
+    write_json(testedSetup)
 
 def get_triplets(units_list,space):
     buyLowest_list = []
@@ -60,7 +60,7 @@ def get_triplets(units_list,space):
     triplets_list = [target_ite,stop_ite,buyStop_ite]
     return list(itertools.product(*triplets_list))
 
-def get_triplet_probabilities(p,raw_df,units_list,target,stop,buyStop):
+def get_tripletsResult(p,raw_df,units_list,target,stop,buyStop):
     setup = {
         'events': {},
         'triplet': {
