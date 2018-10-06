@@ -5,7 +5,7 @@ import numpy as np
 
 def main():
 
-    testedSetup_file = 'triplets_setup1538609561_0.005.txt'
+    testedSetup_file = 'triplets_setup1538846613_0.02.txt'
     testedSetup = get_testedSetup(testedSetup_file)
     
     input_dict = {
@@ -20,15 +20,16 @@ def main():
     for tripletResult in testedSetup['tripletsResult']:
         P = tripletResult['events']
         triplet = tripletResult['triplet']
+        lastPrice = tripletResult['lastPrice']
         omega = sum([P[event] for event in list(P)])
         for event in list(P):
             P[event] = P[event]/omega
 
-        average_bag = bagPrediction(P,triplet,input_dict)
+        average_bag = bagPrediction(P,triplet,lastPrice,input_dict)
         print(triplet,': ',average_bag)
         
 
-def bagPrediction(P,triplet,input_dict):
+def bagPrediction(P,triplet,lastPrice,input_dict):
     target = triplet['target']     
     stop = triplet['stop']     
     buyStop = triplet['buyStop']  
@@ -42,7 +43,7 @@ def bagPrediction(P,triplet,input_dict):
         'TL': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
         'FL': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder},
         'TC': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FC': {'change': -0.01, 'entryFee': marketOrder , 'exitFee': limitOrder},
+        'FC': {'change': lastPrice, 'entryFee': marketOrder , 'exitFee': limitOrder},
         'TN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
         'FN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
         'TP': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
