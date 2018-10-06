@@ -7,7 +7,7 @@ pd.options.mode.chained_assignment = None
 
 def main():
     setup_file = 'setup1538609561.txt'
-    space = 0.005
+    space = 0.001
     p,units_list = get_setup(setup_file)
     triplets_list = get_triplets(units_list,space) 
     raw_df = get_raw(p)

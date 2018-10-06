@@ -5,15 +5,17 @@ import numpy as np
 
 def main():
 
-    testedSetup_file = 'triplets_setup1538609561_0.02.txt'
+    testedSetup_file = 'triplets_setup1538609561_0.005.txt'
     testedSetup = get_testedSetup(testedSetup_file)
     
-    games = 200
-    samples = 50
-    bagPercentage = 0.05
-    initialBag = 10000
-    entryFee = -0.00075
-    exitFee = 0.00025
+    input_dict = {
+        'games': 20,
+        'samples': 50,
+        'bagPercentage': 1,
+        'initialBag': 10000,
+        'marketOrder': -0.00075,
+        'limitOrder': 0.00025
+    }
 
     for tripletResult in testedSetup['tripletsResult']:
         P = tripletResult['events']
@@ -22,30 +24,40 @@ def main():
         for event in list(P):
             P[event] = P[event]/omega
 
-        average_bag = bagPrediction(P,triplet,initialBag,bagPercentage,games,samples,entryFee,exitFee)
+        average_bag = bagPrediction(P,triplet,input_dict)
         print(triplet,': ',average_bag)
+        
 
-def bagPrediction(P,triplet,initialBag,bagPercentage,games,samples,entryFee,exitFee):
+def bagPrediction(P,triplet,input_dict):
     target = triplet['target']     
     stop = triplet['stop']     
     buyStop = triplet['buyStop']  
-    bagChange = {
-        'TW': buyStop,
-        'FW': target,
-        'TL': buyStop,
-        'FL': stop,
-        'TC': buyStop,
-        'FC': 0,
-        'TN': 0,
-        'FN': 0,
-        'TP': 0,
-        'FP': 0,
+    bagPercentage = input_dict['bagPercentage']
+    marketOrder = input_dict['marketOrder']
+    limitOrder = input_dict['limitOrder']
+
+    eventsInfo = {
+        'TW': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': limitOrder},
+        'FW': {'change': target, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'TL': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'FL': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'TC': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'FC': {'change': -0.003, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'TN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
+        'FN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
+        'TP': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'FP': {'change': -0.001, 'entryFee': marketOrder , 'exitFee': marketOrder}
     }
     simulated_bags = []
-    for _ in range(samples):
-        bag = initialBag
-        for _ in range(games):
-            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + bagChange[roll(P)]) + bag*bagPercentage*entryFee + bag*bagPercentage*exitFee
+    for _ in range(input_dict['samples']):
+        bag = input_dict['initialBag']
+        for _ in range(input_dict['games']):
+            event_game = eventsInfo[roll(P)]
+            entryFee = event_game['entryFee']
+            exitFee = event_game['exitFee']
+            change = event_game['change']
+            
+            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + change) + bag*bagPercentage*entryFee + bag*bagPercentage*exitFee
             simulated_bags.append(bag)
     return np.mean(simulated_bags)
     
