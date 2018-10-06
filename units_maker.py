@@ -30,7 +30,7 @@ def main():
         'candle_features': ['open','high','low','close'],
         'max_order': '500', # in USD
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-        'add': ['buy','sell','lowest'] 
+        'add': ['buy','sell','lowest','lastPrice'] 
     }
     }
 
@@ -155,6 +155,12 @@ def add_lowest(p,units_list,candle_df,raw_df):
             if unit['sell']['type'] == 'all-sold':
                 unit['lowest'] = {}
                 find_lowest(p,unit,candle_df,raw_df)
+
+def add_lastPrice(p,units_list,candle_df,raw_df):
+    for unit in units_list:
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
+        raw_section = raw_df[raw_df.timestamp<end_interval]    
+        unit['lastPrice'] = (raw_section.iloc[-1].price - unit['buy']['price'])/unit['buy']['price']
 
 # ---------------------------------------------------------------------------------
 # * SECTION 3 *

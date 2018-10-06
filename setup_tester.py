@@ -6,8 +6,8 @@ from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
 def main():
-    setup_file = 'setup1538609561.txt'
-    space = 0.001
+    setup_file = 'setup1538846613.txt'
+    space = 0.02
     p,units_list = get_setup(setup_file)
     triplets_list = get_triplets(units_list,space) 
     raw_df = get_raw(p)
@@ -70,6 +70,7 @@ def get_tripletsResult(p,raw_df,units_list,target,stop,buyStop):
         }
     }
     aux_list = []
+    lastPrice_list = []
     for unit in units_list:
         if unit['buy']['lowest']['price'] <= buyStop:
             whether_stopped = 'T' # stopped
@@ -106,9 +107,14 @@ def get_tripletsResult(p,raw_df,units_list,target,stop,buyStop):
             partition = 'P' # partiallly-bought
 
         aux_list.append(whether_stopped + partition)
+        if partition == 'C':
+            lastPrice_list.append(unit['lastPrice'])
+
 
     for key in set(aux_list):
         setup['events'][key] = aux_list.count(key)
+
+    setup['lastPrice'] = np.mean(lastPrice_list)
 
     return setup
 

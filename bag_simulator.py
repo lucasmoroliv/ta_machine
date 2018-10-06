@@ -9,8 +9,8 @@ def main():
     testedSetup = get_testedSetup(testedSetup_file)
     
     input_dict = {
-        'games': 20,
-        'samples': 50,
+        'games': 100,
+        'samples': 200,
         'bagPercentage': 1,
         'initialBag': 10000,
         'marketOrder': -0.00075,
@@ -37,16 +37,16 @@ def bagPrediction(P,triplet,input_dict):
     limitOrder = input_dict['limitOrder']
 
     eventsInfo = {
-        'TW': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': limitOrder},
-        'FW': {'change': target, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'TW': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'FW': {'change': target, 'entryFee': marketOrder , 'exitFee': limitOrder},
         'TL': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
         'FL': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder},
         'TC': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FC': {'change': -0.003, 'entryFee': marketOrder , 'exitFee': marketOrder},
+        'FC': {'change': -0.01, 'entryFee': marketOrder , 'exitFee': limitOrder},
         'TN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
         'FN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
         'TP': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FP': {'change': -0.001, 'entryFee': marketOrder , 'exitFee': marketOrder}
+        'FP': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder}
     }
     simulated_bags = []
     for _ in range(input_dict['samples']):
