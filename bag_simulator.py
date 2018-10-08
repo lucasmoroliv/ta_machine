@@ -5,10 +5,8 @@ import numpy as np
 
 def main():
 
-    testedSetup_file = 'triplets_setup1538993682_0.02_20.txt'
-    testedSetup = get_testedSetup(testedSetup_file)
-    
     input_dict = {
+        'testedSetup_file': 'triplets_setup1538993682_0.02_50.txt',
         'games': 100,
         'samples': 200,
         'bagPercentage': 1,
@@ -16,6 +14,8 @@ def main():
         'marketOrder': -0.00075,
         'limitOrder': 0.00025
     }
+
+    testedSetup = get_testedSetup(input_dict['testedSetup_file'])
 
     for tripletResult in testedSetup['tripletsResult']:
         P = tripletResult['events']
