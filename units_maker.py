@@ -208,8 +208,6 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     else:
         unit['buy']['type'] = 'partially-bought'
 
-    
-
 def find_sell(p,unit,candle_df,raw_df):
     start_index = unit['buy']['last_executed']['index']
     end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)

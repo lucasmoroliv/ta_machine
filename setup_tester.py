@@ -6,21 +6,25 @@ from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
 def main():
-    setup_file = 'setup1538846613.txt'
-    space = 0.02
-    p,units_list = get_setup(setup_file)
-    triplets_list = get_triplets(units_list,space) 
+    input_dict = {
+        'setup_file': 'setup1538993682.txt',
+        'space': 0.02,
+        'percentile_lastPrice': 20
+    }
+    p,units_list = get_setup(input_dict['setup_file'])
+    triplets_list = get_triplets(units_list,input_dict['space']) 
     raw_df = get_raw(p)
 
     testedSetup = {
-        'file': setup_file,
+        'file': input_dict['setup_file'],
         'p': p,
-        'space': str(space),
+        'space': str(input_dict['space']),
+        'percentile_lastPrice': str(input_dict['percentile_lastPrice']),
         'tripletsResult': []
     }
 
     for triplet in tqdm(triplets_list):
-        testedSetup['tripletsResult'].append(get_tripletsResult(p,raw_df,units_list,triplet[0],triplet[1],triplet[2]))
+        testedSetup['tripletsResult'].append(get_tripletsResult(p,raw_df,units_list,triplet,input_dict['percentile_lastPrice']))
 
     write_json(testedSetup)
 
@@ -60,7 +64,10 @@ def get_triplets(units_list,space):
     triplets_list = [target_ite,stop_ite,buyStop_ite]
     return list(itertools.product(*triplets_list))
 
-def get_tripletsResult(p,raw_df,units_list,target,stop,buyStop):
+def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
+    target = triplet[0]
+    stop = triplet[1]
+    buyStop = triplet[2]
     setup = {
         'events': {},
         'triplet': {
@@ -110,11 +117,10 @@ def get_tripletsResult(p,raw_df,units_list,target,stop,buyStop):
         if partition == 'C':
             lastPrice_list.append(unit['lastPrice'])
 
-
     for key in set(aux_list):
         setup['events'][key] = aux_list.count(key)
 
-    setup['lastPrice'] = np.mean(lastPrice_list)
+    setup['lastPrice'] = np.percentile(lastPrice_list,percentile)
 
     return setup
 
@@ -123,7 +129,8 @@ def write_json(data):
     firstPart = 'builders/warehouse/setup_data/triplets'
     secondPart = data['file'].split('.')[0]
     thirdPart = data['space']
-    path = firstPart + '_' + secondPart + '_' + thirdPart + '.txt'
+    fourthPart = data['percentile_lastPrice']
+    path = firstPart + '_' + secondPart + '_' + thirdPart + '_' + fourthPart + '.txt'
     if os.path.exists(path):
         print('This setup has already been tested.')
     else:

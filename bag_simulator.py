@@ -5,7 +5,7 @@ import numpy as np
 
 def main():
 
-    testedSetup_file = 'triplets_setup1538846613_0.02.txt'
+    testedSetup_file = 'triplets_setup1538993682_0.02_20.txt'
     testedSetup = get_testedSetup(testedSetup_file)
     
     input_dict = {
