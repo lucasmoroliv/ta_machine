@@ -24,8 +24,8 @@ def main():
         'limit1': '0',
         'limit2': '0'
     },
-    'unit_maker': {
-        'threshold' : '30',
+    'units_maker': {
+        'threshold' : '25',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
         'max_order': '500', # in USD
@@ -36,7 +36,9 @@ def main():
 
     goodtimes = chart_filter.callable(p)
     units_list = callable(p,goodtimes)
+    p['units_maker']['units_amt'] = len(units_list)
     pprint(units_list)
+    print('Amount of units in the setup: ',len(units_list))
     write_json((p,units_list))
 
 def callable(p,goodtimes):
@@ -45,8 +47,8 @@ def callable(p,goodtimes):
     # rsi_df = get_rsi_df(p)
     # td_s_df = get_td_s_df(p)
     # td_c_df = get_td_c_df(p)
-    units_list = globals()[p['unit_maker']['pattern']](p,goodtimes)
-    for item in p['unit_maker']['add']:
+    units_list = globals()[p['units_maker']['pattern']](p,goodtimes)
+    for item in p['units_maker']['add']:
         globals()['add_{0}'.format(item)](p,units_list,candle_df,raw_df)
     return units_list
 
@@ -57,7 +59,7 @@ def callable(p,goodtimes):
 def pattern1(p,goodtimes):
     rsi = momentum_indicators.rsi(p['path_candle_file'])
     units_list = []
-    threshold = float(p['unit_maker']['threshold'])
+    threshold = float(p['units_maker']['threshold'])
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
             ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
@@ -79,7 +81,7 @@ def pattern2(p,goodtimes):
     td_s_df = get_td_s_df(p)
     td_s_df = td_s_df.reset_index()
     td = td_s_df.values
-    td_s = int(p['unit_maker']['td_s'])
+    td_s = int(p['units_maker']['td_s'])
     units_list = []
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
@@ -102,7 +104,7 @@ def pattern3(p,goodtimes):
     td_c_df = get_td_c_df(p)
     td_c_df = td_c_df.reset_index()
     td = td_c_df.values
-    td_c = int(p['unit_maker']['td_c'])
+    td_c = int(p['units_maker']['td_c'])
     units_list = []
     if isinstance(goodtimes, np.ndarray):
         for index in range(goodtimes.shape[0]):
@@ -191,9 +193,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
         'ts': int(raw_partition.iloc[0].timestamp),
         'index': int(raw_partition.iloc[0].name)
     }
-    if (raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])).any():
+    if (raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
         unit['buy']['type'] = 'all-bought'
-        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
+        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
         unit['buy']['last_executed'] = {
             'ts': int(last_executed_row.timestamp),
             'index': int(last_executed_row.name)
@@ -221,15 +223,15 @@ def find_sell(p,unit,candle_df,raw_df):
         unit['sell']['type'] = 'partially-sold'
         raw_sorted['USD_acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)*raw_sorted['price']
 
-    if (raw_sorted.USD_acc_volume >= float(p['unit_maker']['max_order'])).any():
+    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
         unit['sell']['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0].price
+        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0].price
         unit['sell']['realHighest_price'] = realHighest_price
         unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realHighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
-        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['unit_maker']['max_order'])].iloc[0]
+        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
         unit['sell']['first_executed'] = {
             'ts': int(raw_partition.iloc[0].timestamp), 
             'index': int(raw_partition.iloc[0].name) 
@@ -274,7 +276,7 @@ def translate_order(mode,input):
         return candle,moment
 
 def get_raw(p):
-    return pd.read_csv(p['unit_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
+    return pd.read_csv(p['units_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
 
 def filter_rsi(rsi,timeframe):
     return rsi[(rsi[:,0] >= timeframe[0]) & (rsi[:,0] <= timeframe[1])]

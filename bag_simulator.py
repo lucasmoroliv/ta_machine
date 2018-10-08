@@ -6,7 +6,8 @@ import numpy as np
 def main():
 
     input_dict = {
-        'testedSetup_file': 'triplets_setup1538993682_0.02_50.txt',
+        # 'testedSetup_file': 'triplets_setup1538993682_0.02_50.txt',
+        'testedSetup_file': 'triplets_setup1539001681_0.02_50.txt',
         'games': 100,
         'samples': 200,
         'bagPercentage': 1,
@@ -27,7 +28,6 @@ def main():
 
         average_bag = bagPrediction(P,triplet,lastPrice,input_dict)
         print(triplet,': ',average_bag)
-        
 
 def bagPrediction(P,triplet,lastPrice,input_dict):
     target = triplet['target']     

@@ -7,9 +7,9 @@ pd.options.mode.chained_assignment = None
 
 def main():
     input_dict = {
-        'setup_file': 'setup1538993682.txt',
+        'setup_file': 'setup1539001681.txt',
         'space': 0.02,
-        'percentile_lastPrice': 20
+        'percentile_lastPrice': 50
     }
     p,units_list = get_setup(input_dict['setup_file'])
     triplets_list = get_triplets(units_list,input_dict['space']) 
@@ -99,8 +99,8 @@ def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
                 raw_section = raw_df.loc[start_index:end_index] 
                 over_target_df = raw_section[raw_section.price>=target_price]
                 over_target_df['acc_volume'] = over_target_df['volume'].cumsum(axis = 0)
-                if (over_target_df.acc_volume >= float(p['unit_maker']['max_order'])).any():
-                    last_target_index = over_target_df[over_target_df.acc_volume >= float(p['unit_maker']['max_order'])].iloc[0].name
+                if (over_target_df.acc_volume >= float(p['units_maker']['max_order'])).any():
+                    last_target_index = over_target_df[over_target_df.acc_volume >= float(p['units_maker']['max_order'])].iloc[0].name
                     first_stop_index = raw_section[raw_section.price <= stop_price].iloc[0].name
                     if last_target_index > first_stop_index:
                         partition = 'L' # loser
@@ -138,7 +138,7 @@ def write_json(data):
             json.dump(data, outfile)
 
 def get_raw(p):
-    return pd.read_csv(p['unit_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
+    return pd.read_csv(p['units_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
     
 def get_setup(setup_file):
     dir_path = 'builders/warehouse/setup_data/'
