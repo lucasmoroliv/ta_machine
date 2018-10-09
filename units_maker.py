@@ -5,6 +5,7 @@ from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
 pd.options.mode.chained_assignment = None
+import winsound
 
 
 def main():
@@ -25,7 +26,7 @@ def main():
         'limit2': '0'
     },
     'units_maker': {
-        'threshold' : '25',
+        'threshold' : '27',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
         'max_order': '500', # in USD
@@ -345,3 +346,6 @@ if __name__ == '__main__':
     print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
+    duration = 1000  # millisecond
+    freq = 440  # Hz
+    winsound.Beep(freq, duration)
