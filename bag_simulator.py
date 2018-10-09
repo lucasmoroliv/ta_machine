@@ -2,12 +2,12 @@ from pprint import pprint
 import json
 import secrets
 import numpy as np
+import time,csv,os
 
 def main():
 
     input_dict = {
-        # 'testedSetup_file': 'triplets_setup1538993682_0.02_50.txt',
-        'testedSetup_file': 'triplets_setup1539001681_0.02_50.txt',
+        'testedSetup_file': 'triplets_setup1539116406_0.02_50.txt',
         'games': 100,
         'samples': 200,
         'bagPercentage': 1,
@@ -16,9 +16,12 @@ def main():
         'limitOrder': 0.00025
     }
 
-    testedSetup = get_testedSetup(input_dict['testedSetup_file'])
+    p,testedSetup = get_testedSetup(input_dict['testedSetup_file'])
+    p['bag_simulator'] = {key:str(value) for (key,value) in input_dict.items()}
+    
+    simulations_list = []
 
-    for tripletResult in testedSetup['tripletsResult']:
+    for tripletResult in testedSetup:
         P = tripletResult['events']
         triplet = tripletResult['triplet']
         lastPrice = tripletResult['lastPrice']
@@ -26,8 +29,10 @@ def main():
         for event in list(P):
             P[event] = P[event]/omega
 
-        average_bag = bagPrediction(P,triplet,lastPrice,input_dict)
-        print(triplet,': ',average_bag)
+        triplet['average_bag'] = bagPrediction(P,triplet,lastPrice,input_dict)
+        simulations_list.append(triplet)
+
+    write_json((p,simulations_list))
 
 def bagPrediction(P,triplet,lastPrice,input_dict):
     target = triplet['target']     
@@ -73,6 +78,17 @@ def roll(P):
         if randRoll < sum:
             return resultList[result]
         result+=1
+
+def write_json(data):
+    # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
+    firstPart = 'builders/warehouse/setup_data/simulation'
+    secondPart = str(int(time.time()))
+    path = firstPart + '_' + secondPart + '.txt'
+    if os.path.exists(path):
+        print('There is already a file with this name.')
+    else:
+        with open(path, 'w') as outfile:
+            json.dump(data, outfile)        
 
 def get_testedSetup(testedSetup_file):
     dir_path = 'builders/warehouse/setup_data/'
