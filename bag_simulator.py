@@ -7,9 +7,9 @@ import time,csv,os
 def main():
 
     input_dict = {
-        'testedSetup_file': 'triplets_setup1539116406_0.02_50.txt',
-        'games': 100,
-        'samples': 200,
+        'testedSetup_file': 'triplets_setup1539109349_0.003_40.txt',
+        'games': 25,
+        'samples': 50,
         'bagPercentage': 1,
         'initialBag': 10000,
         'marketOrder': -0.00075,
@@ -31,7 +31,6 @@ def main():
 
         triplet['average_bag'] = bagPrediction(P,triplet,lastPrice,input_dict)
         simulations_list.append(triplet)
-
     write_json((p,simulations_list))
 
 def bagPrediction(P,triplet,lastPrice,input_dict):
@@ -81,9 +80,16 @@ def roll(P):
 
 def write_json(data):
     # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
+    p = data[0]
     firstPart = 'builders/warehouse/setup_data/simulation'
-    secondPart = str(int(time.time()))
-    path = firstPart + '_' + secondPart + '.txt'
+    secondPart = p['setup_tester']['setup_file'].split('.')[0][5:] #str(int(time.time()))
+    thirdPart = p['setup_tester']['space']
+    fourthPart = p['setup_tester']['percentile_lastPrice']
+    fifthPart = p['bag_simulator']['games']
+    sixthPart = p['bag_simulator']['bagPercentage']
+    seventhPart = p['bag_simulator']['initialBag']
+    eightPart = 'bitmex'
+    path = firstPart + '_' + secondPart +'_' + thirdPart + '_' + fourthPart + '_' + fifthPart + '_' + sixthPart + '_' + seventhPart + '_' + eightPart + '.txt'
     if os.path.exists(path):
         print('There is already a file with this name.')
     else:

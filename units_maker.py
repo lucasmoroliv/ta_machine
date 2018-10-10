@@ -13,7 +13,7 @@ def main():
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
     'candle_sec': '1800',
-    'buy': '1-sellEnd_1open*1.0001',
+    'buy': '1-sellEnd_0high+5',
     'sell': 'buy-10_realHighest',
     'chart_filter': {
         'toggle': True,
@@ -26,7 +26,9 @@ def main():
         'limit2': '0'
     },
     'units_maker': {
-        'threshold' : '27',
+        'threshold' : '30',
+        'td_s': '-9',
+        'td_c': '13',
         'pattern': 'pattern1',
         'candle_features': ['open','high','low','close'],
         'max_order': '500', # in USD
@@ -38,8 +40,8 @@ def main():
     goodtimes = chart_filter.callable(p)
     units_list = callable(p,goodtimes)
     p['units_maker']['units_amt'] = len(units_list)
-    pprint(units_list)
-    print('Amount of units in the setup: ',len(units_list))
+    # pprint(units_list)
+    # print('Amount of units in the setup: ',len(units_list))
     write_json((p,units_list))
 
 def callable(p,goodtimes):
@@ -306,7 +308,7 @@ def get_td_s_df(p):
             td = float(row[0].split(',')[1])
             big_list.append([ts_start,td])
         td_s_data = np.array(big_list)
-        td_s_data = td_s_data.astype(int)
+        # td_s_data = td_s_data.astype(int)
     td_s_df = pd.DataFrame(td_s_data, columns = ['timestamp','td_s'])
     td_s_df = td_s_df.set_index('timestamp')
     return td_s_df
@@ -322,7 +324,7 @@ def get_td_c_df(p):
             td = float(row[0].split(',')[1])
             big_list.append([ts_start,td])
         td_c_data = np.array(big_list)
-        td_c_data = td_c_data.astype(int)
+        # td_c_data = td_c_data.astype(int)
     td_c_df = pd.DataFrame(td_c_data, columns = ['timestamp','td_c'])
     td_c_df = td_c_df.set_index('timestamp')
     return td_c_df
@@ -346,6 +348,6 @@ if __name__ == '__main__':
     print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
-    duration = 1000  # millisecond
+    duration = 2000  # millisecond
     freq = 440  # Hz
     winsound.Beep(freq, duration)
