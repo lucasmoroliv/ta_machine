@@ -14,7 +14,6 @@ def main():
 
     def func(last_data):
         with open('lattest.csv', 'a', newline='') as csvfile:
-            # spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             data_dict = json.loads(last_data)
             spamwriter.writerow([data_dict['timestamp'],data_dict['price'],data_dict['amount']])
