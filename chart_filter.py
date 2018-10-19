@@ -91,9 +91,10 @@ def get_dataframe(df_file):
     return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
 
 def filterbydate_data(data,timeframe):
-# The motivation for making the function came from allowing the use of data objects previously created. Now we can create a data
-# object with a huge timeframe using trendline5.py and dumping it as a json file. This function will get this huge data object
-# and extract only the part defined by the timeframe variable.
+# The motivation for making the function came from allowing the use of data objects previously 
+# created. Now we can create a data object with a huge timeframe using trendline5.py and 
+# dumping it as a json file. This function will get this huge data object and extract only 
+# the part defined by the timeframe variable.
     struct_time0 = time.strptime(timeframe[0], '%Y-%m-%d %H:%M:%S')
     struct_time1 = time.strptime(timeframe[1], '%Y-%m-%d %H:%M:%S')
     inferior = calendar.timegm(struct_time0)

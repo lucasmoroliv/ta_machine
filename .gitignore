@@ -1,4 +1,5 @@
 builders/warehouse/setup_data
+builders/warehouse/candle_data
 builders/warehouse/historical_data
 builders/warehouse/td_data
 builders/warehouse/trendlines

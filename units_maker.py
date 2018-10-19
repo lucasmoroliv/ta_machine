@@ -4,19 +4,19 @@ import time,calendar,datetime,csv,math,json,sys,operator,os
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
+import ma_filter
 pd.options.mode.chained_assignment = None
-import winsound
-
 
 def main():
     p = {
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
+    'timeframe' : ['2014-01-01 00:00:00','2018-10-10 00:00:00'],
     'candle_sec': '1800',
-    'buy': '1-sellEnd_0high+5',
+    'buy': '1-sellEnd_1open*1.0001',
     'sell': 'buy-10_realHighest',
-    'chart_filter': {
-        'toggle': True,
+    'chart_filter': [
+        {
+        'toggle': False,
         'condition': 'condition1',
         'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
         'mode': 'greater_than_limit',
@@ -24,24 +24,39 @@ def main():
         'limit': '0',
         'limit1': '0',
         'limit2': '0'
-    },
+        },
+        {
+        'toggle': False,
+        'lineAbove': {
+            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+            'indicador': 'SMA',
+            'average': '30',
+        },
+        'lineBellow': {
+            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+            'indicador': 'SMA',
+            'average': '7',
+        }
+        }
+    ],
     'units_maker': {
         'threshold' : '30',
         'td_s': '-9',
         'td_c': '13',
-        'pattern': 'pattern1',
-        'candle_features': ['open','high','low','close'],
+        'pattern': 'pattern6',
         'max_order': '500', # in USD
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         'add': ['buy','sell','lowest','lastPrice'] 
     }
     }
 
-    goodtimes = chart_filter.callable(p)
+    # goodtimes = chart_filter.callable(p)
+    goodtimes = ma_filter.frontDoor(p)
+    # pprint(goodtimes)
     units_list = callable(p,goodtimes)
     p['units_maker']['units_amt'] = len(units_list)
-    # pprint(units_list)
-    # print('Amount of units in the setup: ',len(units_list))
+    pprint(units_list)
+    print('Amount of units in the setup: ',len(units_list))
     write_json((p,units_list))
 
 def callable(p,goodtimes):
@@ -60,22 +75,20 @@ def callable(p,goodtimes):
 # Every function in this section must return a units_list, with the timestamp of the candle 0 of each unit. 
 
 def pattern1(p,goodtimes):
+    # Input: <p>, specifically p['path_candle_file'] and p['units_maker']['threshold']. <goodtimes> which has all the periods we want. In case chart_filter turned off, <goodtimes> will be a list containing
+    # one period, which is a list of two items, the first being the inferior limit and the second the superior limit of the period. In the other hand, if chart_filter is turned on, <goodtimes> will most likely have
+    # many periods in it.
+    # Output: <units_list>, which is a list of dictionaries. Each dictionary only has the '0' key, which stands for 'candle 0'. Its value is also a dictionary with a single key named 'ts' containing the timestamp
+    # of the candle 0 as a value. <units_list> can be understood as a list of units. Every single dictionary in the list is a place where will be added the respective information of each unit. So far in the program
+    # the only information each unit has is its first timestamp, the timestamp that starts the candle 0.       
     rsi = momentum_indicators.rsi(p['path_candle_file'])
     units_list = []
     threshold = float(p['units_maker']['threshold'])
-    if isinstance(goodtimes, np.ndarray):
-        for index in range(goodtimes.shape[0]):
-            ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
-            mini_rsi = filter_rsi(rsi,ts_timeframe)
-            for i in range(mini_rsi.shape[0])[:-1]:
-                if mini_rsi[i,1] < threshold and mini_rsi[i-1,1] > threshold:
-                    units_list.append({'0': {'ts': mini_rsi[i,0]}})
-    else:       
-        ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
-        mini_rsi = filter_rsi(rsi,ts_timeframe) 
-        for i in range(mini_rsi.shape[0])[:-1]:
-            if mini_rsi[i,1] < threshold and mini_rsi[i-1,1] > threshold:
-                units_list.append({'0': {'ts': mini_rsi[i,0]}})
+    for period in goodtimes: 
+        mini_rsi = filter_rsi(rsi,period)
+        for index in range(mini_rsi.shape[0]-1):
+            if mini_rsi[index,1] < threshold and mini_rsi[index-1,1] > threshold:
+                units_list.append({'0': {'ts': mini_rsi[index,0]}})
     return units_list
 
 def pattern2(p,goodtimes):
@@ -86,17 +99,9 @@ def pattern2(p,goodtimes):
     td = td_s_df.values
     td_s = int(p['units_maker']['td_s'])
     units_list = []
-    if isinstance(goodtimes, np.ndarray):
-        for index in range(goodtimes.shape[0]):
-            ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
-            mini_td = filter_td(td,ts_timeframe)
-            for i in range(mini_td.shape[0])[:-1]:
-                if mini_td[i,1]==td_s:
-                    units_list.append({'0': {'ts': mini_td[i,0]}})
-    else:
-        ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
-        mini_td = filter_td(td,ts_timeframe)
-        for i in range(mini_td.shape[0])[:-1]:
+    for period in goodtimes: 
+        mini_td = filter_td(td,period)
+        for i in range(mini_td.shape[0]):
             if mini_td[i,1]==td_s:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
@@ -109,17 +114,9 @@ def pattern3(p,goodtimes):
     td = td_c_df.values
     td_c = int(p['units_maker']['td_c'])
     units_list = []
-    if isinstance(goodtimes, np.ndarray):
-        for index in range(goodtimes.shape[0]):
-            ts_timeframe = (goodtimes[index,0],goodtimes[index,1])
-            mini_td = filter_td(td,ts_timeframe)
-            for i in range(mini_td.shape[0])[:-1]:
-                if mini_td[i,1]==td_c:
-                    units_list.append({'0': {'ts': mini_td[i,0]}})
-    else:
-        ts_timeframe = [calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]
-        mini_td = filter_td(td,ts_timeframe)
-        for i in range(mini_td.shape[0])[:-1]:
+    for period in goodtimes: 
+        mini_td = filter_td(td,period)
+        for i in range(mini_td.shape[0]):
             if mini_td[i,1]==td_c:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
@@ -348,6 +345,3 @@ if __name__ == '__main__':
     print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
-    duration = 2000  # millisecond
-    freq = 440  # Hz
-    winsound.Beep(freq, duration)
