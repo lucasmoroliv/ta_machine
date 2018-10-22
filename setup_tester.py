@@ -66,7 +66,18 @@ def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
     stop = triplet[1]
     buyStop = triplet[2]
     setup = {
-        'events': {},
+        'events': {
+            'TW': 0,
+            'TC': 0,
+            'TL': 0,
+            'TP': 0,
+            'TN': 0,
+            'FW': 0,
+            'FC': 0,
+            'FL': 0,
+            'FP': 0,
+            'FN': 0,
+        },
         'triplet': {
             'target': target,
             'stop': stop,
