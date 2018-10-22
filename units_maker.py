@@ -1,3 +1,18 @@
+# This file is part of ta_machine.
+
+# ta_machine is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# ta_machine is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with ta_machine.  If not, see <https://www.gnu.org/licenses/>.
+
 import numpy as np
 import pandas as pd
 import time,calendar,datetime,csv,math,json,sys,operator,os
@@ -13,7 +28,7 @@ def main():
     'timeframe' : ['2014-01-01 00:00:00','2018-10-10 00:00:00'],
     'candle_sec': '1800',
     'buy': '1-sellEnd_1open*1.0001',
-    'sell': 'buy-10_realHighest',
+    'sell': 'buy-20_realHighest',
     'chart_filter': [
         {
         'toggle': False,
@@ -40,11 +55,11 @@ def main():
         }
     ],
     'units_maker': {
-        'threshold' : '30',
+        'threshold' : '20',
         'td_s': '-9',
         'td_c': '13',
-        'pattern': 'pattern6',
-        'max_order': '500', # in USD
+        'pattern': 'pattern1',
+        'maxOrder': '500', # in USD
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         'add': ['buy','sell','lowest','lastPrice'] 
     }
@@ -86,7 +101,7 @@ def pattern1(p,goodtimes):
     threshold = float(p['units_maker']['threshold'])
     for period in goodtimes: 
         mini_rsi = filter_rsi(rsi,period)
-        for index in range(mini_rsi.shape[0]-1):
+        for index in range(mini_rsi.shape[0]):
             if mini_rsi[index,1] < threshold and mini_rsi[index-1,1] > threshold:
                 units_list.append({'0': {'ts': mini_rsi[index,0]}})
     return units_list
@@ -193,9 +208,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
         'ts': int(raw_partition.iloc[0].timestamp),
         'index': int(raw_partition.iloc[0].name)
     }
-    if (raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
+    if (raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])).any():
         unit['buy']['type'] = 'all-bought'
-        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
+        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0]
         unit['buy']['last_executed'] = {
             'ts': int(last_executed_row.timestamp),
             'index': int(last_executed_row.name)
@@ -223,15 +238,15 @@ def find_sell(p,unit,candle_df,raw_df):
         unit['sell']['type'] = 'partially-sold'
         raw_sorted['USD_acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)*raw_sorted['price']
 
-    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
+    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['maxOrder'])).any():
         unit['sell']['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0].price
+        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0].price
         unit['sell']['realHighest_price'] = realHighest_price
         unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realHighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
-        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
+        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0]
         unit['sell']['first_executed'] = {
             'ts': int(raw_partition.iloc[0].timestamp), 
             'index': int(raw_partition.iloc[0].name) 
@@ -250,11 +265,11 @@ def find_lowest(p,unit,candle_df,raw_df):
     unit['lowest']['ts'] = int(min_row.timestamp)
     unit['lowest']['index'] = int(min_row.name)
 
-def translate_order(mode,input):
-# This function receives as input a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
+def translate_order(mode,inputt):
+# This function receives as inputt a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
 # a dictionary 'moment' that are useful for further calculation.
     moment = {}
-    candle,moment['string'] = input.split('_')
+    candle,moment['string'] = inputt.split('_')
     candle = candle.split('-')
 
     if mode == 'buy':
