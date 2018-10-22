@@ -59,7 +59,7 @@ def main():
         'td_s': '-9',
         'td_c': '13',
         'pattern': 'pattern1',
-        'maxOrder': '500', # in USD
+        'max_order': '500', # in USD
         'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
         'add': ['buy','sell','lowest','lastPrice'] 
     }
@@ -208,9 +208,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
         'ts': int(raw_partition.iloc[0].timestamp),
         'index': int(raw_partition.iloc[0].name)
     }
-    if (raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])).any():
+    if (raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
         unit['buy']['type'] = 'all-bought'
-        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0]
+        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
         unit['buy']['last_executed'] = {
             'ts': int(last_executed_row.timestamp),
             'index': int(last_executed_row.name)
@@ -238,15 +238,15 @@ def find_sell(p,unit,candle_df,raw_df):
         unit['sell']['type'] = 'partially-sold'
         raw_sorted['USD_acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)*raw_sorted['price']
 
-    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['maxOrder'])).any():
+    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
         unit['sell']['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0].price
+        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0].price
         unit['sell']['realHighest_price'] = realHighest_price
         unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realHighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
-        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['maxOrder'])].iloc[0]
+        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
         unit['sell']['first_executed'] = {
             'ts': int(raw_partition.iloc[0].timestamp), 
             'index': int(raw_partition.iloc[0].name) 
