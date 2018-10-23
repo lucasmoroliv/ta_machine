@@ -30,20 +30,19 @@ def main():
     'timeframeEnd' : '2018-04-19 00:00:00',
     'candle_sec': '1800',
     'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-    'buy': '1-sellEnd_0high*1.0001',
+    'buy': '1-sellEnd_1open*1.0001',
     'sell': 'buy-10_realHighest',
     'F1_toggle': False,
     'F1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'F1_above_indicador': 'SMA',
     'F1_above_average': '30',
-    'F1_below_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'F1_below_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'F1_below_indicador': 'SMA',
     'F1_below_average': '7',
     'pattern': 'pattern1',
     'P1_threshold' : '30',
     'P2_td_s': '-9',
     'P3_td_c': '13',
-    'pattern': 'pattern1',
     'max_order': '500', # in USD
     }
 

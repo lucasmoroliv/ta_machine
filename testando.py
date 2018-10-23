@@ -9,7 +9,7 @@ import pandas as pd
 
 def main():
     dir_path = 'builders/warehouse/setup_data/'
-    simulation = 'simulation_1540221259_0.008_50_25_1_10000_bitmex.txt'
+    simulation = 'simulation_1540319594_0.02_50_25_1_10000_bitmex.txt'
     testedSetup_path = dir_path + simulation
     p,data = read_json(testedSetup_path)
 
@@ -19,7 +19,6 @@ def main():
     total = 'triplets_setup' + pt1 + '_' + pt2 + '_' + pt3 + '.txt'
     testedSetup_path2 = dir_path + total
     p1,data1 = read_json2(testedSetup_path2)
-    counter = 0
     x = find_event(data,data1,p,pt2)
     pprint(x)
     # higher_avgBag(x)
@@ -47,23 +46,15 @@ def find_event(data,data1,p,pt2):
             target = i['target']
             stop = i['stop']
             buyStop = i['buyStop']
-            counter = 1
-            if counter == 1:
-                for j in data1:
-                    try:
-                        if j['events']['FL'] > 0 and j['triplet']['target'] == target and j['triplet']['stop'] == stop and j['triplet']['buyStop'] == buyStop:
-                            dtc = {**i, **j['events'],'amount': p['units_maker']['units_amt']}
-                            x.append(dtc)
-                            # print(i)
-                            # print(j['events'])
-                            counter = 0
-                            target = 0
-                            stop = 0
-                            buyStop = 0   
-                    except:
-                        pass   
-            else:
-                pass
+            for j in data1:
+                if j['events']['FL'] > 10 and j['triplet']['target'] == target and j['triplet']['stop'] == stop and j['triplet']['buyStop'] == buyStop and :
+                    dtc = {**i, **j['events'],'amount': p['units_amt'],'id':pt2,'space':p['space'],'buy':p['buy']['moment'],'sell':p['sell']['candle'][1],**{key:value for (key,value) in x.items() if key not in ["F1_above_path_candle_file","F1_below_path_candle_file"]}}
+                    x.append(dtc)
+                    # print(i)
+                    # print(j['events'])
+                    target = 0
+                    stop = 0
+                    buyStop = 0   
     # print(p['units_maker']['units_amt'])
     # print(x)
     return x
