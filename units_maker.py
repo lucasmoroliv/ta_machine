@@ -39,31 +39,12 @@ def main():
     'F1_below_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'F1_below_indicador': 'SMA',
     'F1_below_average': '7',
-    'F2_toogle': False,
-    'F2_condition': 'condition1',
-    'F2_path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
-    'F2_mode': 'greater_than_limit',
-    'F2_condition_parameter': 'm',     
-    'F2_limit': '0',
-    'F2_limit1': '0',
-    'F2_limit2': '0',
     'pattern': 'pattern1',
     'P1_threshold' : '30',
     'P2_td_s': '-9',
     'P3_td_c': '13',
     'pattern': 'pattern1',
     'max_order': '500', # in USD
-    'space': '0.02',
-    'lastPrice_approach': 'percentile',
-    'C_percentile': False,
-    'C_average': True,
-    'lastPrice_percentile': '50',
-    'games': '25',
-    'samples': '50',
-    'bagPercentage': '1',
-    'initialBag': '10000',
-    'marketOrder': '-0.00075',
-    'limitOrder': '0.00025'
     }
 
     goodtimes = ma_filter.frontDoor(p)

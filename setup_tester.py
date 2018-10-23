@@ -7,7 +7,7 @@ pd.options.mode.chained_assignment = None
 
 def main():
     input_dict = {
-        'setup_file': 'setup1539116406.txt',
+        'setup_file': 'setup1540319594.txt',
         'space': 0.02,
         'percentile_lastPrice': 50
     }
@@ -16,7 +16,6 @@ def main():
     raw_df = get_raw(p)
 
     [str(item) for item in list(input_dict)]
-    # p['setup_tester'] = {key:str(value) for (key,value) in input_dict.items()}
     p.update({key:str(value) for (key,value) in input_dict.items()})
 
     testedSetup = []
@@ -136,9 +135,9 @@ def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
 def write_json(data):
     # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
     firstPart = 'builders/warehouse/setup_data/triplets'
-    secondPart = data[0]['setup_tester']['setup_file'].split('.')[0]
-    thirdPart = data[0]['setup_tester']['space']
-    fourthPart = data[0]['setup_tester']['percentile_lastPrice']
+    secondPart = data[0]['setup_file'].split('.')[0]
+    thirdPart = data[0]['space']
+    fourthPart = data[0]['percentile_lastPrice']
     path = firstPart + '_' + secondPart + '_' + thirdPart + '_' + fourthPart + '.txt'
     if os.path.exists(path):
         print('This setup has already been tested.')

@@ -7,7 +7,7 @@ import time,csv,os
 def main():
 
     input_dict = {
-        'testedSetup_file': 'triplets_setup1539109349_0.003_40.txt',
+        'testedSetup_file': 'triplets_setup1540319594_0.02_50.txt',
         'games': 25,
         'samples': 50,
         'bagPercentage': 1,
@@ -17,7 +17,6 @@ def main():
     }
 
     p,testedSetup = get_testedSetup(input_dict['testedSetup_file'])
-    # p['bag_simulator'] = {key:str(value) for (key,value) in input_dict.items()}
     p.update({key:str(value) for (key,value) in input_dict.items()})
 
     simulations_list = []
@@ -84,7 +83,7 @@ def write_json(data):
     p = data[0]
     firstPart = 'builders/warehouse/setup_data/simulation'
     secondPart = p['setup_file'].split('.')[0][5:] #str(int(time.time()))
-    thirdPart = p[['space']
+    thirdPart = p['space']
     fourthPart = p['percentile_lastPrice']
     fifthPart = p['games']
     sixthPart = p['bagPercentage']

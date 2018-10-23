@@ -445,7 +445,7 @@
       </widget>
      </item>
      <item row="11" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_maxOrder">
+      <widget class="QLineEdit" name="E_max_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -503,7 +503,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>maxOrder</string>
+        <string>max_order</string>
        </property>
       </widget>
      </item>

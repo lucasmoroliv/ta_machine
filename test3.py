@@ -37,7 +37,6 @@ def main():
     'lastPrice_approach': 'percentile',
     'C_percentile': False,
     'C_average': True,
-    'lastPrice_percentile': '50',
     'games': '25',
     'samples': '50',
     'bagPercentage': '1',
@@ -45,7 +44,6 @@ def main():
     'marketOrder': '-0.00075',
     'limitOrder': '0.00025'
     }
-
     # dbname = 'postgres'
     # user = 'postgres'
     # host = 'localhost'
