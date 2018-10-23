@@ -17,8 +17,9 @@ def main():
     }
 
     p,testedSetup = get_testedSetup(input_dict['testedSetup_file'])
-    p['bag_simulator'] = {key:str(value) for (key,value) in input_dict.items()}
-    
+    # p['bag_simulator'] = {key:str(value) for (key,value) in input_dict.items()}
+    p.update({key:str(value) for (key,value) in input_dict.items()})
+
     simulations_list = []
 
     for tripletResult in testedSetup:
@@ -82,12 +83,12 @@ def write_json(data):
     # It dumps the data in a new file called "experiment<ts_now>.txt" in experiment_data directory.
     p = data[0]
     firstPart = 'builders/warehouse/setup_data/simulation'
-    secondPart = p['setup_tester']['setup_file'].split('.')[0][5:] #str(int(time.time()))
-    thirdPart = p['setup_tester']['space']
-    fourthPart = p['setup_tester']['percentile_lastPrice']
-    fifthPart = p['bag_simulator']['games']
-    sixthPart = p['bag_simulator']['bagPercentage']
-    seventhPart = p['bag_simulator']['initialBag']
+    secondPart = p['setup_file'].split('.')[0][5:] #str(int(time.time()))
+    thirdPart = p[['space']
+    fourthPart = p['percentile_lastPrice']
+    fifthPart = p['games']
+    sixthPart = p['bagPercentage']
+    seventhPart = p['initialBag']
     eightPart = 'bitmex'
     path = firstPart + '_' + secondPart +'_' + thirdPart + '_' + fourthPart + '_' + fifthPart + '_' + sixthPart + '_' + seventhPart + '_' + eightPart + '.txt'
     if os.path.exists(path):

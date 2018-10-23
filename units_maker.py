@@ -23,53 +23,52 @@ import ma_filter
 pd.options.mode.chained_assignment = None
 
 def main():
+
     p = {
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'timeframe' : ['2014-01-01 00:00:00','2018-10-10 00:00:00'],
+    'timeframeStart' : '2014-01-01 00:00:00',
+    'timeframeEnd' : '2018-04-19 00:00:00',
     'candle_sec': '1800',
-    'buy': '1-sellEnd_1open*1.0001',
-    'sell': 'buy-20_realHighest',
-    'chart_filter': [
-        {
-        'toggle': False,
-        'condition': 'condition1',
-        'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
-        'mode': 'greater_than_limit',
-        'condition_parameter': 'm',     
-        'limit': '0',
-        'limit1': '0',
-        'limit2': '0'
-        },
-        {
-        'toggle': False,
-        'lineAbove': {
-            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-            'indicador': 'SMA',
-            'average': '30',
-        },
-        'lineBellow': {
-            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-            'indicador': 'SMA',
-            'average': '7',
-        }
-        }
-    ],
-    'units_maker': {
-        'threshold' : '20',
-        'td_s': '-9',
-        'td_c': '13',
-        'pattern': 'pattern1',
-        'max_order': '500', # in USD
-        'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-        'add': ['buy','sell','lowest','lastPrice'] 
-    }
+    'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
+    'buy': '1-sellEnd_0high*1.0001',
+    'sell': 'buy-10_realHighest',
+    'F1_toggle': False,
+    'F1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'F1_above_indicador': 'SMA',
+    'F1_above_average': '30',
+    'F1_below_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'F1_below_indicador': 'SMA',
+    'F1_below_average': '7',
+    'F2_toogle': False,
+    'F2_condition': 'condition1',
+    'F2_path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
+    'F2_mode': 'greater_than_limit',
+    'F2_condition_parameter': 'm',     
+    'F2_limit': '0',
+    'F2_limit1': '0',
+    'F2_limit2': '0',
+    'pattern': 'pattern1',
+    'P1_threshold' : '30',
+    'P2_td_s': '-9',
+    'P3_td_c': '13',
+    'pattern': 'pattern1',
+    'max_order': '500', # in USD
+    'space': '0.02',
+    'lastPrice_approach': 'percentile',
+    'C_percentile': False,
+    'C_average': True,
+    'lastPrice_percentile': '50',
+    'games': '25',
+    'samples': '50',
+    'bagPercentage': '1',
+    'initialBag': '10000',
+    'marketOrder': '-0.00075',
+    'limitOrder': '0.00025'
     }
 
-    # goodtimes = chart_filter.callable(p)
     goodtimes = ma_filter.frontDoor(p)
-    # pprint(goodtimes)
     units_list = callable(p,goodtimes)
-    p['units_maker']['units_amt'] = len(units_list)
+    p['units_amt'] = len(units_list)
     pprint(units_list)
     print('Amount of units in the setup: ',len(units_list))
     write_json((p,units_list))
@@ -80,8 +79,8 @@ def callable(p,goodtimes):
     # rsi_df = get_rsi_df(p)
     # td_s_df = get_td_s_df(p)
     # td_c_df = get_td_c_df(p)
-    units_list = globals()[p['units_maker']['pattern']](p,goodtimes)
-    for item in p['units_maker']['add']:
+    units_list = globals()[p['pattern']](p,goodtimes)
+    for item in ['buy','sell','lowest','lastPrice']:
         globals()['add_{0}'.format(item)](p,units_list,candle_df,raw_df)
     return units_list
 
@@ -90,7 +89,7 @@ def callable(p,goodtimes):
 # Every function in this section must return a units_list, with the timestamp of the candle 0 of each unit. 
 
 def pattern1(p,goodtimes):
-    # Input: <p>, specifically p['path_candle_file'] and p['units_maker']['threshold']. <goodtimes> which has all the periods we want. In case chart_filter turned off, <goodtimes> will be a list containing
+    # Input: <p>, specifically p['path_candle_file'] and p['P1_threshold']. <goodtimes> which has all the periods we want. In case chart_filter turned off, <goodtimes> will be a list containing
     # one period, which is a list of two items, the first being the inferior limit and the second the superior limit of the period. In the other hand, if chart_filter is turned on, <goodtimes> will most likely have
     # many periods in it.
     # Output: <units_list>, which is a list of dictionaries. Each dictionary only has the '0' key, which stands for 'candle 0'. Its value is also a dictionary with a single key named 'ts' containing the timestamp
@@ -98,7 +97,7 @@ def pattern1(p,goodtimes):
     # the only information each unit has is its first timestamp, the timestamp that starts the candle 0.       
     rsi = momentum_indicators.rsi(p['path_candle_file'])
     units_list = []
-    threshold = float(p['units_maker']['threshold'])
+    threshold = float(p['P1_threshold'])
     for period in goodtimes: 
         mini_rsi = filter_rsi(rsi,period)
         for index in range(mini_rsi.shape[0]):
@@ -112,7 +111,7 @@ def pattern2(p,goodtimes):
     td_s_df = get_td_s_df(p)
     td_s_df = td_s_df.reset_index()
     td = td_s_df.values
-    td_s = int(p['units_maker']['td_s'])
+    td_s = int(p['P2_td_s'])
     units_list = []
     for period in goodtimes: 
         mini_td = filter_td(td,period)
@@ -127,8 +126,8 @@ def pattern3(p,goodtimes):
     td_c_df = get_td_c_df(p)
     td_c_df = td_c_df.reset_index()
     td = td_c_df.values
-    td_c = int(p['units_maker']['td_c'])
-    units_list = []
+    td_c = int(p['P3_td_c'])
+    # units_list = []
     for period in goodtimes: 
         mini_td = filter_td(td,period)
         for i in range(mini_td.shape[0]):
@@ -208,9 +207,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
         'ts': int(raw_partition.iloc[0].timestamp),
         'index': int(raw_partition.iloc[0].name)
     }
-    if (raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
+    if (raw_partition.USD_acc_volume >= float(p['max_order'])).any():
         unit['buy']['type'] = 'all-bought'
-        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
+        last_executed_row = raw_partition[raw_partition.USD_acc_volume >= float(p['max_order'])].iloc[0]
         unit['buy']['last_executed'] = {
             'ts': int(last_executed_row.timestamp),
             'index': int(last_executed_row.name)
@@ -238,15 +237,15 @@ def find_sell(p,unit,candle_df,raw_df):
         unit['sell']['type'] = 'partially-sold'
         raw_sorted['USD_acc_volume'] = raw_sorted['volume'].cumsum(axis = 0)*raw_sorted['price']
 
-    if (raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])).any():
+    if (raw_sorted.USD_acc_volume >= float(p['max_order'])).any():
         unit['sell']['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0].price
+        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['max_order'])].iloc[0].price
         unit['sell']['realHighest_price'] = realHighest_price
         unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realHighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
-        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['units_maker']['max_order'])].iloc[0]
+        last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['max_order'])].iloc[0]
         unit['sell']['first_executed'] = {
             'ts': int(raw_partition.iloc[0].timestamp), 
             'index': int(raw_partition.iloc[0].name) 
@@ -291,7 +290,7 @@ def translate_order(mode,inputt):
         return candle,moment
 
 def get_raw(p):
-    return pd.read_csv(p['units_maker']['path_historical_data'], header=None, names=['timestamp','price','volume'])
+    return pd.read_csv(p['path_historical_data'], header=None, names=['timestamp','price','volume'])
 
 def filter_rsi(rsi,timeframe):
     return rsi[(rsi[:,0] >= timeframe[0]) & (rsi[:,0] <= timeframe[1])]

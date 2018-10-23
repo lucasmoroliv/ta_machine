@@ -62,15 +62,15 @@ def frontDoor(p):
     # values, depending upon which option was chosen at p['chart_filter'][1]['lineAbove']['indicador']
     # and p['chart_filter'][1]['lineBellow']['indicador'].
     # The arrays will contain the timestamp and average of every candle existing inside
-    # p['chart_filter'][1]['lineBellow']['path_candle_file'] for lineBellow and 
-    # p['chart_filter'][1]['lineAbove']['path_candle_file'] for lineAbove. 
-    if p['chart_filter'][1]['toggle'] == False:
-        return [[calendar.timegm(time.strptime(p['timeframe'][0], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe'][1], '%Y-%m-%d %H:%M:%S'))]]
-    elif p['chart_filter'][1]['toggle'] == True: 
-        lineBellow_all = getattr(momentum_indicators,p['chart_filter'][1]['lineBellow']['indicador'].lower())(p['chart_filter'][1]['lineBellow']['path_candle_file'],int(p['chart_filter'][1]['lineBellow']['average']))
-        lineAbove_all = getattr(momentum_indicators,p['chart_filter'][1]['lineAbove']['indicador'].lower())(p['chart_filter'][1]['lineAbove']['path_candle_file'],int(p['chart_filter'][1]['lineAbove']['average']))
-        lineAbove = filterbydate_array(lineAbove_all,p['timeframe'])
-        lineBellow = filterbydate_array(lineBellow_all,p['timeframe'])
+    # p['F1_below_path_candle_file'] for lineBellow and 
+    # p['F1_above_path_candle_file'] for lineAbove. 
+    if p['F1_toggle'] == False:
+        return [[calendar.timegm(time.strptime(p['timeframeStart'], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframeEnd'], '%Y-%m-%d %H:%M:%S'))]]
+    elif p['F1_toggle'] == True: 
+        lineBellow_all = getattr(momentum_indicators,p['F1_bellow_indicador'].lower())(p['F1_below_path_candle_file'],int(p['F1_bellow_average']))
+        lineAbove_all = getattr(momentum_indicators,p['F1_above_indicador'].lower())(p['F1_above_path_candle_file'],int(p['F1_above_average']))
+        lineAbove = filterbydate_array(lineAbove_all,(p['timeframeStart'],p['timeframeEnd']))
+        lineBellow = filterbydate_array(lineBellow_all,(p['timeframeStart'],p['timeframeEnd']))
         trueTimestamps = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
         goodtimes = buildPeriods(trueTimestamps,int(p['candle_sec']))
         return goodtimes
@@ -115,8 +115,6 @@ def filterbydate_array(array,timeframe):
         return array_partition
     except:
         print('\nYou picked a bad timeframe mate.')
-
-
 
 def filterbydate_df(df,timeframe):
     # Input: <df> is a dataframe to be filtered and <timeframe> a list with two strings, the 

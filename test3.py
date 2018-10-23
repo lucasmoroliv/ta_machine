@@ -9,33 +9,34 @@ def main():
     'timeframeStart' : '2014-01-01 00:00:00',
     'timeframeEnd' : '2018-04-19 00:00:00',
     'candle_sec': '1800',
-    'buy': '1-sellEnd_0high+5',
-    'sell': 'buy-10_realHighest',
     'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-    # 'F1_toogle': False,
-    # 'F1_condition': 'condition1',
-    # 'F1_path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
-    # 'F1_mode': 'greater_than_limit',
-    # 'F1_condition_parameter': 'm',     
-    # 'F1_limit': '0',
-    # 'F1_limit1': '0',
-    # 'F1_limit2': '0',
-    # 'F2_toggle': False,
-    # 'F2_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    # 'F2_above_indicador': 'SMA',
-    # 'F2_above_average': '30',
-    # 'F2_bellow_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    # 'F2_bellow_indicador': 'SMA',
-    # 'F2_bellow_average': '7',
-    # 'P1_threshold' : '30',
-    # 'P2_td_s': '-9',
-    # 'P3_td_c': '13',
-    # 'pattern': 'pattern1',
-    'maxOrder': '500', # in USD
+    'buy': '1-sellEnd_0high*1.0001',
+    'sell': 'buy-10_realHighest',
+    'F1_toggle': False,
+    'F1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'F1_above_indicador': 'SMA',
+    'F1_above_average': '30',
+    'F1_below_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'F1_below_indicador': 'SMA',
+    'F1_below_average': '7',
+    'F2_toogle': False,
+    'F2_condition': 'condition1',
+    'F2_path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
+    'F2_mode': 'greater_than_limit',
+    'F2_condition_parameter': 'm',     
+    'F2_limit': '0',
+    'F2_limit1': '0',
+    'F2_limit2': '0',
+    'pattern': 'pattern1',
+    'P1_threshold' : '30',
+    'P2_td_s': '-9',
+    'P3_td_c': '13',
+    'pattern': 'pattern1',
+    'max_order': '500', # in USD
     'space': '0.02',
-    # 'lastPrice_approach': 'percentile',
-    # 'C_percentile': False
-    # 'C_average': True
+    'lastPrice_approach': 'percentile',
+    'C_percentile': False,
+    'C_average': True,
     'lastPrice_percentile': '50',
     'games': '25',
     'samples': '50',
@@ -61,19 +62,101 @@ def main():
             self.B_OK.clicked.connect(self.on_click)
             self.B_OK.setToolTip('This is an example button')
             self.E_lastPrice_percentile.hide()
-            self.C_percentile.stateChanged.connect(self.clickBox_percentile)
-            self.C_average.stateChanged.connect(self.clickBox_average)
-            self.LI_pattern.itemClicked.connect(self.Clicked1)            
+
+            self.C_percentile.stateChanged.connect(self.click_C_percentile)
+            self.C_average.stateChanged.connect(self.click_C_average)
+            self.LI_pattern.itemClicked.connect(self.click_LI_pattern)            
+            
+            self.patternBox()
+
+        def filterBox(self):
+
+    # 'F1_toggle': False,
+    # 'F1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    # 'F1_above_indicador': 'SMA',
+    # 'F1_above_average': '30',
+    # 'F1_below_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    # 'F1_below_indicador': 'SMA',
+    # 'F1_below_average': '7',
+
+    
+            # Create the lables for patterns.
+            self.L_F1_toogle = QtWidgets.QLabel('F1_toogle',self)
+            self.L_F1_above_path_candle_file = QtWidgets.QLabel('F1_above_path_candle_file',self)
+            self.L_F1_above_indicador = QtWidgets.QLabel('F1_above_indicador',self)
+            self.L_F1_above_average = QtWidgets.QLabel('F1_above_average',self)
+            self.L_F1_below_candle_file = QtWidgets.QLabel('F1_below_candle_file',self)
+            self.L_F1_below_indicador = QtWidgets.QLabel('F1_below_indicador',self)
+            self.F1_below_average = QtWidgets.QLabel('F1_below_average',self)
+
+            # Create the lineEdits for patterns.
+            self.E_P1_threshold = QtWidgets.QLineEdit(self)
+            self.E_P2_td_s = QtWidgets.QLineEdit(self)
+            self.E_P3_td_c = QtWidgets.QLineEdit(self)
+    
+            # Creating variable containing font configuration.
+            newFont = QtGui.QFont('MS Shell Dlg 2',12) 
+            
+            # Adding the configuration to the pattern labels.
+            self.L_P1_threshold.setFont(newFont)
+            self.L_P2_td_s.setFont(newFont)
+            self.L_P3_td_c.setFont(newFont)
+
+            # Positioning the labels.
+            self.L_P1_threshold.setGeometry(800,70,110,25)
+            self.L_P2_td_s.setGeometry(800,70,110,25)
+            self.L_P3_td_c.setGeometry(800,70,110,25)
+
+            # Positioning the lineEdits.
+            self.E_P1_threshold.setGeometry(920,70,171,25)
+            self.E_P2_td_s.setGeometry(920,70,171,25)
+            self.E_P3_td_c.setGeometry(920,70,171,25)
+
             self.L_P1_threshold.hide()
             self.E_P1_threshold.hide()
             self.L_P2_td_s.hide()
             self.E_P2_td_s.hide()
             self.L_P3_td_c.hide()
             self.E_P3_td_c.hide()
+
+        def patternBox(self):
+
+            # Create the lables for patterns.
+            self.L_P1_threshold = QtWidgets.QLabel('P1_threshold',self)
+            self.L_P2_td_s = QtWidgets.QLabel('P2_td_s',self)
+            self.L_P3_td_c = QtWidgets.QLabel('P3_td_c',self)
+
+            # Create the lineEdits for patterns.
+            self.E_P1_threshold = QtWidgets.QLineEdit(self)
+            self.E_P2_td_s = QtWidgets.QLineEdit(self)
+            self.E_P3_td_c = QtWidgets.QLineEdit(self)
+
+            # Creating variable containing font configuration.
+            newFont = QtGui.QFont('MS Shell Dlg 2',12) 
             
+            # Adding the configuration to the pattern labels.
+            self.L_P1_threshold.setFont(newFont)
+            self.L_P2_td_s.setFont(newFont)
+            self.L_P3_td_c.setFont(newFont)
 
+            # Positioning the labels.
+            self.L_P1_threshold.setGeometry(800,70,110,25)
+            self.L_P2_td_s.setGeometry(800,70,110,25)
+            self.L_P3_td_c.setGeometry(800,70,110,25)
 
-        def Clicked1(self,item):
+            # Positioning the lineEdits.
+            self.E_P1_threshold.setGeometry(920,70,171,25)
+            self.E_P2_td_s.setGeometry(920,70,171,25)
+            self.E_P3_td_c.setGeometry(920,70,171,25)
+
+            self.L_P1_threshold.hide()
+            self.E_P1_threshold.hide()
+            self.L_P2_td_s.hide()
+            self.E_P2_td_s.hide()
+            self.L_P3_td_c.hide()
+            self.E_P3_td_c.hide()
+
+        def click_LI_pattern(self,item):
             print("You clicked: "+item.text())
             if item.text() == 'pattern1':
                 self.L_P1_threshold.show()
@@ -99,7 +182,7 @@ def main():
 
 
 
-        def clickBox_percentile(self,state):
+        def click_C_percentile(self,state):
             if state == QtCore.Qt.Checked:
                 self.E_lastPrice_percentile.show()
                 self.C_average.setChecked(False)
@@ -107,7 +190,7 @@ def main():
             else:
                 self.E_lastPrice_percentile.hide()
 
-        def clickBox_average(self,state):
+        def click_C_average(self,state):
             if state == QtCore.Qt.Checked:
                 self.E_lastPrice_percentile.hide()
                 self.C_percentile.setChecked(False)

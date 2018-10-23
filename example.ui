@@ -584,123 +584,6 @@
      <string>lastPrice_approach</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="E_P1_threshold">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>30</y>
-      <width>171</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="L_P1_threshold">
-    <property name="geometry">
-     <rect>
-      <x>800</x>
-      <y>30</y>
-      <width>101</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>P1_threshold</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="L_P2_td_s">
-    <property name="geometry">
-     <rect>
-      <x>800</x>
-      <y>70</y>
-      <width>101</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>P2_td_s</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="E_P2_td_s">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>70</y>
-      <width>171</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="L_P3_td_c">
-    <property name="geometry">
-     <rect>
-      <x>800</x>
-      <y>110</y>
-      <width>101</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>P3_td_c</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="E_P3_td_c">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>110</y>
-      <width>171</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-   </widget>
    <widget class="QListWidget" name="LI_pattern_2">
     <property name="geometry">
      <rect>
@@ -717,7 +600,7 @@
     </property>
     <item>
      <property name="text">
-      <string>moving averages</string>
+      <string>filter1</string>
      </property>
     </item>
    </widget>
@@ -742,7 +625,7 @@
      <bool>false</bool>
     </property>
     <property name="text">
-     <string>chart_filter</string>
+     <string>filter</string>
     </property>
    </widget>
   </widget>
