@@ -48,7 +48,7 @@ def find_event(data,data1,p,pt2):
             buyStop = i['buyStop']
             for j in data1:
                 if j['events']['FL'] > 10 and j['triplet']['target'] == target and j['triplet']['stop'] == stop and j['triplet']['buyStop'] == buyStop and :
-                    dtc = {**i, **j['events'],'amount': p['units_amt'],'id':pt2,'space':p['space'],'buy':p['buy']['moment'],'sell':p['sell']['candle'][1],**{key:value for (key,value) in x.items() if key not in ["F1_above_path_candle_file","F1_below_path_candle_file"]}}
+                    dtc = {**i, **j['events'],'amount': p['units_amt'],'id':pt2,'space':p['space'],'buy':p['buy'],'sell':p['sell'],**{key:value for (key,value) in x.items() if key not in ["F1_above_path_candle_file","F1_below_path_candle_file"]}}
                     x.append(dtc)
                     # print(i)
                     # print(j['events'])

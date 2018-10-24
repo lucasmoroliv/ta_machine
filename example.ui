@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1206</width>
-    <height>835</height>
+    <width>1412</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="font">
@@ -22,10 +22,10 @@
    <widget class="QPushButton" name="B_OK">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>660</y>
+      <x>590</x>
+      <y>520</y>
       <width>121</width>
-      <height>61</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -85,30 +85,6 @@
       <string>pattern3</string>
      </property>
     </item>
-   </widget>
-   <widget class="QLabel" name="L_chart_filter">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
-      <y>540</y>
-      <width>91</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>chart_filter</string>
-    </property>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
@@ -509,7 +485,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLineEdit" name="E_lastPrice_percentile">
+   <widget class="QLineEdit" name="E_percentile_lastPrice">
     <property name="geometry">
      <rect>
       <x>420</x>
@@ -584,7 +560,7 @@
      <string>lastPrice_approach</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="LI_pattern_2">
+   <widget class="QListWidget" name="LI_filter">
     <property name="geometry">
      <rect>
       <x>610</x>
@@ -601,6 +577,11 @@
     <item>
      <property name="text">
       <string>filter1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>none</string>
      </property>
     </item>
    </widget>
@@ -634,13 +615,36 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1206</width>
+     <width>1412</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>E_path_candle_file</tabstop>
+  <tabstop>E_timeframeStart</tabstop>
+  <tabstop>E_timeframeEnd</tabstop>
+  <tabstop>E_candle_sec</tabstop>
+  <tabstop>E_buy</tabstop>
+  <tabstop>E_sell</tabstop>
+  <tabstop>E_path_historical_data</tabstop>
+  <tabstop>E_initialBag</tabstop>
+  <tabstop>E_marketOrder</tabstop>
+  <tabstop>E_limitOrder</tabstop>
+  <tabstop>E_bagPercentage</tabstop>
+  <tabstop>E_games</tabstop>
+  <tabstop>E_max_order</tabstop>
+  <tabstop>E_samples</tabstop>
+  <tabstop>E_space</tabstop>
+  <tabstop>C_average</tabstop>
+  <tabstop>C_percentile</tabstop>
+  <tabstop>E_percentile_lastPrice</tabstop>
+  <tabstop>LI_pattern</tabstop>
+  <tabstop>LI_filter</tabstop>
+  <tabstop>B_OK</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

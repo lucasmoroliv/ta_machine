@@ -7,7 +7,7 @@ import time,csv,os
 def main():
 
     input_dict = {
-        'testedSetup_file': 'triplets_setup1540319594_0.02_50.txt',
+        'testedSetup_file': 'triplets_setup1540344830_0.02_50.txt',
         'games': 25,
         'samples': 50,
         'bagPercentage': 1,

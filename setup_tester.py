@@ -7,7 +7,7 @@ pd.options.mode.chained_assignment = None
 
 def main():
     input_dict = {
-        'setup_file': 'setup1540319594.txt',
+        'setup_file': 'setup1540344830.txt',
         'space': 0.02,
         'percentile_lastPrice': 50
     }

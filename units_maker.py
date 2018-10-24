@@ -60,8 +60,9 @@ def callable(p,goodtimes):
     # td_s_df = get_td_s_df(p)
     # td_c_df = get_td_c_df(p)
     units_list = globals()[p['pattern']](p,goodtimes)
+    action_dict = {}
     for item in ['buy','sell','lowest','lastPrice']:
-        globals()['add_{0}'.format(item)](p,units_list,candle_df,raw_df)
+        globals()['add_{0}'.format(item)](p,units_list,candle_df,raw_df,action_dict)
     return units_list
 
 # ---------------------------------------------------------------------------------
@@ -107,7 +108,7 @@ def pattern3(p,goodtimes):
     td_c_df = td_c_df.reset_index()
     td = td_c_df.values
     td_c = int(p['P3_td_c'])
-    # units_list = []
+    units_list = []
     for period in goodtimes: 
         mini_td = filter_td(td,period)
         for i in range(mini_td.shape[0]):
@@ -119,42 +120,42 @@ def pattern3(p,goodtimes):
 # * SECTION 2 *
 # Add details to units_list for further analysis.
 
-def add_buy(p,units_list,candle_df,raw_df):
+def add_buy(p,units_list,candle_df,raw_df,action_dict):
     operator_dict = {
         '+': operator.add,
         '-': operator.sub,
         '*': operator.mul
     }
     candle,moment = translate_order('buy',p['buy'])
-    p['buy'] = {
+    action_dict['buy'] = {
         'candle': candle,
         'moment': moment
     }
     candle,moment = translate_order('sell',p['sell'])
-    p['sell'] = {
+    action_dict['sell'] = {
         'candle': candle,
         'moment': moment
     }
     for unit in units_list:
         unit['buy'] = {}
-        find_buy(p,unit,candle_df,raw_df,operator_dict)
+        find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
 
-def add_sell(p,units_list,candle_df,raw_df):
+def add_sell(p,units_list,candle_df,raw_df,action_dict):
     for unit in units_list:
         if unit['buy']['type'] == 'all-bought':
             unit['sell'] = {}
-            find_sell(p,unit,candle_df,raw_df)
+            find_sell(p,unit,candle_df,raw_df,action_dict)
 
-def add_lowest(p,units_list,candle_df,raw_df):
+def add_lowest(p,units_list,candle_df,raw_df,action_dict):
     for unit in units_list:
         if unit['buy']['type'] == 'all-bought':
             if unit['sell']['type'] == 'all-sold':
                 unit['lowest'] = {}
                 find_lowest(p,unit,candle_df,raw_df)
 
-def add_lastPrice(p,units_list,candle_df,raw_df):
+def add_lastPrice(p,units_list,candle_df,raw_df,action_dict):
     for unit in units_list:
-        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['sell']['candle'][-1])+1)
         raw_section = raw_df[raw_df.timestamp<end_interval]    
         unit['lastPrice'] = (raw_section.iloc[-1].price - unit['buy']['price'])/unit['buy']['price']
 
@@ -162,15 +163,15 @@ def add_lastPrice(p,units_list,candle_df,raw_df):
 # * SECTION 3 *
 # Here is a space to store all sorts of auxiliary functions.
 
-def find_buy(p,unit,candle_df,raw_df,operator_dict):
-    unit['buy']['price'] = candle_df.loc[int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['moment']['candle'])][p['buy']['moment']['ohlc']]
-    if 'operator' in p['buy']['moment']:
-        unit['buy']['price'] = operator_dict[p['buy']['moment']['operator']](float(unit['buy']['price']),float(p['buy']['moment']['change']))  
-    start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(p['buy']['candle'][0])
-    if p['buy']['candle'][-1] == 'sellEnd':
-        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
+def find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
+    unit['buy']['price'] = candle_df.loc[int(unit['0']['ts'])+int(p['candle_sec'])*int(action_dict['buy']['moment']['candle'])][action_dict['buy']['moment']['ohlc']]
+    if 'operator' in action_dict['buy']['moment']:
+        unit['buy']['price'] = operator_dict[action_dict['buy']['moment']['operator']](float(unit['buy']['price']),float(action_dict['buy']['moment']['change']))  
+    start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(action_dict['buy']['candle'][0])
+    if action_dict['buy']['candle'][-1] == 'sellEnd':
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['sell']['candle'][-1])+1)
     else:
-        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['buy']['candle'][-1])+1) 
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['buy']['candle'][-1])+1) 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
     lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
     unit['buy']['lowest'] = {
@@ -204,9 +205,9 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict):
     else:
         unit['buy']['type'] = 'partially-bought'
 
-def find_sell(p,unit,candle_df,raw_df):
+def find_sell(p,unit,candle_df,raw_df,action_dict):
     start_index = unit['buy']['last_executed']['index']
-    end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(p['sell']['candle'][-1])+1)
+    end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['sell']['candle'][-1])+1)
     raw_section = raw_df[(raw_df.index>start_index) & (raw_df.timestamp<end_interval)]    
     raw_sorted = raw_section.sort_values(by=['price'],ascending=False)
     
