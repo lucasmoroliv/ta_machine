@@ -9,7 +9,9 @@ def main():
     input_dict = {
         'setup_file': 'setup1540344830.txt',
         'space': 0.02,
-        'percentile_lastPrice': 50
+        'percentile_toggle': False, # BOOLEAN
+        'average_toggle': True, # BOOLEAN
+        'percentile_lastPrice': 50 # INTEGER
     }
     p,units_list = get_setup(input_dict['setup_file'])
     triplets_list = get_triplets(units_list,input_dict['space']) 
@@ -21,7 +23,7 @@ def main():
     testedSetup = []
 
     for triplet in tqdm(triplets_list):
-        testedSetup.append(get_tripletsResult(p,raw_df,units_list,triplet,input_dict['percentile_lastPrice']))
+        testedSetup.append(get_tripletsResult(p,raw_df,units_list,triplet))
 
     write_json((p,testedSetup))
 
@@ -61,7 +63,7 @@ def get_triplets(units_list,space):
     triplets_list = [target_ite,stop_ite,buyStop_ite]
     return list(itertools.product(*triplets_list))
 
-def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
+def get_tripletsResult(p,raw_df,units_list,triplet):
     target = triplet[0]
     stop = triplet[1]
     buyStop = triplet[2]
@@ -128,8 +130,11 @@ def get_tripletsResult(p,raw_df,units_list,triplet,percentile):
     for key in set(aux_list):
         setup['events'][key] = aux_list.count(key)
 
-    setup['lastPrice'] = np.percentile(lastPrice_list,percentile)
-
+    
+    if p['percentile_toggle']:
+        setup['lastPrice'] = np.percentile(lastPrice_list,int(p['percentile_lastPrice']))
+    elif p['average_toggle']:
+        setup['lastPrice'] = np.mean(lastPrice_list)
     return setup
 
 def write_json(data):

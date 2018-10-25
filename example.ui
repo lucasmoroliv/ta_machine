@@ -500,7 +500,7 @@
      </font>
     </property>
    </widget>
-   <widget class="QCheckBox" name="C_percentile">
+   <widget class="QCheckBox" name="C_percentile_toggle">
     <property name="geometry">
      <rect>
       <x>290</x>
@@ -518,7 +518,7 @@
      <string>percentile</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="C_average">
+   <widget class="QCheckBox" name="C_average_toggle">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -585,7 +585,7 @@
      </property>
     </item>
    </widget>
-   <widget class="QLabel" name="L_pattern_2">
+   <widget class="QLabel" name="L_filter">
     <property name="geometry">
      <rect>
       <x>610</x>
@@ -638,8 +638,8 @@
   <tabstop>E_max_order</tabstop>
   <tabstop>E_samples</tabstop>
   <tabstop>E_space</tabstop>
-  <tabstop>C_average</tabstop>
-  <tabstop>C_percentile</tabstop>
+  <tabstop>C_average_toggle</tabstop>
+  <tabstop>C_percentile_toggle</tabstop>
   <tabstop>E_percentile_lastPrice</tabstop>
   <tabstop>LI_pattern</tabstop>
   <tabstop>LI_filter</tabstop>
