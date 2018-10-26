@@ -7,10 +7,10 @@ pd.options.mode.chained_assignment = None
 
 def main():
     input_dict = {
-        'setup_file': 'setup1540344830.txt',
+        'setup_file': 'setup1540587174.txt',
         'space': 0.02,
-        'percentile_toggle': False, # BOOLEAN
-        'average_toggle': True, # BOOLEAN
+        'percentile_toggle': True, # BOOLEAN
+        'average_toggle': False, # BOOLEAN
         'percentile_lastPrice': 50 # INTEGER
     }
     p,units_list = get_setup(input_dict['setup_file'])
@@ -131,9 +131,9 @@ def get_tripletsResult(p,raw_df,units_list,triplet):
         setup['events'][key] = aux_list.count(key)
 
     
-    if p['percentile_toggle']:
+    if p['percentile_toggle'] == 'True':
         setup['lastPrice'] = np.percentile(lastPrice_list,int(p['percentile_lastPrice']))
-    elif p['average_toggle']:
+    elif p['average_toggle'] == 'True':
         setup['lastPrice'] = np.mean(lastPrice_list)
     return setup
 
@@ -142,7 +142,10 @@ def write_json(data):
     firstPart = 'builders/warehouse/setup_data/triplets'
     secondPart = data[0]['setup_file'].split('.')[0]
     thirdPart = data[0]['space']
-    fourthPart = data[0]['percentile_lastPrice']
+    if data[0]['percentile_toggle'] == 'True':
+        fourthPart = data[0]['percentile_lastPrice']
+    elif data[0]['average_toggle'] == 'True':
+        fourthPart = 'mean'
     path = firstPart + '_' + secondPart + '_' + thirdPart + '_' + fourthPart + '.txt'
     if os.path.exists(path):
         print('This setup has already been tested.')

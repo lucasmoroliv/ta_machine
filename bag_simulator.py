@@ -7,7 +7,7 @@ import time,csv,os
 def main():
 
     input_dict = {
-        'testedSetup_file': 'triplets_setup1540344830_0.02_50.txt',
+        'testedSetup_file': 'triplets_setup1540580770_0.02_mean.txt',
         'games': 25,
         'samples': 50,
         'bagPercentage': 1,
@@ -84,7 +84,10 @@ def write_json(data):
     firstPart = 'builders/warehouse/setup_data/simulation'
     secondPart = p['setup_file'].split('.')[0][5:] #str(int(time.time()))
     thirdPart = p['space']
-    fourthPart = p['percentile_lastPrice']
+    if p['percentile_toggle'] == 'True':
+        fourthPart = p['percentile_lastPrice']
+    elif p['average_toggle'] == 'True':
+        fourthPart = 'mean'
     fifthPart = p['games']
     sixthPart = p['bagPercentage']
     seventhPart = p['initialBag']
