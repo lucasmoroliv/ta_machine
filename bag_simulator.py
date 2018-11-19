@@ -10,10 +10,10 @@ def main():
         'testedSetup_file': 'triplets_setup1540344830_0.02_50.txt',
         'games': 25,
         'samples': 50,
-        'bagPercentage': 1,
-        'initialBag': 10000,
-        'marketOrder': -0.00075,
-        'limitOrder': 0.00025
+        'bag_percentage': 1,
+        'initial_bag': 10000,
+        'market_order': -0.00075,
+        'limit_order': 0.00025
     }
 
     p,testedSetup = get_testedSetup(input_dict['testedSetup_file'])
@@ -24,45 +24,45 @@ def main():
     for tripletResult in testedSetup:
         P = tripletResult['events']
         triplet = tripletResult['triplet']
-        lastPrice = tripletResult['lastPrice']
+        last_price = tripletResult['last_price']
         omega = sum([P[event] for event in list(P)])
         for event in list(P):
             P[event] = P[event]/omega
 
-        triplet['average_bag'] = bagPrediction(P,triplet,lastPrice,input_dict)
+        triplet['average_bag'] = bagPrediction(P,triplet,last_price,input_dict)
         simulations_list.append(triplet)
     write_json((p,simulations_list))
 
-def bagPrediction(P,triplet,lastPrice,input_dict):
+def bagPrediction(P,triplet,last_price,input_dict):
     target = triplet['target']     
     stop = triplet['stop']     
-    buyStop = triplet['buyStop']  
-    bagPercentage = input_dict['bagPercentage']
-    marketOrder = input_dict['marketOrder']
-    limitOrder = input_dict['limitOrder']
+    buy_stop = triplet['buy_stop']  
+    bag_percentage = input_dict['bag_percentage']
+    market_order = input_dict['market_order']
+    limit_order = input_dict['limit_order']
 
     eventsInfo = {
-        'TW': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FW': {'change': target, 'entryFee': marketOrder , 'exitFee': limitOrder},
-        'TL': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FL': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'TC': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FC': {'change': lastPrice, 'entryFee': marketOrder , 'exitFee': limitOrder},
+        'TW': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
+        'FW': {'change': target, 'entryFee': market_order , 'exitFee': limit_order},
+        'TL': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
+        'FL': {'change': stop, 'entryFee': market_order , 'exitFee': market_order},
+        'TC': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
+        'FC': {'change': last_price, 'entryFee': market_order , 'exitFee': limit_order},
         'TN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
         'FN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
-        'TP': {'change': buyStop, 'entryFee': marketOrder , 'exitFee': marketOrder},
-        'FP': {'change': stop, 'entryFee': marketOrder , 'exitFee': marketOrder}
+        'TP': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
+        'FP': {'change': stop, 'entryFee': market_order , 'exitFee': market_order}
     }
     simulated_bags = []
     for _ in range(input_dict['samples']):
-        bag = input_dict['initialBag']
+        bag = input_dict['initial_bag']
         for _ in range(input_dict['games']):
             event_game = eventsInfo[roll(P)]
             entryFee = event_game['entryFee']
             exitFee = event_game['exitFee']
             change = event_game['change']
             
-            bag = bag*(1 - bagPercentage) + bag*bagPercentage*(1 + change) + bag*bagPercentage*entryFee + bag*bagPercentage*exitFee
+            bag = bag*(1 - bag_percentage) + bag*bag_percentage*(1 + change) + bag*bag_percentage*entryFee + bag*bag_percentage*exitFee
             simulated_bags.append(bag)
     return np.mean(simulated_bags)
     
@@ -84,10 +84,10 @@ def write_json(data):
     firstPart = 'builders/warehouse/setup_data/simulation'
     secondPart = p['setup_file'].split('.')[0][5:] #str(int(time.time()))
     thirdPart = p['space']
-    fourthPart = p['percentile_lastPrice']
+    fourthPart = p['percentile_last_price']
     fifthPart = p['games']
-    sixthPart = p['bagPercentage']
-    seventhPart = p['initialBag']
+    sixthPart = p['bag_percentage']
+    seventhPart = p['initial_bag']
     eightPart = 'bitmex'
     path = firstPart + '_' + secondPart +'_' + thirdPart + '_' + fourthPart + '_' + fifthPart + '_' + sixthPart + '_' + seventhPart + '_' + eightPart + '.txt'
     if os.path.exists(path):

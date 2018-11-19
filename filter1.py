@@ -13,44 +13,24 @@ import pandas as pd
 def main():
     p = {
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'timeframe' : ['2014-01-01 00:00:00','2018-04-19 00:00:00'],
+    'timeframe_start' : '2014-01-01 00:00:00',
+    'timeframe_end' : '2018-04-19 00:00:00',
     'candle_sec': '1800',
-    'buy': '1-sellEnd_0high+5',
+    'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
+    'buy': '1-sellEnd_1open*1.0001',
     'sell': 'buy-10_realHighest',
-    'chart_filter': [
-        {
-        'toggle': False,
-        'condition': 'condition1',
-        'path_trendline_file': 'builders/warehouse/trendlines/' + '30min_2014-01-01_2018-06-19_40_150_4_15_001_001_4.txt', 
-        'mode': 'greater_than_limit',
-        'condition_parameter': 'm',     
-        'limit': '0',
-        'limit1': '0',
-        'limit2': '0'
-        },
-        {
-        'toggle': True,
-        'lineAbove': {
-            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-            'indicador': 'SMA',
-            'average': '7',
-        },
-        'lineBellow': {
-            'path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-            'indicador': 'SMA',
-            'average': '30',
-        }
-        }
-    ],
-    'units_maker': {
-        'threshold' : '30',
-        'td_s': '-9',
-        'td_c': '13',
-        'pattern': 'pattern1',
-        'max_order': '500', # in USD
-        'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-        'add': ['buy','sell','lowest','lastPrice'] 
-    }
+    'filter': 'filter1',
+    'f1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'f1_above_indicator': 'SMA',
+    'f1_above_average': '30',
+    'f1_below_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
+    'f1_below_indicator': 'SMA',
+    'f1_below_average': '7',
+    'pattern': 'pattern1',
+    'p1_threshold' : '30',
+    'p2_td_s': '-9',
+    'p3_td_c': '13',
+    'max_order': '500', # in USD
     }
     
     goodtimes = frontDoor(p)
@@ -59,21 +39,23 @@ def main():
 def frontDoor(p):
     # lineBellow_all and lineAbove_all are both arrays of shape (<num_of_candles>,2).
     # The first column is filled with timestamp values and the second one with SMA or EMA
-    # values, depending upon which option was chosen at p['chart_filter'][1]['lineAbove']['indicador']
-    # and p['chart_filter'][1]['lineBellow']['indicador'].
+    # values, depending upon which option was chosen at p['chart_filter'][1]['lineAbove']['indicator']
+    # and p['chart_filter'][1]['lineBellow']['indicator'].
     # The arrays will contain the timestamp and average of every candle existing inside
-    # p['F1_below_path_candle_file'] for lineBellow and 
-    # p['F1_above_path_candle_file'] for lineAbove. 
-    if p['F1_toggle'] == False:
-        return [[calendar.timegm(time.strptime(p['timeframeStart'], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframeEnd'], '%Y-%m-%d %H:%M:%S'))]]
-    elif p['F1_toggle'] == True: 
-        lineBellow_all = getattr(momentum_indicators,p['F1_bellow_indicador'].lower())(p['F1_below_path_candle_file'],int(p['F1_bellow_average']))
-        lineAbove_all = getattr(momentum_indicators,p['F1_above_indicador'].lower())(p['F1_above_path_candle_file'],int(p['F1_above_average']))
-        lineAbove = filterbydate_array(lineAbove_all,(p['timeframeStart'],p['timeframeEnd']))
-        lineBellow = filterbydate_array(lineBellow_all,(p['timeframeStart'],p['timeframeEnd']))
-        trueTimestamps = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
-        goodtimes = buildPeriods(trueTimestamps,int(p['candle_sec']))
-        return goodtimes
+    # p['f1_below_path_candle_file'] for lineBellow and 
+    # p['f1_above_path_candle_file'] for lineAbove. 
+
+    # if p['filter'] == None:
+    #     return [[calendar.timegm(time.strptime(p['timeframe_start'], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe_end'], '%Y-%m-%d %H:%M:%S'))]]
+    # elif p['filter'] == "filter1": 
+
+    lineBellow_all = getattr(momentum_indicators,p['f1_below_indicator'].lower())(p['f1_below_path_candle_file'],int(p['f1_below_average']))
+    lineAbove_all = getattr(momentum_indicators,p['f1_above_indicator'].lower())(p['f1_above_path_candle_file'],int(p['f1_above_average']))
+    lineAbove = filterbydate_array(lineAbove_all,(p['timeframe_start'],p['timeframe_end']))
+    lineBellow = filterbydate_array(lineBellow_all,(p['timeframe_start'],p['timeframe_end']))
+    trueTimestamps = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
+    goodtimes = buildPeriods(trueTimestamps,int(p['candle_sec']))
+    return goodtimes
 
 def buildPeriods(trueTimestamps,candle_sec):
     goodtimes = []

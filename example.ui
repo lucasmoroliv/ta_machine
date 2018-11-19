@@ -19,17 +19,17 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="B_OK">
+   <widget class="QPushButton" name="B_add_case">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>640</x>
       <y>520</y>
       <width>121</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>OK</string>
+     <string>ADD CASE</string>
     </property>
    </widget>
    <widget class="QLabel" name="L_pattern">
@@ -115,7 +115,7 @@
       </widget>
      </item>
      <item row="7" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_marketOrder">
+      <widget class="QLineEdit" name="E_market_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -124,7 +124,7 @@
       </widget>
      </item>
      <item row="9" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_bagPercentage">
+      <widget class="QLineEdit" name="E_bag_percentage">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -295,7 +295,7 @@
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="L_initialBag">
+      <widget class="QLabel" name="L_initial_bag">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -308,12 +308,12 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>initialBag</string>
+        <string>initial_bag</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="E_timeframeStart">
+      <widget class="QLineEdit" name="E_timeframe_start">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -322,7 +322,7 @@
       </widget>
      </item>
      <item row="6" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_initialBag">
+      <widget class="QLineEdit" name="E_initial_bag">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -331,7 +331,7 @@
       </widget>
      </item>
      <item row="7" column="0">
-      <widget class="QLabel" name="L_marketOrder">
+      <widget class="QLabel" name="L_market_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -344,12 +344,12 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>marketOrder</string>
+        <string>market_order</string>
        </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QLineEdit" name="E_timeframeEnd">
+      <widget class="QLineEdit" name="E_timeframe_end">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -358,7 +358,7 @@
       </widget>
      </item>
      <item row="8" column="0">
-      <widget class="QLabel" name="L_limitOrder">
+      <widget class="QLabel" name="L_limit_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -371,12 +371,12 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>limitOrder</string>
+        <string>limit_order</string>
        </property>
       </widget>
      </item>
      <item row="8" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_limitOrder">
+      <widget class="QLineEdit" name="E_limit_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -385,7 +385,7 @@
       </widget>
      </item>
      <item row="9" column="0">
-      <widget class="QLabel" name="L_bagPercentage">
+      <widget class="QLabel" name="L_bag_percentage">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -398,7 +398,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>bagPercentage</string>
+        <string>bag_percentage</string>
        </property>
       </widget>
      </item>
@@ -466,7 +466,7 @@
       </widget>
      </item>
      <item row="11" column="0">
-      <widget class="QLabel" name="L_maxOrder">
+      <widget class="QLabel" name="L_max_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -485,11 +485,11 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLineEdit" name="E_percentile_lastPrice">
+   <widget class="QLineEdit" name="E_percentile_last_price">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>470</y>
+      <x>300</x>
+      <y>480</y>
       <width>171</width>
       <height>25</height>
      </rect>
@@ -500,47 +500,11 @@
      </font>
     </property>
    </widget>
-   <widget class="QCheckBox" name="C_percentile_toggle">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>471</y>
-      <width>121</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>percentile</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="C_average_toggle">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>471</y>
-      <width>111</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>average</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="L_lastPrice_approach">
+   <widget class="QLabel" name="L_last_price_approach">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>470</y>
+      <y>480</y>
       <width>142</width>
       <height>25</height>
      </rect>
@@ -557,14 +521,14 @@
      <bool>false</bool>
     </property>
     <property name="text">
-     <string>lastPrice_approach</string>
+     <string>last_price_approach</string>
     </property>
    </widget>
    <widget class="QListWidget" name="LI_filter">
     <property name="geometry">
      <rect>
       <x>610</x>
-      <y>180</y>
+      <y>280</y>
       <width>131</width>
       <height>81</height>
      </rect>
@@ -576,12 +540,12 @@
     </property>
     <item>
      <property name="text">
-      <string>filter1</string>
+      <string>none</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>none</string>
+      <string>filter1</string>
      </property>
     </item>
    </widget>
@@ -589,7 +553,7 @@
     <property name="geometry">
      <rect>
       <x>610</x>
-      <y>150</y>
+      <y>250</y>
       <width>91</width>
       <height>22</height>
      </rect>
@@ -609,6 +573,31 @@
      <string>filter</string>
     </property>
    </widget>
+   <widget class="QListWidget" name="LI_last_price_approach">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>480</y>
+      <width>131</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>average</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>percentile</string>
+     </property>
+    </item>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -624,26 +613,25 @@
  </widget>
  <tabstops>
   <tabstop>E_path_candle_file</tabstop>
-  <tabstop>E_timeframeStart</tabstop>
-  <tabstop>E_timeframeEnd</tabstop>
+  <tabstop>E_timeframe_start</tabstop>
+  <tabstop>E_timeframe_end</tabstop>
   <tabstop>E_candle_sec</tabstop>
   <tabstop>E_buy</tabstop>
   <tabstop>E_sell</tabstop>
   <tabstop>E_path_historical_data</tabstop>
-  <tabstop>E_initialBag</tabstop>
-  <tabstop>E_marketOrder</tabstop>
-  <tabstop>E_limitOrder</tabstop>
-  <tabstop>E_bagPercentage</tabstop>
+  <tabstop>E_initial_bag</tabstop>
+  <tabstop>E_market_order</tabstop>
+  <tabstop>E_limit_order</tabstop>
+  <tabstop>E_bag_percentage</tabstop>
   <tabstop>E_games</tabstop>
   <tabstop>E_max_order</tabstop>
   <tabstop>E_samples</tabstop>
   <tabstop>E_space</tabstop>
-  <tabstop>C_average_toggle</tabstop>
-  <tabstop>C_percentile_toggle</tabstop>
-  <tabstop>E_percentile_lastPrice</tabstop>
+  <tabstop>LI_last_price_approach</tabstop>
+  <tabstop>E_percentile_last_price</tabstop>
   <tabstop>LI_pattern</tabstop>
   <tabstop>LI_filter</tabstop>
-  <tabstop>B_OK</tabstop>
+  <tabstop>B_add_case</tabstop>
  </tabstops>
  <resources/>
  <connections/>

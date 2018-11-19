@@ -15,44 +15,37 @@
 
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json,sys,operator,os
+import time,calendar,datetime,csv,math,json,sys,operator,os,sqlalchemy,collections,psycopg2,logging
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
-import ma_filter
+import filter1
 pd.options.mode.chained_assignment = None
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
 def main():
-
-    p = {
-    'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'timeframe_start' : '2014-01-01 00:00:00',
-    'timeframe_end' : '2018-04-19 00:00:00',
-    'candle_sec': '1800',
-    'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
-    'buy': '1-sellEnd_1open*1.0001',
-    'sell': 'buy-10_realHighest',
-    'F1_toggle': False,
-    'f1_above_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'f1_above_indicator': 'SMA',
-    'f1_above_average': '30',
-    'f1_below_path_candle_file': 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
-    'f1_below_indicator': 'SMA',
-    'f1_below_average': '7',
-    'pattern': 'pattern1',
-    'p1_threshold' : '30',
-    'p2_td_s': '-9',
-    'p3_td_c': '13',
-    'max_order': '500', # in USD
-    }
-
-    goodtimes = ma_filter.frontDoor(p)
-    units_list = get_units_list(p,goodtimes)
-    p['units_amt'] = len(units_list)
-    pprint(units_list)
-    print('Amount of units in the setup: ',len(units_list))
-    write_json((p,units_list))
+    engines_door(2)
     
+def engines_door(case_id):
+    logger.info("Running case_id {}".format(case_id))
+    time1 = time.time()
+    p = get_parameters(case_id)
+    if p["filter"] == None:
+        goodtimes = [[calendar.timegm(time.strptime((p['timeframe_start']), '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe_end'], '%Y-%m-%d %H:%M:%S'))]]
+    else:    
+        goodtimes = globals()[p["filter"]].frontDoor(p)
+    units_list = get_units_list(p,goodtimes)
+    insertInto_phase1(units_list,"phase1",p["ph1"])
+    update_state(case_id)
+    logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
+
 def get_units_list(p,goodtimes):
     candle_df = get_dataframe(p)
     raw_df = get_raw(p)
@@ -112,6 +105,7 @@ def pattern3(p,goodtimes):
             if mini_td[i,1]==td_c:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
+
 
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
@@ -217,11 +211,11 @@ def find_sell(p,unit,candle_df,raw_df,action_dict):
 
     if (raw_sorted.USD_acc_volume >= float(p['max_order'])).any():
         unit['sell']['type'] = 'all-sold'
-        realHighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['max_order'])].iloc[0].price
-        unit['sell']['realHighest_price'] = realHighest_price
-        unit['sell']['realHighest'] = (float(realHighest_price) - unit['buy']['price'])/unit['buy']['price']
+        realhighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['max_order'])].iloc[0].price
+        unit['sell']['realhighest_price'] = realhighest_price
+        unit['sell']['realhighest'] = (float(realhighest_price) - unit['buy']['price'])/unit['buy']['price']
 
-        raw_partition = raw_section[raw_section.price>=realHighest_price]
+        raw_partition = raw_section[raw_section.price>=realhighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
         last_row = raw_partition[raw_partition.USD_acc_volume >= float(p['max_order'])].iloc[0]
         unit['sell']['first_executed'] = {
@@ -331,15 +325,20 @@ def write_json(data):
         json.dump(data, outfile)
 
 def insertInto_phase1(units_list,table_name,ph1):
-    # Add the units_list information to table phase1. 
-    df = dataframing(units_list)
-    add_column(df,'ph1',ph1)
-    engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
-    df.to_sql(
-        name = table_name,
-        con = engine,
-        if_exists = 'append'
-    )
+    success = False
+    while not success:
+        try:
+            df = dataframing(units_list)
+            add_column(df,'ph1',ph1)
+            engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+            df.to_sql(
+                name = table_name,
+                con = engine,
+                if_exists = 'append'
+            )
+            success = True
+        except:
+            time.sleep(3)
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
@@ -368,6 +367,34 @@ def flatten(d, parent_key='', sep='_'):
         else:
             items.append((new_key, v))
     return dict(items)
+
+def get_parameters(case_id):
+    engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+    query = "SELECT * FROM cases WHERE case_id = '{}'".format(case_id)
+    df = pd.read_sql_query(query,engine)
+    notYet_p = df.to_dict("list")
+    p = {key:value[0] for (key,value) in notYet_p.items()}
+    p["timeframe_start"] = str(p["timeframe_start"])
+    p["timeframe_end"] = str(p["timeframe_end"])
+    return p
+
+def update_state(case_id):
+    success = False
+    while not success:
+        try:
+            dbname = 'postgres'
+            user = 'postgres'
+            host = 'localhost'
+            password = 'DarkZuoqson-postgresql32229751!'
+            conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
+            c = conn.cursor()
+            c.execute("SELECT ph1 FROM cases WHERE case_id = {}".format(case_id))
+            phase_hash = c.fetchone()[0]
+            c.execute("UPDATE cases SET state = 'ph1' WHERE ph1 = '{}'".format(phase_hash))
+            conn.commit()
+            success = True
+        except:
+            time.sleep(3)
 
 if __name__ == '__main__':
     time1 = time.time()

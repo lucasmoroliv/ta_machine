@@ -6,13 +6,14 @@ from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
 def main():
-    input_dict = {
-        'setup_file': 'setup1540344830.txt',
-        'space': 0.02,
-        'percentile_toggle': False, # BOOLEAN
-        'average_toggle': True, # BOOLEAN
-        'percentile_lastPrice': 50 # INTEGER
+    input_dict = {  
+        'setup_file': 'setup1541710855.txt',
+        'space': 0.01,
+        'percentile_toggle': False, 
+        'average_toggle': True, 
+        'percentile_last_price': 50 
     }
+
     p,units_list = get_setup(input_dict['setup_file'])
     triplets_list = get_triplets(units_list,input_dict['space']) 
     raw_df = get_raw(p)
@@ -57,16 +58,17 @@ def get_triplets(units_list,space):
         highest_buyLowest = 0
 
     target_ite = list(np.arange(0.006,highest_realHighest,space))
+    # stop_ite = list(np.arange((lowest_lowest)*1.005,highest_lowest,space))
     stop_ite = list(np.arange(lowest_lowest,highest_lowest,space))
-    buyStop_ite = list(np.arange(lowest_buyLowest,highest_buyLowest,space))
+    buy_stop_ite = list(np.arange(lowest_buyLowest,highest_buyLowest,space))
 
-    triplets_list = [target_ite,stop_ite,buyStop_ite]
+    triplets_list = [target_ite,stop_ite,buy_stop_ite]
     return list(itertools.product(*triplets_list))
 
 def get_tripletsResult(p,raw_df,units_list,triplet):
     target = triplet[0]
     stop = triplet[1]
-    buyStop = triplet[2]
+    buy_stop = triplet[2]
     setup = {
         'events': {
             'TW': 0,
@@ -83,13 +85,13 @@ def get_tripletsResult(p,raw_df,units_list,triplet):
         'triplet': {
             'target': target,
             'stop': stop,
-            'buyStop': buyStop,
+            'buy_stop': buy_stop,
         }
     }
     aux_list = []
-    lastPrice_list = []
+    last_price_list = []
     for unit in units_list:
-        if unit['buy']['lowest']['price'] <= buyStop:
+        if unit['buy']['lowest']['price'] <= buy_stop:
             whether_stopped = 'T' # stopped
         else: 
             whether_stopped = 'F' # not-stopped
@@ -111,7 +113,7 @@ def get_tripletsResult(p,raw_df,units_list,triplet):
                 over_target_df['acc_volume'] = over_target_df['volume'].cumsum(axis = 0)
                 if (over_target_df.acc_volume >= float(p['max_order'])).any():
                     last_target_index = over_target_df[over_target_df.acc_volume >= float(p['max_order'])].iloc[0].name
-                    first_stop_index = raw_section[raw_section.price <= stop_price].iloc[0].name
+                    first_stop_index = raw_section[raw_section.price <= round(stop_price,3)].iloc[0].name
                     if last_target_index > first_stop_index:
                         partition = 'L' # loser
                     else:
@@ -125,16 +127,16 @@ def get_tripletsResult(p,raw_df,units_list,triplet):
 
         aux_list.append(whether_stopped + partition)
         if partition == 'C':
-            lastPrice_list.append(unit['lastPrice'])
+            last_price_list.append(unit['last_price'])
 
     for key in set(aux_list):
         setup['events'][key] = aux_list.count(key)
 
     
     if p['percentile_toggle']:
-        setup['lastPrice'] = np.percentile(lastPrice_list,int(p['percentile_lastPrice']))
+        setup['last_price'] = np.percentile(last_price_list,int(p['percentile_last_price']))
     elif p['average_toggle']:
-        setup['lastPrice'] = np.mean(lastPrice_list)
+        setup['last_price'] = np.mean(last_price_list)
     return setup
 
 def write_json(data):
@@ -142,7 +144,7 @@ def write_json(data):
     firstPart = 'builders/warehouse/setup_data/triplets'
     secondPart = data[0]['setup_file'].split('.')[0]
     thirdPart = data[0]['space']
-    fourthPart = data[0]['percentile_lastPrice']
+    fourthPart = data[0]['percentile_last_price']
     path = firstPart + '_' + secondPart + '_' + thirdPart + '_' + fourthPart + '.txt'
     if os.path.exists(path):
         print('This setup has already been tested.')
