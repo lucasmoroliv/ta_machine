@@ -34,17 +34,35 @@ def bagPrediction(p,events,setup,last_price):
     limit_order = p['limit_order']
 
     eventsInfo = {
-        'TW': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
-        'FW': {'change': target, 'entryFee': market_order , 'exitFee': limit_order},
-        'TL': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
-        'FL': {'change': stop, 'entryFee': market_order , 'exitFee': market_order},
-        'TC': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
-        'FC': {'change': last_price, 'entryFee': market_order , 'exitFee': market_order},
-        'TN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
-        'FN': {'change': 0, 'entryFee': 0 , 'exitFee': 0},
-        'TP': {'change': buy_stop, 'entryFee': market_order , 'exitFee': market_order},
-        'FP': {'change': stop, 'entryFee': market_order , 'exitFee': market_order}
+        'TW': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
+        'FW': {'change': target, 'entryFee': market_order, 'exitFee': limit_order},
+        'TL': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
+        'FL': {'change': stop, 'entryFee': market_order, 'exitFee': market_order},
+        'TC': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
+        'FC': {'change': last_price, 'entryFee': market_order, 'exitFee': market_order},
+        'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+        'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+        'TP': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
+        'FP': {'change': stop, 'entryFee': market_order, 'exitFee': market_order}
     }
+        
+    ope_index = p["buy"].find("*")
+    if ope_index > -1:
+        multiplier = p["buy"][ope_index+1:]
+        if "1open" in p["buy"] and float(multiplier) < 1:
+            eventsInfo = {
+                'TW': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+                'FW': {'change': target, 'entryFee': limit_order, 'exitFee': limit_order},
+                'TL': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+                'FL': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order},
+                'TC': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+                'FC': {'change': last_price, 'entryFee': limit_order, 'exitFee': market_order},
+                'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+                'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+                'TP': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+                'FP': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order}
+            } 
+
     simulated_bags = []
     for _ in range(p['samples']):
         bag = p['initial_bag']
