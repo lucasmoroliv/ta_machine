@@ -101,7 +101,7 @@ def find_hashBank(cases_df):
     for _,row in partition_df.iterrows():
         for column in state_ran[row["state"]]:
             hashBank.append(row[column])
-    return set(hashBank)   
+    return set(hashBank)    
     
 if __name__ == '__main__':
     time1 = time.time()
