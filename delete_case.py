@@ -86,7 +86,6 @@ def main():
             nested_list = [list(item) for item in partition_df.values]
             all_other_hashes = list(chain.from_iterable(nested_list))
 
-            delete_case(case_id)
 
             for phase in ran_phases:
                 hash_to_delete = hash_dict[phase]
@@ -98,6 +97,9 @@ def main():
                     # In this case there is no problem deleting this hash.
                     logger.info("Deleting hash {}, which is phase{} of case_id {}.".format(hash_dict[phase],phase[-1],case_id))
                     delete_hash_in_table(phase,hash_dict[phase])
+
+            logger.info("Deleting case_id {} from the cases table.".format(case_id))
+            delete_case(case_id)
 
 def delete_hash_in_table(phase,hashh):
     dbname = 'postgres'
