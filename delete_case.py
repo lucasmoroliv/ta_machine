@@ -67,6 +67,7 @@ def main():
         
         # The dictionary below has for each state value the respective phases which were ran.
         state_ran = {
+            "ph0": [],
             "ph1": ["ph1"],
             "ph2": ["ph1","ph2"],
             "ph3": ["ph1","ph2","ph3"],

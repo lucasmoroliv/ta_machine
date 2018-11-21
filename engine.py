@@ -20,12 +20,15 @@ logger.addHandler(stream_handler)
 
 def main():
     max_cases = sys.argv[1]
-    approach1(max_cases)
+    # max_cases = 3
+    # approach1(max_cases)
+    approach2(max_cases)
 
 def approach1(max_cases):
+    # Under this approach the engine will run a maximum number of cases of <max_cases> at a time. Then after this number of cases
+    # are ran, a new batch starts, and it goes on this way until every phase is ran.
     while True:
-        cases_df = get_cases_df()
-        toRun_dict = get_toRun_dict(cases_df)
+        toRun_dict = get_toRun_dict()
         if len(toRun_dict) == 0:
             logger.info("There is no phase to run.")
             break
@@ -34,6 +37,47 @@ def approach1(max_cases):
         with multiprocessing.Pool(processes=int(max_cases)) as p:
             p.map(phase_runner,input_list)
 
+def approach2(max_cases):
+    # Under this approach the engine also runs a maximum number of cases of <max_cases> at a time. However the processes don't need
+    # for the others on the batch to finish so I can start to run new cases as the approach1 does. This one allows processes to run
+    # new phases as soon as each process is free to do it.
+    running_processes = []
+    running_inputs = []
+    while len(running_inputs) < int(max_cases):
+        nextToRun = get_nextToRun(running_inputs)
+        p = multiprocessing.Process(target=phase_runner, args=(nextToRun,))
+        running_processes.append(p)
+        running_inputs.append(nextToRun)
+        p.start()
+
+    while True:
+        time.sleep(2)
+        for n, p in enumerate(running_processes):
+            if not p.is_alive():
+                running_processes.pop(n)
+                running_inputs.pop(n)
+                nextToRun = get_nextToRun(running_inputs)
+                p = multiprocessing.Process(target=phase_runner, args=(nextToRun,))
+                running_processes.append(p)
+                running_inputs.append(nextToRun)
+                p.start()
+
+def get_nextToRun(running_list):
+    while True:
+        toRun_dict = get_toRun_dict()
+        if len(list(toRun_dict)) == 0:
+            logger.info("There are no more phases to run.")
+            sys.exit()
+        cases_running = [item[0] for item in running_list]
+        hashes_running = [item[2] for item in running_list]
+        for case_id,phase_dict in toRun_dict.items():
+            if case_id not in cases_running and phase_dict[list(phase_dict)[0]] not in hashes_running:
+                return [case_id,list(phase_dict)[0],phase_dict[list(phase_dict)[0]]]
+        # In case len(list(toRun_dict)) is not 0, which means there is still phases to be run,
+        # and also the for for loop above runs without returning any nextToRun, it means that
+        # the next phases to run need to wait for the phases running at the moment. Every 5 seconds
+        time.sleep(5)
+        
 def get_input_list(toRun_dict,max_cases):
     cases_toRun = []
     hashes_toRun = []
@@ -52,7 +96,8 @@ def get_cases_df():
     query = "SELECT case_id,ph1,ph2,ph3,state FROM cases ORDER BY case_id"
     return pd.read_sql_query(query,db_engine)
 
-def get_toRun_dict(cases_df):   
+def get_toRun_dict():   
+    cases_df = get_cases_df()
     hashBank = find_hashBank(cases_df)
     toRun_dict = {}
     # The dictionary below has for every key the phases the code must run for the case.
@@ -76,7 +121,6 @@ def get_toRun_dict(cases_df):
                 pass
             # In other hand, if case[column] is not in hashBank list, we conclude that we must run this phase.
             else:
-                # toRun_list.append([case["case_id"],"phase"+column[2]])
                 if str(case["case_id"]) not in list(toRun_dict):
                     toRun_dict[str(case["case_id"])] = {}
                 toRun_dict[str(case["case_id"])]["phase"+column[2]] = case[column]
