@@ -1,6 +1,7 @@
 from pprint import pprint
 import psycopg2,logging,time,datetime,sqlalchemy,sys
 import pandas as pd
+import numpy as np
 from itertools import chain
 
 
@@ -30,22 +31,22 @@ def main():
         if len(user_input) == 0:
             raise NoInputGivenError
 
-        # If any of the item of cases_list is not convertible to integer, a ValueError will be raised.
-        cases_list = list(map(int,user_input))
+        # If any of the item of cases_toDelete_list is not convertible to integer, a ValueError will be raised.
+        cases_toDelete_list = list(map(int,user_input))
         
         # Checking if the case_ids are distinct.
-        if len(set(cases_list)) != len(cases_list):
+        if len(set(cases_toDelete_list)) != len(cases_toDelete_list):
             raise NotDistinctError 
 
         # Checking if all the case_id given exist in the database. If don't, NoMatchingCasesError will be raised and the
         # case_ids not matching the one in the database will be returned in the error message.
         no_matching = []
         cases_df = get_cases_df()
-        for item in cases_list:
+        for item in cases_toDelete_list:
             if item not in cases_df.index:
                 no_matching.append(item)
         no_matching = list(map(str,no_matching))
-        if len(no_matching)>0:
+        if len(no_matching) > 0:
             raise NoMatchingCasesError("There is no case_id {} in the database.".format(", ".join(no_matching)))
             
     except NoInputGivenError:
@@ -62,9 +63,6 @@ def main():
         sys.exit()
     else:
 
-        # hash_list is a list containing all the hashes of phases in the database, either the ones
-        # that had been ran and the ones that hadn't.
-        
         # The dictionary below has for each state value the respective phases which were ran.
         state_ran = {
             "ph0": [],
@@ -73,43 +71,49 @@ def main():
             "ph3": ["ph1","ph2","ph3"],
         }
         
-        for case_id in cases_list:
+        # The two dataframes below hold respectively the rows of case_ids the user asked to delete and the ones that are not.
+        toDelete_df = cases_df.loc[cases_toDelete_list]
+        toStay_df = cases_df[~cases_df.index.isin(cases_toDelete_list)]
 
-            # hash_dict is a three key dictionary with ph1, ph2 and ph3 hashes of case_id.
-            hash_dict = cases_df.loc[case_id][["ph1","ph2","ph3"]].to_dict()         
+        # maybeDelete_list will be a list of lists. Every list of this list will have three items: 1) case_id 2) ph 3) hash. In this list is still included the "please_dont_delete" hashes,
+        # which are the hashes that should not be deleted because there is at least a case that needs it.  
+        maybeDelete_list = []
+        for index,row in toDelete_df.iterrows():
+            [maybeDelete_list.append([index,ph,row[ph]]) for ph in state_ran[row["state"]]]
 
-            # ran_phases is a list containing the phases of the case that were already ran.
-            ran_phases = state_ran[cases_df.loc[case_id]["state"]]
-            # print(ran_phases)
+        # The list below will have all the hashes that are supposed to be deleted, assuming there are no other case that need any of them.
+        hashes_maybeDelete_list = [item[2] for item in maybeDelete_list]
 
-            # all_other_hashes is a list of the ph1, ph2 and ph3 hashes of all cases exlucuding the hashes of the case_id. 
-            partition_df = cases_df[cases_df.index != case_id][["ph1","ph2","ph3"]]
-            nested_list = [list(item) for item in partition_df.values]
-            all_other_hashes = list(chain.from_iterable(nested_list))
+        
+        hashes_maybeDelete_set = set(hashes_maybeDelete_list)
+        hashes_maybeDelete_list = hashes_maybeDelete_set
+            
+        nested_lists = toStay_df[["ph1","ph2","ph3"]].values
+        hashes_toStay_set = set(chain.from_iterable(nested_lists))
+        
+        please_dont_delete = list(hashes_toStay_set.intersection(hashes_maybeDelete_set))
+        
+        toDelete_list = [item for item in maybeDelete_list if item[2] not in please_dont_delete]
 
-
-            for phase in ran_phases:
-                hash_to_delete = hash_dict[phase]
-                if hash_to_delete in all_other_hashes:
-                    # In this case hash should not be deleted because other case_id needs it.
-                    logger.info("The hash {}, which is phase{} of case_id {}, will not be deleted because other cases need it.")
-                    continue
-                else:
-                    # In this case there is no problem deleting this hash.
-                    logger.info("Deleting hash {}, which is phase{} of case_id {}.".format(hash_dict[phase],phase[-1],case_id))
-                    delete_hash_in_table(phase,hash_dict[phase])
-
+        for item in toDelete_list:
+            case_id = item[0]
+            ph = item[1]
+            hashh = item[2]
+            logger.info("Deleting hash {}, which is phase{} of case_id {}.".format(hashh,ph[2],case_id))
+            delete_hash_in_table(ph,hashh)
+            
+        for case_id in cases_toDelete_list:
             logger.info("Deleting case_id {} from the cases table.".format(case_id))
             delete_case(case_id)
 
-def delete_hash_in_table(phase,hashh):
+def delete_hash_in_table(ph,hashh):
     dbname = 'postgres'
     user = 'postgres'
     host = 'localhost'
     password = 'DarkZuoqson-postgresql32229751!'
     conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
     c = conn.cursor()
-    c.execute("DELETE FROM phase{} WHERE {} = '{}'".format(phase[-1],phase,hashh))    
+    c.execute("DELETE FROM phase{} WHERE {} = '{}'".format(ph[-1],"ph"+ph[-1],hashh))    
     conn.commit()
 
 def delete_case(case_id):

@@ -33,6 +33,9 @@ logger.addHandler(stream_handler)
 def main():
     engines_door(2)
     
+# def engines_door(case_id):
+#     time.sleep(10)
+
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()

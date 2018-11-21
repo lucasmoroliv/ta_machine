@@ -16,6 +16,9 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
+# def engines_door(case_id):
+#     time.sleep(10)
+
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()

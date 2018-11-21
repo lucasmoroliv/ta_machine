@@ -62,20 +62,21 @@ def approach2(max_cases):
                 running_inputs.append(nextToRun)
                 p.start()
 
-def get_nextToRun(running_list):
+def get_nextToRun(running_inputs):
     while True:
         toRun_dict = get_toRun_dict()
         if len(list(toRun_dict)) == 0:
             logger.info("There are no more phases to run.")
             sys.exit()
-        cases_running = [item[0] for item in running_list]
-        hashes_running = [item[2] for item in running_list]
+        cases_running = [item[0] for item in running_inputs]
+        hashes_running = [item[2] for item in running_inputs]
         for case_id,phase_dict in toRun_dict.items():
             if case_id not in cases_running and phase_dict[list(phase_dict)[0]] not in hashes_running:
                 return [case_id,list(phase_dict)[0],phase_dict[list(phase_dict)[0]]]
         # In case len(list(toRun_dict)) is not 0, which means there is still phases to be run,
-        # and also the for for loop above runs without returning any nextToRun, it means that
-        # the next phases to run need to wait for the phases running at the moment. Every 5 seconds
+        # and also the for loop above runs without returning any nextToRun, it means that
+        # the next phases to run need to wait for the phases running at the moment. After 5 seconds
+        # the code will run again and try to find a phase to run.
         time.sleep(5)
         
 def get_input_list(toRun_dict,max_cases):
