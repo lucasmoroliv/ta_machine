@@ -2,7 +2,7 @@ import json,time,datetime,itertools,os,sqlalchemy,collections,psycopg2,logging
 from pprint import pprint
 import pandas as pd
 import numpy as np
-# from tqdm import tqdm
+import random
 pd.options.mode.chained_assignment = None
 
 def main():
@@ -17,7 +17,11 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 # def engines_door(case_id):
-#     time.sleep(10)
+#     logger.info("Running case_id {}".format(case_id))
+#     time1 = time.time()
+#     time.sleep(random.randint(15,20))
+#     update_state(case_id)
+#     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))

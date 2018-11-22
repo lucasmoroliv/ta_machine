@@ -19,8 +19,8 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    max_cases = sys.argv[1]
-    # max_cases = 3
+    # max_cases = sys.argv[1]
+    max_cases = 4
     # approach1(max_cases)
     approach2(max_cases)
 
@@ -39,45 +39,46 @@ def approach1(max_cases):
 
 def approach2(max_cases):
     # Under this approach the engine also runs a maximum number of cases of <max_cases> at a time. However the processes don't need
-    # for the others on the batch to finish so I can start to run new cases as the approach1 does. This one allows processes to run
-    # new phases as soon as each process is free to do it.
+    # to wait for the others on the batch to finish so I can start to run new cases as the approach1 does. This one allows processes 
+    # to run new phases as soon as each process is free to do it.
     running_processes = []
     running_inputs = []
+    
     while len(running_inputs) < int(max_cases):
         nextToRun = get_nextToRun(running_inputs)
+        if nextToRun == None:
+            continue
         p = multiprocessing.Process(target=phase_runner, args=(nextToRun,))
         running_processes.append(p)
         running_inputs.append(nextToRun)
         p.start()
 
     while True:
-        time.sleep(2)
         for n, p in enumerate(running_processes):
             if not p.is_alive():
                 running_processes.pop(n)
                 running_inputs.pop(n)
                 nextToRun = get_nextToRun(running_inputs)
+                if nextToRun == None:
+                    continue
                 p = multiprocessing.Process(target=phase_runner, args=(nextToRun,))
                 running_processes.append(p)
                 running_inputs.append(nextToRun)
                 p.start()
 
 def get_nextToRun(running_inputs):
-    while True:
-        toRun_dict = get_toRun_dict()
-        if len(list(toRun_dict)) == 0:
-            logger.info("There are no more phases to run.")
-            sys.exit()
-        cases_running = [item[0] for item in running_inputs]
-        hashes_running = [item[2] for item in running_inputs]
-        for case_id,phase_dict in toRun_dict.items():
-            if case_id not in cases_running and phase_dict[list(phase_dict)[0]] not in hashes_running:
-                return [case_id,list(phase_dict)[0],phase_dict[list(phase_dict)[0]]]
-        # In case len(list(toRun_dict)) is not 0, which means there is still phases to be run,
-        # and also the for loop above runs without returning any nextToRun, it means that
-        # the next phases to run need to wait for the phases running at the moment. After 5 seconds
-        # the code will run again and try to find a phase to run.
-        time.sleep(5)
+    # while True:
+    toRun_dict = get_toRun_dict()
+    if len(list(toRun_dict)) == 0:
+        logger.info("There are no more phases to run.")
+        sys.exit()
+    cases_running = [item[0] for item in running_inputs]
+    hashes_running = [item[2] for item in running_inputs]
+    for case_id,phase_dict in toRun_dict.items():
+        if case_id not in cases_running and phase_dict[list(phase_dict)[0]] not in hashes_running:
+            return [case_id,list(phase_dict)[0],phase_dict[list(phase_dict)[0]]]
+    return None
+    # time.sleep(2)
         
 def get_input_list(toRun_dict,max_cases):
     cases_toRun = []
@@ -155,7 +156,6 @@ if __name__ == '__main__':
     print('---------------------------------------')
     print('Runtime: ',time2-time1)
     print('Ran at: ',datetime.datetime.fromtimestamp(time2))
-    
     
     
     
