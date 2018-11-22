@@ -15,7 +15,7 @@
 
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json,sys,operator,os,sqlalchemy,collections,psycopg2,logging
+import time,calendar,datetime,csv,math,json,sys,operator,os,sqlalchemy,collections,psycopg2,logging,re
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
@@ -286,7 +286,7 @@ def get_rsi_df(p):
 
 def get_td_s_df(p):
 # Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
-    with open('builders/warehouse/td_data/td_setup_30min_bitstamp.csv', newline='') as csvfile:
+    with open('builders/warehouse/td_data/td_setup_{}.csv'.format(get_name(p["path_candle_file"])), newline='') as csvfile:
         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
         big_list = []
         for row in data:
@@ -299,9 +299,13 @@ def get_td_s_df(p):
     td_s_df = td_s_df.set_index('timestamp')
     return td_s_df
 
+def get_name(string):
+    index = [m.start() for m in re.finditer('/', string)][-1]
+    return string[index+1:-4]
+
 def get_td_c_df(p):
 # Here we get the data from the csv and put in an array the timestamp and the td of the respective candle
-    with open('builders/warehouse/td_data/td_countdown_30min_bitstamp.csv', newline='') as csvfile:
+    with open('builders/warehouse/td_data/td_countdown_{}.csv'.format(get_name(p["path_candle_file"])), newline='') as csvfile:
         data = csv.reader(csvfile, delimiter=' ', quotechar='|')
         list = []
         big_list = []
