@@ -20,6 +20,7 @@ from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
 import filter1
+import random
 pd.options.mode.chained_assignment = None
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,12 @@ def main():
     engines_door(2)
     
 # def engines_door(case_id):
-#     time.sleep(10)
-
+#     logger.info("Running case_id {}".format(case_id))
+#     time1 = time.time()
+#     time.sleep(random.randint(15,20))
+#     update_state(case_id)
+#     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
+    
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()

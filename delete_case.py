@@ -84,24 +84,31 @@ def main():
         # The list below will have all the hashes that are supposed to be deleted, assuming there are no other case that need any of them.
         hashes_maybeDelete_list = [item[2] for item in maybeDelete_list]
 
-        
+        # The conversion from list to a set is a way to exclude the duplicate hashes.
         hashes_maybeDelete_set = set(hashes_maybeDelete_list)
         hashes_maybeDelete_list = hashes_maybeDelete_set
             
+        # The goal of the next two lines is to get hashes_toStay_set, which are all the hashes that will continue to be part of the database after the deletion.
         nested_lists = toStay_df[["ph1","ph2","ph3"]].values
         hashes_toStay_set = set(chain.from_iterable(nested_lists))
-        
+
+        # The items of the list below contain the hashes there are present in both hashes_toStay_set and hashes_maybeDelete_set. These hashes are the ones that should be spared instead of deleted like the others
+        # currently at hashes_maybeDelete_set. 
         please_dont_delete = list(hashes_toStay_set.intersection(hashes_maybeDelete_set))
         
+        # Since now we have please_dont_delete, we can now subtract the hashes at maybeDelete_list the hashes in please_dont_delete so we could get toDelete_list, which will contain the case_id, the ph and the hashes
+        # of the hashes we are going to delete from the database.
         toDelete_list = [item for item in maybeDelete_list if item[2] not in please_dont_delete]
 
+        # First to be deleted are the records of tables phase1, phase2 and phase3 which contain the records if the hashes in toDelete_list.
         for item in toDelete_list:
             case_id = item[0]
             ph = item[1]
             hashh = item[2]
             logger.info("Deleting hash {}, which is phase{} of case_id {}.".format(hashh,ph[2],case_id))
             delete_hash_in_table(ph,hashh)
-            
+
+        # Second and finally, the case_ids are deleted from the table cases.
         for case_id in cases_toDelete_list:
             logger.info("Deleting case_id {} from the cases table.".format(case_id))
             delete_case(case_id)
