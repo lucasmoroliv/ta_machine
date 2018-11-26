@@ -19,9 +19,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    # max_cases = sys.argv[1]
-    max_cases = 4
-    # approach1(max_cases)
+    max_cases = sys.argv[1]
     approach2(max_cases)
 
 def approach1(max_cases):
