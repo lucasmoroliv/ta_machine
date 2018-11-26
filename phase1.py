@@ -31,15 +31,11 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
+class ZeroUnitsError(Exception):
+    pass
+
 def main():
     engines_door(2)
-    
-# def engines_door(case_id):
-#     logger.info("Running case_id {}".format(case_id))
-#     time1 = time.time()
-#     time.sleep(random.randint(15,20))
-#     update_state(case_id)
-#     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -50,6 +46,8 @@ def engines_door(case_id):
     else:    
         goodtimes = globals()[p["filter"]].frontDoor(p)
     units_list = get_units_list(p,goodtimes)
+    if len(units_list) == 0:
+        raise ZeroUnitsError
     insertInto_phase1(units_list,"phase1",p["ph1"])
     update_state(case_id)
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))

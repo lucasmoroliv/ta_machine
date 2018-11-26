@@ -5,9 +5,6 @@ import numpy as np
 import random
 pd.options.mode.chained_assignment = None
 
-def main():
-    engines_door(2)
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -16,12 +13,8 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
-# def engines_door(case_id):
-#     logger.info("Running case_id {}".format(case_id))
-#     time1 = time.time()
-#     time.sleep(random.randint(15,20))
-#     update_state(case_id)
-#     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
+def main():
+    engines_door(1)
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -130,16 +123,11 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                 partition = 'P' # partiallly-bought
 
             aux_list.append(whether_stopped + partition)
-            if partition == 'C':
-                last_price_list.append(unit['last_price'])
+            last_price_list.append(unit['last_price'])
                 
-                
-
         for key in set(aux_list):
             setup[key] = aux_list.count(key)
             
-            
-        
         if p["last_price_approach"] == "percentile":
             setup['last_price'] = np.percentile(last_price_list,int(p['percentile_last_price']))
         if p["last_price_approach"] == "average":
