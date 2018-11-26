@@ -123,15 +123,19 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                 partition = 'P' # partiallly-bought
 
             aux_list.append(whether_stopped + partition)
-            last_price_list.append(unit['last_price'])
+            if partition == 'C':
+                last_price_list.append(unit['last_price'])
                 
         for key in set(aux_list):
             setup[key] = aux_list.count(key)
             
-        if p["last_price_approach"] == "percentile":
-            setup['last_price'] = np.percentile(last_price_list,int(p['percentile_last_price']))
-        if p["last_price_approach"] == "average":
-            setup['last_price'] = np.mean(last_price_list)
+        if len(last_price_list) == 0:
+            setup['last_price'] = None
+        else:
+            if p["last_price_approach"] == "percentile":
+                setup['last_price'] = np.percentile(last_price_list,int(p['percentile_last_price']))
+            if p["last_price_approach"] == "average":
+                setup['last_price'] = np.mean(last_price_list)
 
         testedSetups.append(setup)
 
