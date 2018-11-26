@@ -15,13 +15,6 @@ logger.addHandler(stream_handler)
 def main():
     engines_door(2)
 
-# def engines_door(case_id):
-#     logger.info("Running case_id {}".format(case_id))
-#     time1 = time.time()
-#     time.sleep(random.randint(15,20))
-#     update_state(case_id)
-#     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
-
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()
