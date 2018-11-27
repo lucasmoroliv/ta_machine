@@ -62,7 +62,7 @@
       <x>610</x>
       <y>50</y>
       <width>131</width>
-      <height>81</height>
+      <height>141</height>
      </rect>
     </property>
     <property name="font">
@@ -83,6 +83,11 @@
     <item>
      <property name="text">
       <string>pattern3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pattern4</string>
      </property>
     </item>
    </widget>
