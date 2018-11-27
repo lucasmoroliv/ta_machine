@@ -29,6 +29,10 @@ def main():
             'p1_threshold' : None,  # INTEGER
             'p2_td_s': None, # INTEGER
             'p3_td_c': None, # INTEGER
+            "p4_shorter_rsi": None,
+            "p4_longer_rsi_max": None,
+            "p4_longer_rsi_min": None,
+            "p4_longer_path_candle_file": None,
             # -------------
             'max_order': None, # INTEGER
             'space': None, # REAL
@@ -88,7 +92,7 @@ def main():
             self.L_f1_above_path_candle_file = QtWidgets.QLabel('f1_above_path_candle_file',self)
             self.L_f1_above_indicator = QtWidgets.QLabel('f1_above_indicator',self)
             self.L_f1_above_average = QtWidgets.QLabel('f1_above_average',self)
-            self.L_f1_below_path_candle_file = QtWidgets.QLabel('F1_below__path_candle_file',self)
+            self.L_f1_below_path_candle_file = QtWidgets.QLabel('f1_below_path_candle_file',self)
             self.L_f1_below_indicator = QtWidgets.QLabel('f1_below_indicator',self)
             self.L_f1_below_average = QtWidgets.QLabel('f1_below_average',self)
 
@@ -151,11 +155,19 @@ def main():
             self.L_p1_threshold = QtWidgets.QLabel('p1_threshold',self)
             self.L_p2_td_s = QtWidgets.QLabel('p2_td_s',self)
             self.L_p3_td_c = QtWidgets.QLabel('p3_td_c',self)
+            self.L_p4_shorter_rsi = QtWidgets.QLabel('p4_shorter_rsi',self)
+            self.L_p4_longer_rsi_max = QtWidgets.QLabel('p4_longer_rsi_max',self)
+            self.L_p4_longer_rsi_min = QtWidgets.QLabel('p4_longer_rsi_min',self)
+            self.L_p4_longer_path_candle_file = QtWidgets.QLabel('p4_longer_path_candle_file',self)
 
             # Create the lineEdits for patterns.
             self.E_p1_threshold = QtWidgets.QLineEdit(self)
             self.E_p2_td_s = QtWidgets.QLineEdit(self)
             self.E_p3_td_c = QtWidgets.QLineEdit(self)
+            self.E_p4_shorter_rsi = QtWidgets.QLineEdit(self)
+            self.E_p4_longer_rsi_max = QtWidgets.QLineEdit(self)
+            self.E_p4_longer_rsi_min = QtWidgets.QLineEdit(self)
+            self.E_p4_longer_path_candle_file = QtWidgets.QLineEdit(self)
 
             # Creating variable containing font configuration.
             newFont = QtGui.QFont('MS Shell Dlg 2',12) 
@@ -164,24 +176,44 @@ def main():
             self.L_p1_threshold.setFont(newFont)
             self.L_p2_td_s.setFont(newFont)
             self.L_p3_td_c.setFont(newFont)
+            self.L_p4_shorter_rsi.setFont(newFont)
+            self.L_p4_longer_rsi_max.setFont(newFont)
+            self.L_p4_longer_rsi_min.setFont(newFont)
+            self.L_p4_longer_path_candle_file.setFont(newFont)
 
             # Positioning the labels.
-            self.L_p1_threshold.setGeometry(750,70,200,25)
-            self.L_p2_td_s.setGeometry(750,70,200,25)
-            self.L_p3_td_c.setGeometry(750,70,200,25)
+            self.L_p1_threshold.setGeometry(750,20,200,25)
+            self.L_p2_td_s.setGeometry(750,20,200,25)
+            self.L_p3_td_c.setGeometry(750,20,200,25)
+            self.L_p4_shorter_rsi.setGeometry(750,20,200,25)
+            self.L_p4_longer_rsi_max.setGeometry(750,53,200,25)
+            self.L_p4_longer_rsi_min.setGeometry(750,86,200,25)
+            self.L_p4_longer_path_candle_file.setGeometry(750,119,200,25)
 
             # Positioning the lineEdits.
-            self.E_p1_threshold.setGeometry(870,70,100,25)
-            self.E_p2_td_s.setGeometry(870,70,100,25)
-            self.E_p3_td_c.setGeometry(870,70,100,25)
+            self.E_p1_threshold.setGeometry(870,20,100,25)
+            self.E_p2_td_s.setGeometry(870,20,100,25)
+            self.E_p3_td_c.setGeometry(870,20,100,25)
+            self.E_p4_shorter_rsi.setGeometry(970,20,431,25)
+            self.E_p4_longer_rsi_max.setGeometry(970,53,431,25)
+            self.E_p4_longer_rsi_min.setGeometry(970,86,431,25)
+            self.E_p4_longer_path_candle_file.setGeometry(970,119,431,25)
 
             # Hidding all the widgets made in the function.
             self.L_p1_threshold.hide()
             self.L_p2_td_s.hide()
             self.L_p3_td_c.hide()
+            self.L_p4_shorter_rsi.hide()
+            self.L_p4_longer_rsi_max.hide()
+            self.L_p4_longer_rsi_min.hide()
+            self.L_p4_longer_path_candle_file.hide()
             self.E_p1_threshold.hide()
             self.E_p2_td_s.hide()
             self.E_p3_td_c.hide()
+            self.E_p4_shorter_rsi.hide()
+            self.E_p4_longer_rsi_max.hide()
+            self.E_p4_longer_rsi_min.hide()
+            self.E_p4_longer_path_candle_file.hide()
 
             # The item 'pattern1' in the ListWidget will be selected by default, L_p1_threshold and 
             # E_p1_threshold will be visible, and value 'pattern1' will be assigned to p['pattern'].
@@ -234,9 +266,21 @@ def main():
                 self.E_p2_td_s.hide()
                 self.L_p3_td_c.hide()
                 self.E_p3_td_c.hide()
+                self.L_p4_shorter_rsi.hide()
+                self.E_p4_shorter_rsi.hide()
+                self.L_p4_longer_rsi_max.hide()
+                self.E_p4_longer_rsi_max.hide()
+                self.L_p4_longer_rsi_min.hide()
+                self.E_p4_longer_rsi_min.hide()
+                self.L_p4_longer_path_candle_file.hide()
+                self.E_p4_longer_path_candle_file.hide()
                 self.p['pattern'] = 'pattern1'
                 self.E_p2_td_s.setText("")
                 self.E_p3_td_c.setText("")
+                self.E_p4_shorter_rsi.setText("")
+                self.E_p4_longer_rsi_max.setText("")
+                self.E_p4_longer_rsi_min.setText("")
+                self.E_p4_longer_path_candle_file.setText("")
             if item.text() == 'pattern2':
                 self.L_p1_threshold.hide()
                 self.E_p1_threshold.hide()
@@ -244,9 +288,21 @@ def main():
                 self.E_p2_td_s.show()
                 self.L_p3_td_c.hide()
                 self.E_p3_td_c.hide()
+                self.L_p4_shorter_rsi.hide()
+                self.E_p4_shorter_rsi.hide()
+                self.L_p4_longer_rsi_max.hide()
+                self.E_p4_longer_rsi_max.hide()
+                self.L_p4_longer_rsi_min.hide()
+                self.E_p4_longer_rsi_min.hide()
+                self.L_p4_longer_path_candle_file.hide()
+                self.E_p4_longer_path_candle_file.hide()
                 self.p['pattern'] = 'pattern2'
                 self.E_p1_threshold.setText("")
                 self.E_p3_td_c.setText("")
+                self.E_p4_shorter_rsi.setText("")
+                self.E_p4_longer_rsi_max.setText("")
+                self.E_p4_longer_rsi_min.setText("")
+                self.E_p4_longer_path_candle_file.setText("")
             if item.text() == 'pattern3':
                 self.L_p1_threshold.hide()
                 self.E_p1_threshold.hide()
@@ -254,9 +310,40 @@ def main():
                 self.E_p2_td_s.hide()
                 self.L_p3_td_c.show()
                 self.E_p3_td_c.show()
+                self.L_p4_shorter_rsi.hide()
+                self.E_p4_shorter_rsi.hide()
+                self.L_p4_longer_rsi_max.hide()
+                self.E_p4_longer_rsi_max.hide()
+                self.L_p4_longer_rsi_min.hide()
+                self.E_p4_longer_rsi_min.hide()
+                self.L_p4_longer_path_candle_file.hide()
+                self.E_p4_longer_path_candle_file.hide()
                 self.p['pattern'] = 'pattern3'
                 self.E_p1_threshold.setText("")
                 self.E_p2_td_s.setText("")
+                self.E_p4_shorter_rsi.setText("")
+                self.E_p4_longer_rsi_max.setText("")
+                self.E_p4_longer_rsi_min.setText("")
+                self.E_p4_longer_path_candle_file.setText("")
+            if item.text() == 'pattern4':
+                self.L_p1_threshold.hide()
+                self.E_p1_threshold.hide()
+                self.L_p2_td_s.hide()
+                self.E_p2_td_s.hide()
+                self.L_p3_td_c.hide()
+                self.E_p3_td_c.hide()
+                self.L_p4_shorter_rsi.show()
+                self.E_p4_shorter_rsi.show()
+                self.L_p4_longer_rsi_max.show()
+                self.E_p4_longer_rsi_max.show()
+                self.L_p4_longer_rsi_min.show()
+                self.E_p4_longer_rsi_min.show()
+                self.L_p4_longer_path_candle_file.show()
+                self.E_p4_longer_path_candle_file.show()
+                self.p['pattern'] = 'pattern4'
+                self.E_p1_threshold.setText("")
+                self.E_p2_td_s.setText("")
+                self.E_p3_td_c.setText("")
 
         def click_LI_last_price_approach(self,item):
             if item.text() == "average":
@@ -297,7 +384,7 @@ def main():
                 c = conn.cursor()
                 c.execute(
                     """
-                INSERT INTO cases (path_candle_file,timeframe_start,timeframe_end,candle_sec,path_historical_data,buy,sell,filter,f1_above_path_candle_file,f1_above_indicator,f1_above_average,f1_below_path_candle_file,f1_below_indicator,f1_below_average,pattern,p1_threshold,p2_td_s,p3_td_c,max_order,space,last_price_approach,percentile_last_price,games,samples,bag_percentage,initial_bag,market_order,limit_order,ph1,ph2,ph3,state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING case_id
+                INSERT INTO cases (path_candle_file,timeframe_start,timeframe_end,candle_sec,path_historical_data,buy,sell,filter,f1_above_path_candle_file,f1_above_indicator,f1_above_average,f1_below_path_candle_file,f1_below_indicator,f1_below_average,pattern,p1_threshold,p2_td_s,p3_td_c,p4_shorter_rsi,p4_longer_rsi_max,p4_longer_rsi_min,p4_longer_path_candle_file,max_order,space,last_price_approach,percentile_last_price,games,samples,bag_percentage,initial_bag,market_order,limit_order,ph1,ph2,ph3,state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING case_id
                     """,(
                     p['path_candle_file'], # VARCHAR(80)
                     p['timeframe_start'], # TIMESTAMP
@@ -314,9 +401,13 @@ def main():
                     p['f1_below_indicator'], # VARCHAR(3)
                     p['f1_below_average'], # INTEGER   
                     p['pattern'], # VARCHAR(20)
-                    p['p1_threshold'],  # INTEGER
+                    p['p1_threshold'], # INTEGER
                     p['p2_td_s'], # INTEGER
                     p['p3_td_c'], # INTEGER
+                    p["p4_shorter_rsi"], # INTEGER
+                    p["p4_longer_rsi_max"], # INTEGER
+                    p["p4_longer_rsi_min"], # INTEGER
+                    p["p4_longer_path_candle_file"], # VARCHAR(80)
                     p['max_order'], # INTEGER
                     p['space'], # REAL
                     p['last_price_approach'], # VARCHAR(20)
@@ -341,7 +432,7 @@ def main():
                 # Check if the user inserted all the parameters required.
                 # Firstly it checks if there is any empty qLineEdit.  
                 missingList = []
-                keys1 = [i for i in list(self.p) if i not in ["filter","pattern","last_price_approach","percentile_last_price","p1_threshold","p2_td_s","p3_td_c","f1_above_path_candle_file","f1_above_indicator","f1_above_average","f1_below_path_candle_file","f1_below_indicator","f1_below_average"]]
+                keys1 = [i for i in list(self.p) if i not in ["p4_longer_path_candle_file","p4_longer_rsi_min","p4_longer_rsi_max","p4_shorter_rsi","filter","pattern","last_price_approach","percentile_last_price","p1_threshold","p2_td_s","p3_td_c","f1_above_path_candle_file","f1_above_indicator","f1_above_average","f1_below_path_candle_file","f1_below_indicator","f1_below_average"]]
                 for key in keys1:
                     if len(getattr(self, 'E_' + key).text()) == 0:
                         missingList.append(key)
@@ -355,6 +446,15 @@ def main():
                 if self.p["pattern"] == "pattern3":
                     if len(self.E_p3_td_c.text()) == 0:
                         missingList.append("p3_td_c")
+                if self.p["pattern"] == "pattern4":
+                    if len(self.E_p4_shorter_rsi.text()) == 0:
+                        missingList.append("p4_shorter_rsi")
+                    if len(self.E_p4_longer_rsi_max.text()) == 0:
+                        missingList.append("p4_longer_rsi_max")
+                    if len(self.E_p4_longer_rsi_min.text()) == 0:
+                        missingList.append("p4_longer_rsi_min")
+                    if len(self.E_p4_longer_path_candle_file.text()) == 0:
+                        missingList.append("p4_longer_path_candle_file")
                 # Thirdly it checks if the parameters for the filter chosen were inserted.
                 if self.p["filter"] == "filter1":
                     if len(self.E_f1_above_path_candle_file.text()) == 0: 
@@ -482,6 +582,10 @@ def createDatabase():
         p1_threshold INTEGER,
         p2_td_s INTEGER,
         p3_td_c INTEGER,
+        p4_shorter_rsi INTEGER,
+        p4_longer_rsi_max INTEGER,
+        p4_longer_rsi_min INTEGER,
+        p4_longer_path_candle_file VARCHAR(80),
         max_order INTEGER,
         space REAL,
         last_price_approach VARCHAR(20),

@@ -35,7 +35,7 @@ class ZeroUnitsError(Exception):
     pass
 
 def main():
-    engines_door(2)
+    engines_door(1)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -112,6 +112,15 @@ def pattern3(p,goodtimes):
                 units_list.append({'0': {'ts': mini_td[i,0]}})
     return units_list
 
+def pattern4(p,goodtimes):
+    shorter_rsi = momentum_indicators.rsi(p['path_candle_file'])
+    maybe_candle0_list = []
+    for period in goodtimes: 
+        mini_rsi = filter_rsi(shorter_rsi,period)
+        for index in range(mini_rsi.shape[0]):
+            if mini_rsi[index,1] < float(p['p4_shorter_rsi']) and mini_rsi[index-1,1] > float(p['p4_shorter_rsi']):
+                maybe_candle0_list.append(mini_rsi[index,0])
+    return check_longer_rsi(p,maybe_candle0_list)
 
 # ---------------------------------------------------------------------------------
 # * SECTION 2 *
@@ -405,6 +414,18 @@ def update_state(case_id):
             success = True
         except:
             time.sleep(3)
+
+def check_longer_rsi(p,maybe_candle0_list):
+    units_list = []
+    longer_rsi = momentum_indicators.rsi(p['p4_longer_path_candle_file'])
+    candle_sec = longer_rsi[1,0] - longer_rsi[0,0]
+    ts_longer_array = longer_rsi[:,0]
+    for maybe_candle0 in maybe_candle0_list:
+        ts_longer_candle = ts_longer_array[ts_longer_array<=maybe_candle0][-1]
+        rsi_longer_candle = longer_rsi[np.where(longer_rsi[:,0] == ts_longer_candle)][0,1]
+        if rsi_longer_candle >= int(p["p4_longer_rsi_min"]) and rsi_longer_candle <= int(p["p4_longer_rsi_max"]):
+            units_list.append({'0': {'ts': maybe_candle0}})
+    return units_list
 
 if __name__ == '__main__':
     time1 = time.time()
