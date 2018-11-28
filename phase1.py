@@ -48,7 +48,6 @@ def engines_door(case_id):
     units_list = get_units_list(p,goodtimes)
     if len(units_list) == 0:
         raise ZeroUnitsError
-    pprint(units_list)
     insertInto_phase1(units_list,"phase1",p["ph1"])
     update_state(case_id)
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
