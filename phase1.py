@@ -35,7 +35,7 @@ class ZeroUnitsError(Exception):
     pass
 
 def main():
-    engines_door(1)
+    engines_door(3)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -48,12 +48,13 @@ def engines_door(case_id):
     units_list = get_units_list(p,goodtimes)
     if len(units_list) == 0:
         raise ZeroUnitsError
+    pprint(units_list)
     insertInto_phase1(units_list,"phase1",p["ph1"])
     update_state(case_id)
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
 
 def get_units_list(p,goodtimes):
-    candle_df = get_dataframe(p)
+    candle_df = get_dataframe(p["path_candle_file"])
     raw_df = get_raw(p)
     units_list = globals()[p['pattern']](p,goodtimes)
     action_dict = {}
@@ -285,10 +286,11 @@ def filter_rsi(rsi,timeframe):
 def filter_td(td,timeframe):
     return td[(td[:,0] >= timeframe[0]) & (td[:,0] <= timeframe[1])]
 
-def get_dataframe(p):
-    pre_candles_df = pd.read_csv(p['path_candle_file'], header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+def get_dataframe(candle_file):
+    pre_candles_df = pd.read_csv(candle_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
     candles_df = pre_candles_df.set_index('timestamp')
     return candles_df
+
 
 def get_rsi_df(p):
     rsi_array = momentum_indicators.rsi(p['path_candle_file'])
@@ -416,16 +418,26 @@ def update_state(case_id):
             time.sleep(3)
 
 def check_longer_rsi(p,maybe_candle0_list):
+    # INPUT
+    # p: case parameteres.
+    # maybe_candle0_list: list with timestamp of candles that have rsi dropping below <p4_shorter_rsi>.
+    # OUTPUT
+    # It returns units_list, which is a partition of maybe_candle0_list (the candles that are under the requisits of of the longer_rsi) in a dictionary-like format. 
     units_list = []
-    longer_rsi = momentum_indicators.rsi(p['p4_longer_path_candle_file'])
-    candle_sec = longer_rsi[1,0] - longer_rsi[0,0]
-    ts_longer_array = longer_rsi[:,0]
+    longer_ts_array = momentum_indicators.rsi(p['p4_longer_path_candle_file'])[:,0]
+    candle_sec = longer_ts_array[1] - longer_ts_array[0]
     for maybe_candle0 in maybe_candle0_list:
-        ts_longer_candle = ts_longer_array[ts_longer_array<=maybe_candle0][-1]
-        rsi_longer_candle = longer_rsi[np.where(longer_rsi[:,0] == ts_longer_candle)][0,1]
+        ts_longer_candle = longer_ts_array[longer_ts_array<=maybe_candle0][-1]
+        close_of_candle = find_close_of_candle(maybe_candle0,p["path_candle_file"])        
+        rsi_longer_candle = momentum_indicators.new_close_rsi(ts_longer_candle,p['p4_longer_path_candle_file'],close_of_candle)
         if rsi_longer_candle >= int(p["p4_longer_rsi_min"]) and rsi_longer_candle <= int(p["p4_longer_rsi_max"]):
             units_list.append({'0': {'ts': maybe_candle0}})
     return units_list
+
+def find_close_of_candle(candle_ts,candle_file):
+    df = get_dataframe(candle_file)
+    # return float(df[df.timestamp == candle_ts]["close"])
+    return float(df.loc[candle_ts]["close"])
 
 if __name__ == '__main__':
     time1 = time.time()
