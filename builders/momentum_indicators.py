@@ -47,6 +47,42 @@ def macd(file,shorter_ema=12,longer_ema=26,signal_ema=9):
     macd_histogram_array[:,1] = (ema(file,shorter_ema)[:,1]-ema(file,longer_ema)[:,1])-signal('4h_bitstamp.csv',12,26,9)
     return {'macd_line': macd_line_array,'signal_line': signal_line_array,'macd_histogram': macd_histogram_array}
 
+def new_close_rsi(candle_ts,file,new_close,choise='close',num_of_candles=14):
+    # INPUT
+    # candle_ts: Timestamp of the candle the user wants the rsi.
+    # file: Path of file containing this candle information.
+    # new_close: New close price of the candle with timestamp <candle_ts>.
+    # OUTPUT
+    # It returns the rsi of the candle with timestamp <candle_ts> if it had a close price of <new_close>.
+    df = get_dataframe(file)
+    index_to_change = df[df.timestamp == candle_ts].index[0]
+    df.at[index_to_change, 'close'] = new_close
+    dynamic_array = df[choise].values
+    upward_movement,downward_movement,average_upward_movement,average_downward_movement,relative_strength = np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0])
+    rsi = np.zeros([dynamic_array.shape[0],2])
+    checker = 0
+    for index in range(dynamic_array.shape[0])[1:]:
+        dif = dynamic_array[index] - dynamic_array[index-1]
+        if dif >= 0:
+            upward_movement[index] = dif
+        else:
+            downward_movement[index] = abs(dif)
+        if index >= num_of_candles-1:
+            if checker == 0:
+                average_upward_movement[index] = np.mean(upward_movement[index-(num_of_candles-1):index+1])
+                average_downward_movement[index] = np.mean(downward_movement[index-(num_of_candles-1):index+1])
+                checker = 1
+            average_upward_movement[index] = (average_upward_movement[index-1]*(num_of_candles-1)+upward_movement[index])/num_of_candles
+            average_downward_movement[index] = (average_downward_movement[index-1]*(num_of_candles-1)+downward_movement[index])/num_of_candles
+            if average_downward_movement[index] == 0:
+                relative_strength[index] = 0
+            else:
+                relative_strength[index] = average_upward_movement[index]/average_downward_movement[index]
+            rsi[index,1] = 100-(100/(relative_strength[index]+1))
+    rsi[:,0] = get_dataframe(file)['timestamp'].values
+    return rsi[rsi[:,0] == candle_ts][0][1]
+
+
 def rsi(file,choise='close',num_of_candles=14):
     dynamic_array = get_dataframe(file)[choise].values
     upward_movement,downward_movement,average_upward_movement,average_downward_movement,relative_strength = np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0]),np.zeros(dynamic_array.shape[0])
@@ -92,6 +128,10 @@ def stochastic(file,num_of_candles=14):
 
 def get_dataframe(df_file):
     return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+
+def find_close_of_candle(candle_ts,path_candle_file):
+    df = get_dataframe("builders/warehouse/candle_data/30min_bitstamp.csv")
+    return int(df[df.timestamp == candle_ts]["close"])
 
 if __name__ == '__main__':
     x1 = time.time()
