@@ -57,7 +57,7 @@ def get_triplets_list(units_list,space):
     if highest_buyLowest > 0:
         highest_buyLowest = 0
 
-    highest_realhighest = 0.075
+    highest_realhighest = 0.05
     target_ite = list(np.arange(0.001,highest_realhighest,space))
     stop_ite = list(np.arange(lowest_lowest,highest_lowest,space))
     buy_stop_ite = list(np.arange(lowest_buyLowest,highest_buyLowest,space))
@@ -165,7 +165,7 @@ def get_setup(setup_file):
         return json.load(f)
 
 def get_units_list(p):
-    engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
+    engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
     query = "SELECT * FROM phase1 WHERE ph1 = '{}'".format(p["ph1"])
     df = pd.read_sql_query(query,engine) 
     units_dict = df.to_dict("index")
@@ -177,7 +177,7 @@ def insertInto_phase2(testedSetups,table_name,ph2):
         try:
             df = pd.DataFrame(testedSetups)
             add_column(df,'ph2',ph2)
-            engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
+            engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
             df.to_sql(
                 name = table_name,
                 con = engine,
@@ -216,7 +216,7 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 def get_parameters(case_id):
-    engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
+    engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
     query = "SELECT * FROM cases WHERE case_id = '{}'".format(case_id)
     df = pd.read_sql_query(query,engine)
     notYet_p = df.to_dict("list")
@@ -232,7 +232,7 @@ def update_state(case_id):
             dbname = 'postgres'
             user = 'postgres'
             host = 'localhost'
-            password = 'spectrum'
+            password = 'DarkZuoqson-postgresql32229751!'
             conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
             c = conn.cursor()
             c.execute("SELECT ph2 FROM cases WHERE case_id = {}".format(case_id))

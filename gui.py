@@ -62,10 +62,10 @@ def main():
             self.last_price_approachBox()
 
             # In order to don't waste time typing many times the same inputs on the GUI, I will add them by default while testing the program.
-            self.E_path_candle_file.setText("builders/warehouse/candle_data/30min_bitstamp.csv")
+            self.E_path_candle_file.setText("builders/warehouse/candle_data/1h_bitstamp.csv")
             self.E_timeframe_start.setText("2014-01-01 00:00:00")
             self.E_timeframe_end.setText("2018-04-19 00:00:00")
-            self.E_candle_sec.setText("1800")
+            self.E_candle_sec.setText("3600")
             self.E_buy.setText("1-sellEnd_1open*1.0001")
             self.E_sell.setText("buy-10_realhighest")
             self.E_path_historical_data.setText("builders/warehouse/historical_data/bitstampUSD.csv")
@@ -76,7 +76,7 @@ def main():
             self.E_games.setText("25")
             self.E_max_order.setText("500")
             self.E_samples.setText("50")
-            self.E_space.setText("0.02")
+            self.E_space.setText("0.006")
             self.E_p1_threshold.setText("30")
 
             # The section of code below enable every edit widget of the program to have add_case button called when Enter key is pressed. 
