@@ -8,13 +8,12 @@ def main():
     class MyWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super().__init__()
-            uic.loadUi('example.ui',self)
+            uic.loadUi('interface.ui',self)
             
             self.p = {
             'path_candle_file': None, # VARCHAR(80)
             'timeframe_start': None, # TIMESTAMP
             'timeframe_end': None, # TIMESTAMP
-            'candle_sec': None, # INTEGER
             'path_historical_data' : None, # VARCHAR(80)
             'buy': None, # VARCHAR(40)
             'sell': None, # VARCHAR(40)
@@ -65,7 +64,6 @@ def main():
             self.E_path_candle_file.setText("builders/warehouse/candle_data/1h_bitstamp.csv")
             self.E_timeframe_start.setText("2014-01-01 00:00:00")
             self.E_timeframe_end.setText("2018-04-19 00:00:00")
-            self.E_candle_sec.setText("3600")
             self.E_buy.setText("1-sellEnd_1open*1.0001")
             self.E_sell.setText("buy-10_realhighest")
             self.E_path_historical_data.setText("builders/warehouse/historical_data/bitstampUSD.csv")
@@ -357,6 +355,7 @@ def main():
                 self.p["last_price_approach"] = "average"
             if item.text() == "percentile":
                 self.E_percentile_last_price.show()
+                self.E_percentile_last_price.setText("50") 
                 self.p["last_price_approach"] = "percentile"
 
         def click_B_add_case(self):
@@ -389,12 +388,11 @@ def main():
                 c = conn.cursor()
                 c.execute(
                     """
-                INSERT INTO cases (path_candle_file,timeframe_start,timeframe_end,candle_sec,path_historical_data,buy,sell,filter,f1_above_path_candle_file,f1_above_indicator,f1_above_average,f1_below_path_candle_file,f1_below_indicator,f1_below_average,pattern,p1_threshold,p2_td_s,p3_td_c,p4_shorter_rsi,p4_longer_rsi_max,p4_longer_rsi_min,p4_longer_path_candle_file,max_order,space,last_price_approach,percentile_last_price,games,samples,bag_percentage,initial_bag,market_order,limit_order,ph1,ph2,ph3,state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING case_id
+                INSERT INTO cases (path_candle_file,timeframe_start,timeframe_end,path_historical_data,buy,sell,filter,f1_above_path_candle_file,f1_above_indicator,f1_above_average,f1_below_path_candle_file,f1_below_indicator,f1_below_average,pattern,p1_threshold,p2_td_s,p3_td_c,p4_shorter_rsi,p4_longer_rsi_max,p4_longer_rsi_min,p4_longer_path_candle_file,max_order,space,last_price_approach,percentile_last_price,games,samples,bag_percentage,initial_bag,market_order,limit_order,ph1,ph2,ph3,state) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING case_id
                     """,(
                     p['path_candle_file'], # VARCHAR(80)
                     p['timeframe_start'], # TIMESTAMP
                     p['timeframe_end'], # TIMESTAMP
-                    p['candle_sec'], # INTEGER
                     p['path_historical_data'], # VARCHAR(80)
                     p['buy'], # VARCHAR(40)
                     p['sell'], # VARCHAR(40)
@@ -572,7 +570,6 @@ def createDatabase():
         path_candle_file VARCHAR(80),
         timeframe_start TIMESTAMP,
         timeframe_end TIMESTAMP,
-        candle_sec INTEGER,
         path_historical_data VARCHAR(80),
         buy VARCHAR(40),
         sell VARCHAR(40),

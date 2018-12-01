@@ -15,7 +15,6 @@ def main():
     'path_candle_file' : 'builders/warehouse/candle_data/' + '30min_bitstamp.csv',
     'timeframe_start' : '2014-01-01 00:00:00',
     'timeframe_end' : '2018-04-19 00:00:00',
-    'candle_sec': '1800',
     'path_historical_data' : 'builders/warehouse/historical_data/' + 'bitstampUSD.csv',
     'buy': '1-sellEnd_1open*1.0001',
     'sell': 'buy-10_realHighest',
@@ -49,12 +48,14 @@ def frontDoor(p):
     #     return [[calendar.timegm(time.strptime(p['timeframe_start'], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe_end'], '%Y-%m-%d %H:%M:%S'))]]
     # elif p['filter'] == "filter1": 
 
+    entire_candle_df = get_dataframe(p["path_candle_file"])
+    candle_sec = entire_candle_df.iloc[1].name - entire_candle_df.iloc[0].name
     lineBellow_all = getattr(momentum_indicators,p['f1_below_indicator'].lower())(p['f1_below_path_candle_file'],int(p['f1_below_average']))
     lineAbove_all = getattr(momentum_indicators,p['f1_above_indicator'].lower())(p['f1_above_path_candle_file'],int(p['f1_above_average']))
     lineAbove = filterbydate_array(lineAbove_all,(p['timeframe_start'],p['timeframe_end']))
     lineBellow = filterbydate_array(lineBellow_all,(p['timeframe_start'],p['timeframe_end']))
     trueTimestamps = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
-    goodtimes = buildPeriods(trueTimestamps,int(p['candle_sec']))
+    goodtimes = buildPeriods(trueTimestamps,candle_sec)
     return goodtimes
 
 def buildPeriods(trueTimestamps,candle_sec):
@@ -78,8 +79,10 @@ def buildPeriods(trueTimestamps,candle_sec):
             goodtimes.append([start,end])
     return goodtimes
 
-def get_dataframe(df_file):
-    return pd.read_csv(df_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+def get_dataframe(candle_file):
+    pre_candles_df = pd.read_csv(candle_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
+    candles_df = pre_candles_df.set_index('timestamp')
+    return candles_df
 
 def filterbydate_array(array,timeframe):
     # Input: <array> is a array to be filtered and <timeframe> a list with two strings, the 

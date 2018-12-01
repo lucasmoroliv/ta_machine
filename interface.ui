@@ -101,8 +101,26 @@
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="L_path_candle_file">
+     <item row="12" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_space">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_max_order">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="L_max_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -115,12 +133,66 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>path_candle_file</string>
+        <string>max_order</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_market_order">
+     <item row="12" column="0">
+      <widget class="QLabel" name="L_space">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>space</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="L_bag_percentage">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>bag_percentage</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="L_samples">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>samples</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_samples">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -128,16 +200,7 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_bag_percentage">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="L_games">
        <property name="font">
         <font>
@@ -155,35 +218,8 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_games">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="L_candle_sec">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>candle_sec</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_path_candle_file">
+     <item row="6" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_market_order">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -192,33 +228,6 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="L_buy">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>buy</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_candle_sec">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
       <widget class="QLabel" name="L_sell">
        <property name="font">
         <font>
@@ -237,69 +246,6 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="L_path_historical_data">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>path_historical_data</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_buy">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="L_timeframe">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>timeframe</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_sell">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_path_historical_data">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
       <widget class="QLabel" name="L_initial_bag">
        <property name="font">
         <font>
@@ -317,16 +263,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="E_timeframe_start">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1" colspan="2">
+     <item row="5" column="1" colspan="2">
       <widget class="QLineEdit" name="E_initial_bag">
        <property name="font">
         <font>
@@ -335,7 +272,25 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="4" column="0">
+      <widget class="QLabel" name="L_path_historical_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>path_historical_data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
       <widget class="QLabel" name="L_market_order">
        <property name="font">
         <font>
@@ -362,7 +317,34 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="2" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_buy">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_path_historical_data">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_bag_percentage">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
       <widget class="QLabel" name="L_limit_order">
        <property name="font">
         <font>
@@ -380,7 +362,7 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1" colspan="2">
+     <item row="7" column="1" colspan="2">
       <widget class="QLineEdit" name="E_limit_order">
        <property name="font">
         <font>
@@ -389,8 +371,26 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="L_bag_percentage">
+     <item row="0" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_path_candle_file">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="E_timeframe_start">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="L_timeframe">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -403,12 +403,12 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>bag_percentage</string>
+        <string>timeframe</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_samples">
+     <item row="3" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_sell">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -416,26 +416,8 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_space">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="1" colspan="2">
-      <widget class="QLineEdit" name="E_max_order">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="0">
-      <widget class="QLabel" name="L_samples">
+     <item row="2" column="0">
+      <widget class="QLabel" name="L_buy">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -448,12 +430,21 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>samples</string>
+        <string>buy</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
-      <widget class="QLabel" name="L_space">
+     <item row="9" column="1" colspan="2">
+      <widget class="QLineEdit" name="E_games">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="L_path_candle_file">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -466,25 +457,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>space</string>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="0">
-      <widget class="QLabel" name="L_max_order">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>max_order</string>
+        <string>path_candle_file</string>
        </property>
       </widget>
      </item>
@@ -620,7 +593,6 @@
   <tabstop>E_path_candle_file</tabstop>
   <tabstop>E_timeframe_start</tabstop>
   <tabstop>E_timeframe_end</tabstop>
-  <tabstop>E_candle_sec</tabstop>
   <tabstop>E_buy</tabstop>
   <tabstop>E_sell</tabstop>
   <tabstop>E_path_historical_data</tabstop>

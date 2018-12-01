@@ -54,6 +54,7 @@ def engines_door(case_id):
 
 def get_units_list(p,goodtimes):
     candle_df = get_dataframe(p["path_candle_file"])
+    p["candle_sec"] = candle_df.iloc[1].name - candle_df.iloc[0].name
     raw_df = get_raw(p)
     units_list = globals()[p['pattern']](p,goodtimes)
     action_dict = {}
@@ -289,7 +290,6 @@ def get_dataframe(candle_file):
     pre_candles_df = pd.read_csv(candle_file, header=None, names=['time','timestamp','open','high','low','close','volume','change'])
     candles_df = pre_candles_df.set_index('timestamp')
     return candles_df
-
 
 def get_rsi_df(p):
     rsi_array = momentum_indicators.rsi(p['path_candle_file'])
