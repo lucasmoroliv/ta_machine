@@ -63,7 +63,7 @@ def main():
             # In order to don't waste time typing many times the same inputs on the GUI, I will add them by default while testing the program.
             self.E_path_candle_file.setText("builders/warehouse/candle_data/1h_bitstamp.csv")
             self.E_timeframe_start.setText("2014-01-01 00:00:00")
-            self.E_timeframe_end.setText("2018-04-19 00:00:00")
+            self.E_timeframe_end.setText("2018-11-28 00:00:00")
             self.E_buy.setText("1-sellEnd_1open*1.0001")
             self.E_sell.setText("buy-10_realhighest")
             self.E_path_historical_data.setText("builders/warehouse/historical_data/bitstampUSD.csv")

@@ -1,9 +1,7 @@
-builders/warehouse/setup_data
 builders/warehouse/candle_data
 builders/warehouse/historical_data
 builders/warehouse/td_data
 builders/warehouse/trendlines
-builders/warehouse/experiment_data
 */__pycache__
 .vs/
 .vscode/
