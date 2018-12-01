@@ -350,7 +350,7 @@ def insertInto_phase1(units_list,table_name,ph1):
         try:
             df = dataframing(units_list)
             add_column(df,'ph1',ph1)
-            engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+            engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
             df.to_sql(
                 name = table_name,
                 con = engine,
@@ -389,7 +389,7 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 def get_parameters(case_id):
-    engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+    engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
     query = "SELECT * FROM cases WHERE case_id = '{}'".format(case_id)
     df = pd.read_sql_query(query,engine)
     notYet_p = df.to_dict("list")
@@ -405,7 +405,7 @@ def update_state(case_id):
             dbname = 'postgres'
             user = 'postgres'
             host = 'localhost'
-            password = 'DarkZuoqson-postgresql32229751!'
+            password = 'spectrum'
             conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
             c = conn.cursor()
             c.execute("SELECT ph1 FROM cases WHERE case_id = {}".format(case_id))
