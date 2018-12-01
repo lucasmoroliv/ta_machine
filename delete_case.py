@@ -117,7 +117,7 @@ def delete_hash_in_table(ph,hashh):
     dbname = 'postgres'
     user = 'postgres'
     host = 'localhost'
-    password = 'DarkZuoqson-postgresql32229751!'
+    password = 'spectrum'
     conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
     c = conn.cursor()
     c.execute("DELETE FROM phase{} WHERE {} = '{}'".format(ph[-1],"ph"+ph[-1],hashh))    
@@ -127,14 +127,14 @@ def delete_case(case_id):
     dbname = 'postgres'
     user = 'postgres'
     host = 'localhost'
-    password = 'DarkZuoqson-postgresql32229751!'
+    password = 'spectrum'
     conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
     c = conn.cursor()
     c.execute("DELETE FROM cases WHERE case_id = '{}'".format(case_id))    
     conn.commit()
 
 def get_cases_df():
-    db_engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+    db_engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
     query = "SELECT case_id,ph1,ph2,ph3,state FROM cases ORDER BY case_id"
     return pd.read_sql_query(query,db_engine,index_col="case_id")
 

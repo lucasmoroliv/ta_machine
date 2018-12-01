@@ -79,6 +79,11 @@ def main():
             self.E_space.setText("0.02")
             self.E_p1_threshold.setText("30")
 
+            # The section of code below enable every edit widget of the program to have add_case button called when Enter key is pressed. 
+            edits_list = [item for item in dir(self) if item[0] == "E"]
+            for edit in edits_list:
+                getattr(self,edit).returnPressed.connect(self.click_B_add_case)              
+
         def last_price_approachBox(self):
             # Setting the default values. LI_last_price_approach will have the item average selected as default, E_percentile_last_price will
             # be hidden and self.p["last_price_approach"] will be set to "average".    
@@ -379,7 +384,7 @@ def main():
                 dbname = 'postgres'
                 user = 'postgres'
                 host = 'localhost'
-                password = 'DarkZuoqson-postgresql32229751!'
+                password = 'spectrum'
                 conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
                 c = conn.cursor()
                 c.execute(
@@ -481,7 +486,7 @@ def main():
                 dbname = 'postgres'
                 user = 'postgres'
                 host = 'localhost'
-                password = 'DarkZuoqson-postgresql32229751!'
+                password = 'spectrum'
                 conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
                 c = conn.cursor()
 
@@ -556,7 +561,7 @@ def createDatabase():
     dbname = 'postgres'
     user = 'postgres'
     host = 'localhost'
-    password = 'DarkZuoqson-postgresql32229751!'
+    password = 'spectrum'
     conn = psycopg2.connect(host=host,dbname=dbname,user=user,password=password)
     c = conn.cursor()
 

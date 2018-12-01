@@ -92,7 +92,7 @@ def get_input_list(toRun_dict,max_cases):
     return input_list
 
 def get_cases_df():
-    db_engine = sqlalchemy.create_engine("postgresql://postgres:DarkZuoqson-postgresql32229751!@localhost/postgres")
+    db_engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
     query = "SELECT case_id,ph1,ph2,ph3,state FROM cases ORDER BY case_id"
     return pd.read_sql_query(query,db_engine)
 
