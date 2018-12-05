@@ -15,7 +15,7 @@
 
 import numpy as np
 import pandas as pd
-import time,calendar,datetime,csv,math,json,sys,operator,os,sqlalchemy,collections,psycopg2,logging,re
+import time,calendar,datetime,csv,math,json,sys,operator,os,sqlalchemy,collections,psycopg2,logging,re,random
 from pprint import pprint
 from builders import momentum_indicators 
 import chart_filter
@@ -395,7 +395,7 @@ def insertInto_phase1(units_list,table_name,ph1):
             )
             success = True
         except:
-            time.sleep(3)
+            time.sleep(random.randint(3,6))
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
@@ -451,7 +451,7 @@ def update_state(case_id):
             conn.commit()
             success = True
         except:
-            time.sleep(3)
+            time.sleep(random.randint(3,6))
 
 def check_longer_rsi(p,maybe_candle0_list):
     # INPUT

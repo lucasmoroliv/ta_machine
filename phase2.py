@@ -175,7 +175,7 @@ def insertInto_phase2(testedSetups,table_name,ph2):
             )
             success = True
         except:
-            time.sleep(3)
+            time.sleep(random.randint(3,6))
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
@@ -231,7 +231,7 @@ def update_state(case_id):
             conn.commit()
             success = True
         except:
-            time.sleep(3)
+            time.sleep(random.randint(3,6))
             
 def translate_order(mode,inputt):
 # This function receives as inputt a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
