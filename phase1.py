@@ -35,7 +35,7 @@ class ZeroUnitsError(Exception):
     pass
 
 def main():
-    engines_door(3)
+    engines_door(1)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -145,7 +145,10 @@ def add_buy(p,units_list,candle_df,raw_df,action_dict):
     }
     for unit in units_list:
         unit['buy'] = {}
-        find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
+        if not "operator" in moment or float(moment["change"]) >= 1:
+            find_market_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
+        elif float(moment["change"]) < 1:
+            find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
 
 def add_sell(p,units_list,candle_df,raw_df,action_dict):
     for unit in units_list:
@@ -170,7 +173,7 @@ def add_last_price(p,units_list,candle_df,raw_df,action_dict):
 # * SECTION 3 *
 # Here is a space to store all sorts of auxiliary functions.
 
-def find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
+def find_market_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
     unit['buy']['price'] = candle_df.loc[int(unit['0']['ts'])+int(p['candle_sec'])*int(action_dict['buy']['moment']['candle'])][action_dict['buy']['moment']['ohlc']]
     if 'operator' in action_dict['buy']['moment']:
         unit['buy']['price'] = operator_dict[action_dict['buy']['moment']['operator']](float(unit['buy']['price']),float(action_dict['buy']['moment']['change']))  
@@ -190,6 +193,40 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
     if raw_partition.empty:
         unit['buy']['type'] = 'nothing-bought'
         return
+    unit['buy']['type'] = 'all-bought'
+    unit['buy']['first_executed'] = {
+        'ts': int(raw_partition.iloc[0].timestamp),
+        'index': int(raw_partition.iloc[0].name)
+    }
+    unit['buy']['last_executed'] = unit['buy']['first_executed']
+    start_interval_to_last_executed = raw_section.loc[:unit['buy']['last_executed']['index']]
+    lowest_row = start_interval_to_last_executed[start_interval_to_last_executed.price == start_interval_to_last_executed.price.min()].iloc[0]
+    unit['buy']['farthest'] = {
+        'ts': int(lowest_row.timestamp), 
+        'index': int(lowest_row.name),
+        'price': (float(lowest_row.price) - unit['buy']['price'])/unit['buy']['price']
+    }
+
+def find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
+    unit['buy']['price'] = candle_df.loc[int(unit['0']['ts'])+int(p['candle_sec'])*int(action_dict['buy']['moment']['candle'])][action_dict['buy']['moment']['ohlc']]
+    if 'operator' in action_dict['buy']['moment']:
+        unit['buy']['price'] = operator_dict[action_dict['buy']['moment']['operator']](float(unit['buy']['price']),float(action_dict['buy']['moment']['change']))  
+    start_interval = int(unit['0']['ts'])+int(p['candle_sec'])*int(action_dict['buy']['candle'][0])
+    if action_dict['buy']['candle'][-1] == 'sellEnd':
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['sell']['candle'][-1])+1)
+    else:
+        end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['buy']['candle'][-1])+1) 
+    raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
+    lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
+    unit['buy']['lowest'] = {
+        'ts': int(lowest_of_section.timestamp), 
+        'index': int(lowest_of_section.name),
+        'price': (float(lowest_of_section.price) - unit['buy']['price'])/unit['buy']['price']
+    }
+    raw_partition = raw_section[raw_section.price<=unit['buy']['price']]
+    if raw_partition.empty:
+        unit['buy']['type'] = 'nothing-bought'
+        return
     raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
     unit['buy']['first_executed'] = {
         'ts': int(raw_partition.iloc[0].timestamp),
@@ -203,11 +240,11 @@ def find_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
             'index': int(last_executed_row.name)
         }
         start_interval_to_last_executed = raw_section.loc[:unit['buy']['last_executed']['index']]
-        lowest_row = start_interval_to_last_executed[start_interval_to_last_executed.price == start_interval_to_last_executed.price.min()].iloc[0]
-        unit['buy']['lowest'] = {
-            'ts': int(lowest_row.timestamp), 
-            'index': int(lowest_row.name),
-            'price': (float(lowest_row.price) - unit['buy']['price'])/unit['buy']['price']
+        highest_row = start_interval_to_last_executed[start_interval_to_last_executed.price == start_interval_to_last_executed.price.max()].iloc[0]
+        unit['buy']['farthest'] = {
+            'ts': int(highest_row.timestamp), 
+            'index': int(highest_row.name),
+            'price': (float(highest_row.price) - unit['buy']['price'])/unit['buy']['price']
         }
     else:
         unit['buy']['type'] = 'partially-bought'

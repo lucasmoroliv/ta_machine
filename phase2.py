@@ -14,59 +14,42 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(1)
+    engines_door(3)
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()
     p = get_parameters(case_id)
     units_list = get_units_list(p)
-    triplets_list = get_triplets_list(units_list,p['space']) 
+    triplets_list = get_triplets_list(p,units_list) 
     raw_df = get_raw(p)
     testedSetups = get_testedSetups(p,raw_df,units_list,triplets_list)
     insertInto_phase2(testedSetups,"phase2",p["ph2"])
     update_state(case_id)
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
 
-def get_triplets_list(units_list,space):
-    buyLowest_list = []
-    lowest_list = []
-    realhighest_list = []
+def get_triplets_list(p,units_list):
+    buy_stop_list = []
+    stop_list = []
+    target_list = []
+    candle,moment = translate_order('buy',p['buy'])
+
+    if not "operator" in moment or float(moment["change"]) >= 1:
+        # Cases where the purchase will be made through a market order.
+        buy_stop_list = list(np.arange(-0.05,-0.001,p["space"]))
+    elif float(moment["change"]) < 1:
+        # Cases where the purchase will be made through a limit order.
+        buy_stop_list = list(np.arange(0.001,0.05,p["space"]))
     
-    for unit in units_list:
-        buyLowest_list.append(unit['buy_lowest_price'])
-        if unit['buy_type'] == 'all-bought':
-            realhighest_list.append(unit['sell_realhighest'])
-            lowest_list.append(unit['lowest_price'])
-        else:
-            realhighest_list.append(None)
-            lowest_list.append(None)
+    target_list = list(np.arange(0.001,0.06,p["space"]))
+    stop_list = list(np.arange(-0.15,0.005,p["space"]))
 
-    buyLowest_list = [x for x in buyLowest_list if x is not None]
-    lowest_list = [x for x in lowest_list if x is not None]
-    realhighest_list = [x for x in realhighest_list if x is not None]
-
-    lowest_buyLowest = min(buyLowest_list)
-    highest_buyLowest = max(buyLowest_list)
-    lowest_lowest = min(lowest_list)
-    highest_lowest = max(lowest_list)
-    highest_realhighest = max(realhighest_list)
-
-    if highest_lowest > 0:
-        highest_lowest = 0
-    if highest_buyLowest > 0:
-        highest_buyLowest = 0
-
-    highest_realhighest = 0.05
-    target_ite = list(np.arange(0.001,highest_realhighest,space))
-    stop_ite = list(np.arange(lowest_lowest,highest_lowest,space))
-    buy_stop_ite = list(np.arange(lowest_buyLowest,highest_buyLowest,space))
-
-    triplets_list = [target_ite,stop_ite,buy_stop_ite]
+    triplets_list = [target_list,stop_list,buy_stop_list]
     return list(itertools.product(*triplets_list))
 
 def get_testedSetups(p,raw_df,units_list,triplets_list):
     testedSetups = []
+    candle,moment = translate_order('buy',p['buy'])
     for triplet in triplets_list:
         target = triplet[0]
         stop = triplet[1]
@@ -89,19 +72,25 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
         aux_list = []
         last_price_list = []
         for unit in units_list:
-            if unit['buy_lowest_price'] <= buy_stop:
-                whether_stopped = 'T' # stopped
-            else: 
-                whether_stopped = 'F' # not-stopped
+            if not "operator" in moment or float(moment["change"]) >= 1:
+                if unit['buy_farthest_price'] <= buy_stop:
+                    whether_stopped = 'T' # stopped
+                else: 
+                    whether_stopped = 'F' # not-stopped
+            elif float(moment["change"]) < 1:
+                if unit['buy_farthest_price'] >= buy_stop:
+                    whether_stopped = 'T' # stopped
+                else: 
+                    whether_stopped = 'F' # not-stopped
 
             if unit['buy_type'] == 'all-bought':
                 if unit['sell_realhighest'] >= target and unit['lowest_price'] > stop:
                     partition = 'W' # winner
-                if unit['sell_realhighest'] < target and unit['lowest_price'] > stop:
+                elif unit['sell_realhighest'] < target and unit['lowest_price'] > stop:
                     partition = 'C' # consolidation
-                if unit['sell_realhighest'] < target and unit['lowest_price'] <= stop:
+                elif unit['sell_realhighest'] < target and unit['lowest_price'] <= stop:
                     partition = 'L' # loser
-                if unit['sell_realhighest'] >= target and unit['lowest_price'] <= stop:
+                elif unit['sell_realhighest'] >= target and unit['lowest_price'] <= stop:
                     target_price = unit['buy_price']*(1+target)
                     stop_price = unit['buy_price']*(1+stop)
                     start_index = unit['buy_last_executed_index'] + 1
@@ -118,12 +107,13 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                             partition = 'W' # winner
                     else:
                         partition = 'L' # loser
-            if unit['buy_type'] == 'nothing-bought':
+            elif unit['buy_type'] == 'nothing-bought':
                 partition = 'N' # nothing-bought
-            if unit['buy_type'] == 'partially-bought':
+            elif unit['buy_type'] == 'partially-bought':
                 partition = 'P' # partiallly-bought
 
             aux_list.append(whether_stopped + partition)
+
             if partition == 'C':
                 last_price_list.append(unit['last_price'])
                 
@@ -135,7 +125,7 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
         else:
             if p["last_price_approach"] == "percentile":
                 setup['last_price'] = np.percentile(last_price_list,int(p['percentile_last_price']))
-            if p["last_price_approach"] == "average":
+            elif p["last_price_approach"] == "average":
                 setup['last_price'] = np.mean(last_price_list)
 
         testedSetups.append(setup)
@@ -242,6 +232,31 @@ def update_state(case_id):
             success = True
         except:
             time.sleep(3)
+            
+def translate_order(mode,inputt):
+# This function receives as inputt a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
+# a dictionary 'moment' that are useful for further calculation.
+    moment = {}
+    candle,moment['string'] = inputt.split('_')
+    candle = candle.split('-')
+
+    if mode == 'buy':
+        index = 0
+        for char in moment['string']:
+            if char.isdigit():
+                index = index + 1 
+            else:
+                break
+        moment['candle'] = moment['string'][0:index]
+        moment['ohlc'] = [i for i in ['open','high','low','close'] if i in moment['string']][0]
+        ope = [i for i in ['+','-','*'] if i in moment['string']]
+        if ope != []:
+            moment['operator'] = ope[0]
+            moment['change'] = moment['string'][moment['string'].find(moment['operator'])+1:]
+        return candle,moment
+
+    if mode == 'sell':
+        return candle,moment
 
 if __name__ == '__main__':
     time1 = time.time()

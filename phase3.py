@@ -26,6 +26,7 @@ def engines_door(case_id):
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
 
 def bagPrediction(p,events,setup,last_price):
+    candle,moment = translate_order('buy',p['buy'])
     target = setup['target']     
     stop = setup['stop']     
     buy_stop = setup['buy_stop']  
@@ -33,35 +34,34 @@ def bagPrediction(p,events,setup,last_price):
     market_order = p['market_order']
     limit_order = p['limit_order']
 
-    eventsInfo = {
-        'TW': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
-        'FW': {'change': target, 'entryFee': market_order, 'exitFee': limit_order},
-        'TL': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
-        'FL': {'change': stop, 'entryFee': market_order, 'exitFee': market_order},
-        'TC': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
-        'FC': {'change': last_price, 'entryFee': market_order, 'exitFee': market_order},
-        'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
-        'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
-        'TP': {'change': buy_stop, 'entryFee': market_order, 'exitFee': market_order},
-        'FP': {'change': stop, 'entryFee': market_order, 'exitFee': market_order}
-    }
-        
-    ope_index = p["buy"].find("*")
-    if ope_index > -1:
-        multiplier = p["buy"][ope_index+1:]
-        if "1open" in p["buy"] and float(multiplier) < 1:
-            eventsInfo = {
-                'TW': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
-                'FW': {'change': target, 'entryFee': limit_order, 'exitFee': limit_order},
-                'TL': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
-                'FL': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order},
-                'TC': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
-                'FC': {'change': last_price, 'entryFee': limit_order, 'exitFee': market_order},
-                'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
-                'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
-                'TP': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
-                'FP': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order}
-            } 
+    # eventsInfo in case change is either not existent or >= than 1.
+    if not "operator" in moment or float(moment["change"]) >= 1:
+        eventsInfo = {
+            'TW': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FW': {'change': target, 'entryFee': market_order, 'exitFee': limit_order},
+            'TL': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FL': {'change': stop, 'entryFee': market_order, 'exitFee': market_order},
+            'TC': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FC': {'change': last_price, 'entryFee': market_order, 'exitFee': market_order},
+            'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'TP': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FP': {'change': 0, 'entryFee': 0, 'exitFee': 0} # There will be no FP events in such case.
+        }
+    # eventsInfo in case change is < than 1.
+    elif float(moment["change"]) < 1:
+        eventsInfo = {
+            'TW': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+            'FW': {'change': target, 'entryFee': limit_order, 'exitFee': limit_order},
+            'TL': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+            'FL': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order},
+            'TC': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+            'FC': {'change': last_price, 'entryFee': limit_order, 'exitFee': market_order},
+            'TN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'FN': {'change': 0, 'entryFee': 0, 'exitFee': 0},
+            'TP': {'change': buy_stop, 'entryFee': limit_order, 'exitFee': market_order},
+            'FP': {'change': stop, 'entryFee': limit_order, 'exitFee': market_order}
+        } 
 
     simulated_bags = []
     for _ in range(p['samples']):
@@ -210,6 +210,31 @@ def update_state(case_id):
             success = True
         except:
             time.sleep(3)
+
+def translate_order(mode,inputt):
+# This function receives as inputt a string with the format '1-2-3_0high+30' and returns a list called 'candle' and
+# a dictionary 'moment' that are useful for further calculation.
+    moment = {}
+    candle,moment['string'] = inputt.split('_')
+    candle = candle.split('-')
+
+    if mode == 'buy':
+        index = 0
+        for char in moment['string']:
+            if char.isdigit():
+                index = index + 1 
+            else:
+                break
+        moment['candle'] = moment['string'][0:index]
+        moment['ohlc'] = [i for i in ['open','high','low','close'] if i in moment['string']][0]
+        ope = [i for i in ['+','-','*'] if i in moment['string']]
+        if ope != []:
+            moment['operator'] = ope[0]
+            moment['change'] = moment['string'][moment['string'].find(moment['operator'])+1:]
+        return candle,moment
+
+    if mode == 'sell':
+        return candle,moment
 
 if __name__ == '__main__':
     main()
