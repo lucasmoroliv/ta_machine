@@ -171,7 +171,7 @@ def insertInto_phase2(testedSetups,table_name,ph2):
             df.to_sql(
                 name = table_name,
                 con = engine,
-                if_exists = 'append'
+                if_exists = 'append',
                 dtype={
                     "FC": sqlalchemy.types.SmallInteger(),
                     "FL": sqlalchemy.types.SmallInteger(),

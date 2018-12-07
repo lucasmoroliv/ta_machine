@@ -149,7 +149,7 @@ def insertInto_phase3(units_list,table_name,ph3):
             df.to_sql(
                 name = table_name,
                 con = engine,
-                if_exists = 'append'
+                if_exists = 'append',
                 dtype={
                     "average_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
                     "buy_stop": sqlalchemy.types.Numeric(precision=6,scale=5),
