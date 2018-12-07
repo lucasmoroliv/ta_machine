@@ -172,6 +172,23 @@ def insertInto_phase2(testedSetups,table_name,ph2):
                 name = table_name,
                 con = engine,
                 if_exists = 'append'
+                dtype={
+                    "FC": sqlalchemy.types.SmallInteger(),
+                    "FL": sqlalchemy.types.SmallInteger(),
+                    "FN": sqlalchemy.types.SmallInteger(),
+                    "FP": sqlalchemy.types.SmallInteger(),
+                    "FW": sqlalchemy.types.SmallInteger(),
+                    "TC": sqlalchemy.types.SmallInteger(),
+                    "TL": sqlalchemy.types.SmallInteger(),
+                    "TN": sqlalchemy.types.SmallInteger(),
+                    "TP": sqlalchemy.types.SmallInteger(),
+                    "TW": sqlalchemy.types.SmallInteger(),
+                    "buy_stop": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "last_price": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "stop": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "target": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "ph2": sqlalchemy.types.String(32),
+                }     
             )
             success = True
         except:

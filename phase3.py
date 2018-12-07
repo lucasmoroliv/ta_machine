@@ -150,10 +150,36 @@ def insertInto_phase3(units_list,table_name,ph3):
                 name = table_name,
                 con = engine,
                 if_exists = 'append'
+                dtype={
+                    "average_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "buy_stop": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "max_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "median_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "min_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "stop": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "target": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "ph3": sqlalchemy.types.String(32),
+                }
             )
             success = True
         except:
             time.sleep(random.randint(3,6))
+
+# def insertInto_phase3(units_list,table_name,ph3):
+#     success = False
+#     while not success:
+#         try:
+#             df = dataframing(units_list)
+#             add_column(df,'ph3',ph3)
+#             engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
+#             df.to_sql(
+#                 name = table_name,
+#                 con = engine,
+#                 if_exists = 'append'
+#             )
+#             success = True
+#         except:
+#             time.sleep(random.randint(3,6))
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into

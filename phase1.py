@@ -391,11 +391,39 @@ def insertInto_phase1(units_list,table_name,ph1):
             df.to_sql(
                 name = table_name,
                 con = engine,
-                if_exists = 'append'
+                if_exists = 'append',
+                dtype= {
+                    "0_ts": sqlalchemy.types.Integer(),
+                    "buy_farthest_index": sqlalchemy.types.Integer(),
+                    "buy_farthest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "buy_farthest_ts": sqlalchemy.types.Integer(),
+                    "buy_first_executed_index": sqlalchemy.types.Integer(),
+                    "buy_first_executed_ts": sqlalchemy.types.Integer(),
+                    "buy_last_executed_index": sqlalchemy.types.Integer(),
+                    "buy_last_executed_ts": sqlalchemy.types.Integer(),
+                    "buy_lowest_index": sqlalchemy.types.Integer(),
+                    "buy_lowest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "buy_lowest_ts": sqlalchemy.types.Integer(),
+                    "buy_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "buy_type": sqlalchemy.types.String(16),
+                    "last_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "lowest_index": sqlalchemy.types.Integer(),
+                    "lowest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "lowest_ts": sqlalchemy.types.Integer(),
+                    "sell_first_executed_index": sqlalchemy.types.Integer(),
+                    "sell_first_executed_ts": sqlalchemy.types.Integer(),
+                    "sell_last_executed_index": sqlalchemy.types.Integer(),
+                    "sell_last_executed_ts": sqlalchemy.types.Integer(),
+                    "sell_realhighest": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "sell_realhighest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "sell_type": sqlalchemy.types.String(16),
+                    "ph1": sqlalchemy.types.String(32),
+                }
             )
             success = True
         except:
             time.sleep(random.randint(3,6))
+
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
