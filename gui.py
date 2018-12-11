@@ -576,24 +576,24 @@ def createDatabase():
         filter VARCHAR(20),
         f1_above_path_candle_file VARCHAR(80),
         f1_above_indicator VARCHAR(3),
-        f1_above_average INTEGER,
+        f1_above_average SMALLINT,
         f1_below_path_candle_file VARCHAR(80),
         f1_below_indicator VARCHAR(3),
-        f1_below_average INTEGER,
+        f1_below_average SMALLINT,
         pattern VARCHAR(20),
-        p1_threshold INTEGER,
-        p2_td_s INTEGER,
-        p3_td_c INTEGER,
-        p4_shorter_rsi INTEGER,
-        p4_longer_rsi_max INTEGER,
-        p4_longer_rsi_min INTEGER,
+        p1_threshold SMALLINT,
+        p2_td_s SMALLINT,
+        p3_td_c SMALLINT,
+        p4_shorter_rsi SMALLINT,
+        p4_longer_rsi_max SMALLINT,
+        p4_longer_rsi_min SMALLINT,
         p4_longer_path_candle_file VARCHAR(80),
-        max_order INTEGER,
+        max_order SMALLINT,
         space REAL,
         last_price_approach VARCHAR(20),
-        percentile_last_price INTEGER,
-        games INTEGER,
-        samples INTEGER,
+        percentile_last_price SMALLINT,
+        games SMALLINT,
+        samples SMALLINT,
         bag_percentage REAL,
         initial_bag REAL,
         market_order REAL,
@@ -608,5 +608,5 @@ def createDatabase():
     conn.commit()
 
 if __name__ == '__main__':
-    main()
-    #createDatabase()
+    # main()
+    createDatabase()
