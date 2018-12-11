@@ -31,9 +31,6 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
-class ZeroUnitsError(Exception):
-    pass
-
 def main():
     engines_door(1026)
     
@@ -47,6 +44,7 @@ def engines_door(case_id):
         goodtimes = globals()[p["filter"]].frontDoor(p)
     units_list = get_units_list(p,goodtimes)
     if len(units_list) == 0:
+        logger.info("Case_id {} is unitless.".format(case_id))
         update_state(case_id,"unitless")
     else:
         insertInto_phase1(units_list,"phase1",p["ph1"])

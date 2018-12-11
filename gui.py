@@ -73,7 +73,7 @@ def main():
             self.E_bag_percentage.setText("1")
             self.E_games.setText("25")
             self.E_max_order.setText("500")
-            self.E_samples.setText("50")
+            self.E_samples.setText("200")
             self.E_space.setText("0.006")
             self.E_p1_threshold.setText("30")
 

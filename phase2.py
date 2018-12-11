@@ -194,10 +194,10 @@ def insertInto_phase2(testedSetups,table_name,ph2):
                     "TN": sqlalchemy.types.SmallInteger(),
                     "TP": sqlalchemy.types.SmallInteger(),
                     "TW": sqlalchemy.types.SmallInteger(),
-                    "buy_stop": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "last_price": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "stop": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "target": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "buy_stop": sqlalchemy.types.Numeric(precision=4,scale=3),
+                    "last_price": sqlalchemy.types.Numeric(precision=6,scale=4),
+                    "stop": sqlalchemy.types.Numeric(precision=4,scale=3),
+                    "target": sqlalchemy.types.Numeric(precision=4,scale=3),
                     "ph2": sqlalchemy.types.String(32),
                 }     
             )

@@ -152,12 +152,12 @@ def insertInto_phase3(units_list,table_name,ph3):
                 if_exists = 'append',
                 dtype={
                     "average_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "buy_stop": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "buy_stop": sqlalchemy.types.Numeric(precision=4,scale=3),
                     "max_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
                     "median_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
                     "min_bag": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "stop": sqlalchemy.types.Numeric(precision=6,scale=5),
-                    "target": sqlalchemy.types.Numeric(precision=6,scale=5),
+                    "stop": sqlalchemy.types.Numeric(precision=4,scale=3),
+                    "target": sqlalchemy.types.Numeric(precision=4,scale=3),
                     "ph3": sqlalchemy.types.String(32),
                 }
             )
