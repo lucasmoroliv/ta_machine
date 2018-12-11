@@ -1,4 +1,4 @@
-import json,time,datetime,itertools,os,sqlalchemy,collections,psycopg2,logging
+import json,time,datetime,itertools,os,sqlalchemy,collections,psycopg2,logging,sys
 from pprint import pprint
 import pandas as pd
 import numpy as np
@@ -14,7 +14,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(3)
+    engines_door(1026)
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -50,10 +50,16 @@ def get_triplets_list(p,units_list):
 def get_testedSetups(p,raw_df,units_list,triplets_list):
     testedSetups = []
     candle,moment = translate_order('buy',p['buy'])
+    
     for triplet in triplets_list:
         target = triplet[0]
         stop = triplet[1]
         buy_stop = triplet[2]
+        
+        target = round(target,3)
+        stop = round(stop,3)
+        buy_stop = round(buy_stop,3)
+
         setup = {
             'TW': 0,
             'TC': 0,
@@ -66,33 +72,37 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
             'FP': 0,
             'FN': 0,
             'target': target,
-            'stop': stop,
+            'stop': stop, 
             'buy_stop': buy_stop,
         }
         aux_list = []
         last_price_list = []
         for unit in units_list:
+
+            target_price = unit['buy_price']*(1+target)
+            stop_price = unit['buy_price']*(1+stop)
+            buy_stop_price = unit["buy_price"]*(1+buy_stop)
+
             if not "operator" in moment or float(moment["change"]) >= 1:
-                if unit['buy_farthest_price'] <= buy_stop:
+                if unit["buy_farthest_price"] <= buy_stop_price:
                     whether_stopped = 'T' # stopped
                 else: 
                     whether_stopped = 'F' # not-stopped
             elif float(moment["change"]) < 1:
-                if unit['buy_farthest_price'] >= buy_stop:
+                if unit["buy_farthest_price"] >= buy_stop_price:
                     whether_stopped = 'T' # stopped
                 else: 
                     whether_stopped = 'F' # not-stopped
 
             if unit['buy_type'] == 'all-bought':
-                if unit['sell_realhighest'] >= target and unit['lowest_price'] > stop:
+                lowest_absprice = raw_df.loc[unit["lowest_index"]].price
+                if unit["sell_realhighest_price"] >= target_price and unit["lowest_price"] > stop_price:
                     partition = 'W' # winner
-                elif unit['sell_realhighest'] < target and unit['lowest_price'] > stop:
+                elif unit["sell_realhighest_price"] < target_price and unit["lowest_price"] > stop_price:
                     partition = 'C' # consolidation
-                elif unit['sell_realhighest'] < target and unit['lowest_price'] <= stop:
+                elif unit["sell_realhighest_price"] < target_price and unit["lowest_price"] <= stop_price:
                     partition = 'L' # loser
-                elif unit['sell_realhighest'] >= target and unit['lowest_price'] <= stop:
-                    target_price = unit['buy_price']*(1+target)
-                    stop_price = unit['buy_price']*(1+stop)
+                elif unit["sell_realhighest_price"] >= target_price and unit["lowest_price"] <= stop_price:
                     start_index = unit['buy_last_executed_index'] + 1
                     end_index = unit['sell_last_executed_index']
                     raw_section = raw_df.loc[start_index:end_index] 
@@ -107,6 +117,7 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                             partition = 'W' # winner
                     else:
                         partition = 'L' # loser
+
             elif unit['buy_type'] == 'nothing-bought':
                 partition = 'N' # nothing-bought
             elif unit['buy_type'] == 'partially-bought':

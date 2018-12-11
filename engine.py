@@ -65,7 +65,6 @@ def approach2(max_cases):
                 p.start()
 
 def get_nextToRun(running_inputs):
-    # while True:
     toRun_dict = get_toRun_dict()
     if len(list(toRun_dict)) == 0:
         logger.info("There are no more phases to run.")
@@ -76,7 +75,6 @@ def get_nextToRun(running_inputs):
         if case_id not in cases_running and phase_dict[list(phase_dict)[0]] not in hashes_running:
             return [case_id,list(phase_dict)[0],phase_dict[list(phase_dict)[0]]]
     return None
-    # time.sleep(2)
         
 def get_input_list(toRun_dict,max_cases):
     cases_toRun = []
@@ -108,7 +106,7 @@ def get_toRun_dict():
     }
     # Since cases that have the value "ph3" in column "state" have already run all the phases they had to, we
     # make a dataframe called partition_df out of cases_df that have all the cases but the ones with state "ph3".
-    partition_df = cases_df[cases_df.state != "ph3"]
+    partition_df = cases_df[(cases_df.state != "ph3") & (cases_df.state != "unitless")]
     # The loop iterates through every row of partition_df.
     for _,case in partition_df.iterrows():
         # The next loop will iterate through ["ph1","ph2","ph3"], or ["ph2","ph3"] or ["ph3"] depending on each
@@ -141,7 +139,7 @@ def find_hashBank(cases_df):
     hashBank = []
     # We could use cases_df as it is, but there are probably benifts for excluding all the rows containing
     # the column value "ph0", because these cases haven't ran any of the phase modules.
-    partition_df = cases_df[cases_df.state != "ph0"]
+    partition_df = cases_df[(cases_df.state != "ph0") & (cases_df.state != "unitless")]
     for _,row in partition_df.iterrows():
         for column in state_ran[row["state"]]:
             hashBank.append(row[column])

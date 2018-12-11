@@ -4,14 +4,8 @@ import numpy as np
 from pprint import pprint
 import json
 
-def callable():
-    df_file = '30min_bitstamp.csv'
-    df = get_dataframe('warehouse/candle_data/' + df_file)
-    df, highest, lowest = td_setup(df,df_file)
-    return td_countdown(df, highest, lowest)
-
 def main():
-    df_file = '30min_bitstamp.csv'
+    df_file = '1h_bitstamp.csv'
     df = get_dataframe('warehouse/candle_data/' + df_file)
     df, highest, lowest = td_setup(df,df_file)
     td_countdown(df, df_file, highest, lowest)

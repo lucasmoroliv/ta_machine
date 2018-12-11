@@ -35,7 +35,7 @@ class ZeroUnitsError(Exception):
     pass
 
 def main():
-    engines_door(1)
+    engines_door(1026)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -47,9 +47,10 @@ def engines_door(case_id):
         goodtimes = globals()[p["filter"]].frontDoor(p)
     units_list = get_units_list(p,goodtimes)
     if len(units_list) == 0:
-        raise ZeroUnitsError
-    insertInto_phase1(units_list,"phase1",p["ph1"])
-    update_state(case_id)
+        update_state(case_id,"unitless")
+    else:
+        insertInto_phase1(units_list,"phase1",p["ph1"])
+        update_state(case_id)
     logger.info("case_id {} is completed in {} seconds.".format(case_id,time.time()-time1))
 
 def get_units_list(p,goodtimes):
@@ -183,15 +184,15 @@ def find_market_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
     else:
         end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['buy']['candle'][-1])+1) 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
-    lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
-    unit['buy']['lowest'] = {
-        'ts': int(lowest_of_section.timestamp), 
-        'index': int(lowest_of_section.name),
-        'price': (float(lowest_of_section.price) - unit['buy']['price'])/unit['buy']['price']
-    }
     raw_partition = raw_section[raw_section.price>=unit['buy']['price']]
     if raw_partition.empty:
         unit['buy']['type'] = 'nothing-bought'
+        lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
+        unit['buy']['farthest'] = {
+            'ts': int(lowest_of_section.timestamp), 
+            'index': int(lowest_of_section.name),
+            'price': float(lowest_of_section.price)
+        }
         return
     unit['buy']['type'] = 'all-bought'
     unit['buy']['first_executed'] = {
@@ -204,7 +205,7 @@ def find_market_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
     unit['buy']['farthest'] = {
         'ts': int(lowest_row.timestamp), 
         'index': int(lowest_row.name),
-        'price': (float(lowest_row.price) - unit['buy']['price'])/unit['buy']['price']
+        'price': float(lowest_row.price)
     }
 
 def find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
@@ -217,15 +218,15 @@ def find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
     else:
         end_interval = int(unit['0']['ts'])+int(p['candle_sec'])*(int(action_dict['buy']['candle'][-1])+1) 
     raw_section = raw_df[(raw_df.timestamp>=start_interval) & (raw_df.timestamp<end_interval)]    
-    lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
-    unit['buy']['lowest'] = {
-        'ts': int(lowest_of_section.timestamp), 
-        'index': int(lowest_of_section.name),
-        'price': (float(lowest_of_section.price) - unit['buy']['price'])/unit['buy']['price']
-    }
     raw_partition = raw_section[raw_section.price<=unit['buy']['price']]
     if raw_partition.empty:
         unit['buy']['type'] = 'nothing-bought'
+        lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
+        unit['buy']['farthest'] = {
+            'ts': int(lowest_of_section.timestamp), 
+            'index': int(lowest_of_section.name),
+            'price': float(lowest_of_section.price)
+        }
         return
     raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
     unit['buy']['first_executed'] = {
@@ -244,10 +245,16 @@ def find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict):
         unit['buy']['farthest'] = {
             'ts': int(highest_row.timestamp), 
             'index': int(highest_row.name),
-            'price': (float(highest_row.price) - unit['buy']['price'])/unit['buy']['price']
+            'price': float(highest_row.price)
         }
     else:
         unit['buy']['type'] = 'partially-bought'
+        lowest_of_section = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
+        unit['buy']['farthest'] = {
+            'ts': int(lowest_of_section.timestamp), 
+            'index': int(lowest_of_section.name),
+            'price': float(lowest_of_section.price)
+        }
 
 def find_sell(p,unit,candle_df,raw_df,action_dict):
     start_index = unit['buy']['last_executed']['index']
@@ -266,7 +273,6 @@ def find_sell(p,unit,candle_df,raw_df,action_dict):
         unit['sell']['type'] = 'all-sold'
         realhighest_price = raw_sorted[raw_sorted.USD_acc_volume >= float(p['max_order'])].iloc[0].price
         unit['sell']['realhighest_price'] = realhighest_price
-        unit['sell']['realhighest'] = (float(realhighest_price) - unit['buy']['price'])/unit['buy']['price']
 
         raw_partition = raw_section[raw_section.price>=realhighest_price]
         raw_partition['USD_acc_volume'] = raw_partition['volume'].cumsum(axis = 0)*raw_partition['price']
@@ -285,7 +291,7 @@ def find_lowest(p,unit,candle_df,raw_df):
     end_index = unit['sell']['last_executed']['index']
     raw_section = raw_df.loc[start_index:end_index]    
     min_row = raw_section[raw_section.price == raw_section.price.min()].iloc[0]
-    unit['lowest']['price'] = (float(min_row.price) - unit['buy']['price'])/unit['buy']['price']
+    unit['lowest']['price'] = float(min_row.price)
     unit['lowest']['ts'] = int(min_row.timestamp)
     unit['lowest']['index'] = int(min_row.name)
 
@@ -395,27 +401,23 @@ def insertInto_phase1(units_list,table_name,ph1):
                 dtype= {
                     "0_ts": sqlalchemy.types.Integer(),
                     "buy_farthest_index": sqlalchemy.types.Integer(),
-                    "buy_farthest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "buy_farthest_price": sqlalchemy.types.Numeric(precision=7,scale=2),
                     "buy_farthest_ts": sqlalchemy.types.Integer(),
                     "buy_first_executed_index": sqlalchemy.types.Integer(),
                     "buy_first_executed_ts": sqlalchemy.types.Integer(),
                     "buy_last_executed_index": sqlalchemy.types.Integer(),
                     "buy_last_executed_ts": sqlalchemy.types.Integer(),
-                    "buy_lowest_index": sqlalchemy.types.Integer(),
-                    "buy_lowest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
-                    "buy_lowest_ts": sqlalchemy.types.Integer(),
-                    "buy_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "buy_price": sqlalchemy.types.Numeric(precision=7,scale=2),
                     "buy_type": sqlalchemy.types.String(16),
                     "last_price": sqlalchemy.types.Numeric(precision=10,scale=5),
                     "lowest_index": sqlalchemy.types.Integer(),
-                    "lowest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "lowest_price": sqlalchemy.types.Numeric(precision=7,scale=2),
                     "lowest_ts": sqlalchemy.types.Integer(),
                     "sell_first_executed_index": sqlalchemy.types.Integer(),
                     "sell_first_executed_ts": sqlalchemy.types.Integer(),
                     "sell_last_executed_index": sqlalchemy.types.Integer(),
                     "sell_last_executed_ts": sqlalchemy.types.Integer(),
-                    "sell_realhighest": sqlalchemy.types.Numeric(precision=10,scale=5),
-                    "sell_realhighest_price": sqlalchemy.types.Numeric(precision=10,scale=5),
+                    "sell_realhighest_price": sqlalchemy.types.Numeric(precision=7,scale=2),
                     "sell_type": sqlalchemy.types.String(16),
                     "ph1": sqlalchemy.types.String(32),
                 }
@@ -423,7 +425,6 @@ def insertInto_phase1(units_list,table_name,ph1):
             success = True
         except:
             time.sleep(random.randint(3,6))
-
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
@@ -463,7 +464,7 @@ def get_parameters(case_id):
     p["timeframe_end"] = str(p["timeframe_end"])
     return p
 
-def update_state(case_id):
+def update_state(case_id,mode=None):
     success = False
     while not success:
         try:
@@ -475,7 +476,10 @@ def update_state(case_id):
             c = conn.cursor()
             c.execute("SELECT ph1 FROM cases WHERE case_id = {}".format(case_id))
             phase_hash = c.fetchone()[0]
-            c.execute("UPDATE cases SET state = 'ph1' WHERE ph1 = '{}'".format(phase_hash))
+            if mode == "unitless":
+                c.execute("UPDATE cases SET state = 'unitless' WHERE ph1 = '{}'".format(phase_hash))
+            else:
+                c.execute("UPDATE cases SET state = 'ph1' WHERE ph1 = '{}'".format(phase_hash))
             conn.commit()
             success = True
         except:

@@ -13,7 +13,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(2)
+    engines_door(1024)
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -164,22 +164,6 @@ def insertInto_phase3(units_list,table_name,ph3):
             success = True
         except:
             time.sleep(random.randint(3,6))
-
-# def insertInto_phase3(units_list,table_name,ph3):
-#     success = False
-#     while not success:
-#         try:
-#             df = dataframing(units_list)
-#             add_column(df,'ph3',ph3)
-#             engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
-#             df.to_sql(
-#                 name = table_name,
-#                 con = engine,
-#                 if_exists = 'append'
-#             )
-#             success = True
-#         except:
-#             time.sleep(random.randint(3,6))
 
 def dataframing(units_list):
     # It receives as input the units_list and turns it into a dataframe, which is compatible to be inserted into
