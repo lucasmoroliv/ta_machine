@@ -608,5 +608,5 @@ def createDatabase():
     conn.commit()
 
 if __name__ == '__main__':
-    # main()
-    createDatabase()
+    main()
+    # createDatabase()
