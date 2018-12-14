@@ -1020,7 +1020,7 @@ def createDatabase():
 
     c.execute(
         """
-    CREATE TABLE test(
+    CREATE TABLE cases(
         case_id SERIAL PRIMARY KEY,
         path_candle_file VARCHAR(80),
         timeframe_start TIMESTAMP,
