@@ -161,8 +161,8 @@ def pattern5(p,goodtimes):
                 continue
 
             # 2) It has to be within a timestamp interval.
-            leftlimit_ts_rsilow1 = ts_edge + candle_sec * round(int(p["horizon"]) * float(p["min_propdif_edge_rsilow1"]))
-            rightlimit_ts_rsilow1 = ts_rsicandle0 - candle_sec * round(int(p["horizon"]) * float(p["min_propdif_rsilow1_rsicandle0"]))
+            leftlimit_ts_rsilow1 = ts_edge + candle_sec * round((int(p["horizon"])-1) * float(p["min_propdif_edge_rsilow1"]))
+            rightlimit_ts_rsilow1 = ts_rsicandle0 - candle_sec * round((int(p["horizon"])-1) * float(p["min_propdif_rsilow1_rsicandle0"]))
             if not (ts_rsilow1>=leftlimit_ts_rsilow1 and ts_rsilow1<=rightlimit_ts_rsilow1) or ts_rsilow1==ts_rsicandle0: 
                 continue
             
