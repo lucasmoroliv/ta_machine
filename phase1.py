@@ -32,7 +32,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(1026)
+    engines_door(768)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -133,7 +133,7 @@ def pattern5(p,goodtimes):
         
         timeframe_start = period[0]
         timeframe_end = period[1]
-        candle_df = entire_candle_df.loc[timeframe_start-round(int(p["horizon"]) * candle_sec):timeframe_end]
+        candle_df = entire_candle_df.loc[timeframe_start-round(int(p["p5_horizon"]) * candle_sec):timeframe_end]
         
         for ts_rsicandle0,row in candle_df.loc[timeframe_start:].iterrows():
             rsicandle0 = row["rsi"]
@@ -143,7 +143,7 @@ def pattern5(p,goodtimes):
             # Find rsilow1 information.
             # -------------------------
 
-            ts_edge = ts_rsicandle0 - round(int(p["horizon"])*candle_sec)
+            ts_edge = ts_rsicandle0 - round(int(p["p5_horizon"])*candle_sec)
             ts_rsilow1 = candle_df["rsi"].loc[ts_edge:(ts_rsicandle0-candle_sec)].idxmin()
             rsilow1 = candle_df["rsi"].loc[ts_rsilow1]
             price_rsilow1 = candle_df["low"].loc[ts_rsilow1]
@@ -157,18 +157,18 @@ def pattern5(p,goodtimes):
             # Checking whether rsilow1 is acceptable.
 
             # 1) It has to be within a rsi interval.
-            if not (rsilow1>=float(p["min_rsilow1"]) and rsilow1<=float(p["max_rsilow1"])):
+            if not (rsilow1>=float(p["p5_min_rsilow1"]) and rsilow1<=float(p["p5_max_rsilow1"])):
                 continue
 
             # 2) It has to be within a timestamp interval.
-            leftlimit_ts_rsilow1 = ts_edge + candle_sec * round((int(p["horizon"])-1) * float(p["min_propdif_edge_rsilow1"]))
-            rightlimit_ts_rsilow1 = ts_rsicandle0 - candle_sec * round((int(p["horizon"])-1) * float(p["min_propdif_rsilow1_rsicandle0"]))
+            leftlimit_ts_rsilow1 = ts_edge + candle_sec * round((int(p["p5_horizon"])-1) * float(p["p5_min_propdif_edge_rsilow1"]))
+            rightlimit_ts_rsilow1 = ts_rsicandle0 - candle_sec * round((int(p["p5_horizon"])-1) * float(p["p5_min_propdif_rsilow1_rsicandle0"]))
             if not (ts_rsilow1>=leftlimit_ts_rsilow1 and ts_rsilow1<=rightlimit_ts_rsilow1) or ts_rsilow1==ts_rsicandle0: 
                 continue
             
             # 3) rsilow1 has to be within a minimum and maximum rsi difference from rsicandle0. 
-            upperlimit_rsilow1 = rsicandle0 - float(p["min_difrsi_rsilow1_rsicandle0"]) 
-            lowerlimit_rsilow1 = rsicandle0 - float(p["max_difrsi_rsilow1_rsicandle0"])
+            upperlimit_rsilow1 = rsicandle0 - float(p["p5_min_difrsi_rsilow1_rsicandle0"]) 
+            lowerlimit_rsilow1 = rsicandle0 - float(p["p5_max_difrsi_rsilow1_rsicandle0"])
             if not (rsilow1>=lowerlimit_rsilow1 and rsilow1<=upperlimit_rsilow1) or rsilow1==rsicandle0:
                 continue
 
@@ -178,11 +178,11 @@ def pattern5(p,goodtimes):
 
             candledif_rsilow1_rsicandle0 = ((ts_rsicandle0 - ts_rsilow1) / candle_sec) - 1 
             # leftlimit_ts_rsilow2 can't be equal to ts_rsilow1 because otherwise there is a chance the same candle that were assigned to rsilow1 is assigned to rsilow2. 
-            leftlimit_ts_rsilow2 = ts_rsilow1 + candle_sec * round(candledif_rsilow1_rsicandle0 * float(p["min_propdif_rsilow1_rsilow2"]))
+            leftlimit_ts_rsilow2 = ts_rsilow1 + candle_sec * round(candledif_rsilow1_rsicandle0 * float(p["p5_min_propdif_rsilow1_rsilow2"]))
             if leftlimit_ts_rsilow2 == ts_rsilow1:
                 leftlimit_ts_rsilow2 = leftlimit_ts_rsilow2 + candle_sec  
             # rightlimit_ts_rsilow2 can't be equal to ts_rsicandle0 because otherwise there is a chance the same candle that were assigned to rsicandle0 is assigned to rsilow2. 
-            rightlimit_ts_rsilow2 = ts_rsicandle0 - candle_sec * round(candledif_rsilow1_rsicandle0 * float(p["min_propdif_rsilow2_rsicandle0"]))
+            rightlimit_ts_rsilow2 = ts_rsicandle0 - candle_sec * round(candledif_rsilow1_rsicandle0 * float(p["p5_min_propdif_rsilow2_rsicandle0"]))
             if rightlimit_ts_rsilow2 == ts_rsicandle0:
                 rightlimit_ts_rsilow2 = rightlimit_ts_rsilow2 - candle_sec  
             # There is not way we can find ts_rsilow2 if leftlimit_ts_rsilow2 is higher than rightlimit_ts_rsilow2, therefore in such case this rsicandle0 is rejected.
@@ -196,7 +196,7 @@ def pattern5(p,goodtimes):
             price_rsilow2 = candle_df["low"].loc[ts_rsilow2]
 
             # 1) It has to be within a rsi interval.
-            if not (rsilow2>=float(p["min_rsilow2"]) and rsilow2<=float(p["max_rsilow2"])):
+            if not (rsilow2>=float(p["p5_min_rsilow2"]) and rsilow2<=float(p["p5_max_rsilow2"])):
                 continue
 
             # 2) price_rsilow1 has to be greater than price_rsilow2.
@@ -204,26 +204,26 @@ def pattern5(p,goodtimes):
                 continue
 
             # 3) rsilow2 has to be within a minimum and maximum rsi difference from rsilow1. 
-            lowerlimit_rsilow2 = rsilow1 + float(p["min_difrsi_rsilow1_rsilow2"]) 
-            upperlimit_rsilow2 = rsilow1 + float(p["max_difrsi_rsilow1_rsilow2"])
+            lowerlimit_rsilow2 = rsilow1 + float(p["p5_min_difrsi_rsilow1_rsilow2"]) 
+            upperlimit_rsilow2 = rsilow1 + float(p["p5_max_difrsi_rsilow1_rsilow2"])
             if not (rsilow2>=lowerlimit_rsilow2 and rsilow2<=upperlimit_rsilow2) or rsilow1==rsilow2:
                 continue
 
             # 4) There is a minimum candle distance between rsilow1 and rsilow2 allowed. If the distance between the both is smaller than this amount this rsicandle0 is rejected.
             candledif_rsilow1_rsilow2 = ((ts_rsilow2 - ts_rsilow1) / candle_sec) - 1
-            if not (candledif_rsilow1_rsilow2 >= int(p["min_candledif_rsilow1_rsilow2"])):
+            if not (candledif_rsilow1_rsilow2 >= int(p["p5_min_candledif_rsilow1_rsilow2"])):
                 continue
 
             # -------------------------
             # Find rsihigh
             # -------------------------
             
-            leftlimit_ts_rsihigh = ts_rsilow1 + candle_sec * round(candledif_rsilow1_rsilow2 * float(p["min_propdif_rsilow1_rsihigh"]))
+            leftlimit_ts_rsihigh = ts_rsilow1 + candle_sec * round(candledif_rsilow1_rsilow2 * float(p["p5_min_propdif_rsilow1_rsihigh"]))
             # leftlimit_ts_rsihigh can't be equal to ts_rsilow1 because otherwise there is a chance the same candle that were assigned to rsilow1 is assigned to rsihigh. 
             if leftlimit_ts_rsihigh == ts_rsilow1:
                 leftlimit_ts_rsihigh = leftlimit_ts_rsihigh + candle_sec
 
-            rightlimit_ts_rsihigh = ts_rsilow2 - candle_sec * round(candledif_rsilow1_rsilow2 * float(p["min_propdif_rsihigh_rsilow2"]))
+            rightlimit_ts_rsihigh = ts_rsilow2 - candle_sec * round(candledif_rsilow1_rsilow2 * float(p["p5_min_propdif_rsihigh_rsilow2"]))
             # rightlimit_ts_rsihigh can't be equal to rsilow2 because otherwise there is a chance the same candle that were assigned to rsilow2 is assigned to rsihigh. 
             if rightlimit_ts_rsihigh == ts_rsilow2:
                 rightlimit_ts_rsihigh = rightlimit_ts_rsihigh - candle_sec  
@@ -241,8 +241,8 @@ def pattern5(p,goodtimes):
                 continue
             
             # 2) rsihigh has to be within a minimum and maximum rsi difference from rsilow2. rsihigh also must be higher than rsilow1 and rsilow2. The conditition checks only the latter rsi because it will always be greater than the former.
-            lowerlimit_rsihigh = rsilow2 + float(p["min_difrsi_rsihigh_rsilow2"]) 
-            upperlimit_rsihigh = rsilow2 + float(p["max_difrsi_rsihigh_rsilow2"])
+            lowerlimit_rsihigh = rsilow2 + float(p["p5_min_difrsi_rsihigh_rsilow2"]) 
+            upperlimit_rsihigh = rsilow2 + float(p["p5_max_difrsi_rsihigh_rsilow2"])
             if not (rsihigh>=lowerlimit_rsilow2 and rsihigh<=upperlimit_rsilow2) or rsihigh == rsilow2:
                 continue
 
