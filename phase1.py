@@ -32,7 +32,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(768)
+    engines_door(219)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -272,9 +272,9 @@ def add_buy(p,units_list,candle_df,raw_df,action_dict):
     }
     for unit in units_list:
         unit['buy'] = {}
-        if not "operator" in moment or float(moment["change"]) >= 1:
+        if not "operator" in action_dict["buy"]["moment"] or float(action_dict["buy"]["moment"]["change"]) >= 1:
             find_market_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
-        elif float(moment["change"]) < 1:
+        elif float(action_dict["buy"]["moment"]["change"]) < 1:
             find_limit_buy(p,unit,candle_df,raw_df,operator_dict,action_dict)
 
 def add_sell(p,units_list,candle_df,raw_df,action_dict):
