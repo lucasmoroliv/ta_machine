@@ -42,7 +42,7 @@ def get_triplets_list(p,units_list):
         buy_stop_list = list(np.arange(0.001,0.05,p["space"]))
     
     target_list = list(np.arange(0.001,0.06,p["space"]))
-    stop_list = list(np.arange(-0.15,0.005,p["space"]))
+    stop_list = list(np.arange(-0.15,-0.005,p["space"]))
 
     triplets_list = [target_list,stop_list,buy_stop_list]
     return list(itertools.product(*triplets_list))
@@ -95,7 +95,6 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                     whether_stopped = 'F' # not-stopped
 
             if unit['buy_type'] == 'all-bought':
-                lowest_absprice = raw_df.loc[unit["lowest_index"]].price
                 if unit["sell_realhighest_price"] >= target_price and unit["lowest_price"] > stop_price:
                     partition = 'W' # winner
                 elif unit["sell_realhighest_price"] < target_price and unit["lowest_price"] > stop_price:
