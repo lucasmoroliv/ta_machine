@@ -9,8 +9,8 @@ def main():
     d = 24*h
     w = 7*d
     c = {
-        'candle_str': '4h',
-        'candle_sec': 4*h,
+        'candle_str': '12h',
+        'candle_sec': 12*h,
         'data_path': 'warehouse/historical_data/bitstampUSD.csv',
         'ts_reference': 1315785600
     }

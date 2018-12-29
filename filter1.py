@@ -44,39 +44,32 @@ def frontDoor(p):
     # p['f1_below_path_candle_file'] for lineBellow and 
     # p['f1_above_path_candle_file'] for lineAbove. 
 
-    # if p['filter'] == None:
-    #     return [[calendar.timegm(time.strptime(p['timeframe_start'], '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe_end'], '%Y-%m-%d %H:%M:%S'))]]
-    # elif p['filter'] == "filter1": 
+    trade_candle_df = get_dataframe(p["path_candle_file"])
+    candle_sec = trade_candle_df.iloc[1].name - trade_candle_df.iloc[0].name
+    ma_candle_df = get_dataframe(p["f1_below_path_candle_file"])
+    candle_sec_ma = ma_candle_df.iloc[1].name - ma_candle_df.iloc[0].name
 
-    entire_candle_df = get_dataframe(p["path_candle_file"])
-    candle_sec = entire_candle_df.iloc[1].name - entire_candle_df.iloc[0].name
     lineBellow_all = getattr(momentum_indicators,p['f1_below_indicator'].lower())(p['f1_below_path_candle_file'],int(p['f1_below_average']))
     lineAbove_all = getattr(momentum_indicators,p['f1_above_indicator'].lower())(p['f1_above_path_candle_file'],int(p['f1_above_average']))
     lineAbove = filterbydate_array(lineAbove_all,(p['timeframe_start'],p['timeframe_end']))
     lineBellow = filterbydate_array(lineBellow_all,(p['timeframe_start'],p['timeframe_end']))
-    trueTimestamps = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
-    goodtimes = buildPeriods(trueTimestamps,candle_sec)
+    filtered_array = lineAbove[lineAbove[:,1]>lineBellow[:,1],0]   
+    goodtimes = buildPeriods(filtered_array,candle_sec,candle_sec_ma)
     return goodtimes
 
-def buildPeriods(trueTimestamps,candle_sec):
+def buildPeriods(filtered_array,candle_sec,candle_sec_ma):
     goodtimes = []
-    state = 'empty'
-    for index in range(trueTimestamps.shape[0]):
-        if index == trueTimestamps.shape[0]-1:
-            if state == 'opened':
-                end = trueTimestamps[index]
-                goodtimes.append([start,end])
-                break
-            if state == 'empty':
-                break
-        diff = trueTimestamps[index+1] - trueTimestamps[index]
-        if diff <= candle_sec and state == 'empty':
-            start = trueTimestamps[index]
-            state = 'opened'
-        if diff > candle_sec and state == 'opened':
-            end = trueTimestamps[index]
-            state = 'empty'
-            goodtimes.append([start,end])
+    tsdiff_array = np.diff(filtered_array)
+    candlediff_array = tsdiff_array/candle_sec_ma
+    filtered_array = np.append(filtered_array,100)
+    candlediff_array = np.append(candlediff_array,100)
+    start = filtered_array[0]
+    for index in range(filtered_array.shape[0]-1):
+        if candlediff_array[index] == 1:
+            continue
+        elif candlediff_array[index] > 1:
+            goodtimes.append([start,filtered_array[index]])
+        start = filtered_array[index+1]
     return goodtimes
 
 def get_dataframe(candle_file):
