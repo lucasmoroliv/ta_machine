@@ -15,7 +15,7 @@ def main():
             spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             data_dict = json.loads(last_data)
             spamwriter.writerow([data_dict['timestamp'],data_dict['price'],data_dict['amount']])
-
+    
     def connect_handler(data):
         channel = pusher.subscribe('live_trades')
         channel.bind('trade', func)

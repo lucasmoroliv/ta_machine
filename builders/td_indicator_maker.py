@@ -5,7 +5,7 @@ from pprint import pprint
 import json
 
 def main():
-    df_file = '1h_bitstamp.csv'
+    df_file = '15min_bitstamp.csv'
     df = get_dataframe('warehouse/candle_data/' + df_file)
     df, highest, lowest = td_setup(df,df_file)
     td_countdown(df, df_file, highest, lowest)

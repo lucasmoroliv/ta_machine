@@ -36,6 +36,7 @@ def main():
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
+    time1 = time.time()
     p = get_parameters(case_id)
     if p["filter"] == None:
         goodtimes = [[calendar.timegm(time.strptime((p['timeframe_start']), '%Y-%m-%d %H:%M:%S')),calendar.timegm(time.strptime(p['timeframe_end'], '%Y-%m-%d %H:%M:%S'))]]
