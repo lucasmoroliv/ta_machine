@@ -17,12 +17,11 @@ def main():
     user_input = sys.argv[1:]
 
     # Paths of both the new and old historical data files.  
-    if user_input == "lucas":
+    if user_input[0] == "lucas":
         new_historicalData = "C:\\Users\\lucas\\Downloads\\bitstampUSD.csv.gz"
         old_historicalData = "C:\\Users\\lucas\\code\\projects\\ta_machine\\builders\\warehouse\\historical_data\\bitstampUSD.csv"
         chromedriver_path = "C:\\Users\\lucas\\code\\chromedriver"
-    
-    if user_input == "kenji":
+    elif user_input[0] == "kenji":
         new_historicalData = "C:\\Users\\Danil\\Downloads\\bitstampUSD.csv.gz"
         old_historicalData = "C:\\Users\\Danil\\Desktop\\ta_machine\\builders\\warehouse\\historical_data\\bitstampUSD.csv"
         chromedriver_path = "C:\\Users\\Danil\\Desktop\\code\\chromedriver"
