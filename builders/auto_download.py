@@ -1,5 +1,5 @@
 from selenium import webdriver
-import os,time,logging,csv,warnings
+import os,time,logging,csv,warnings,sys
 import pandas as pd
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -14,17 +14,24 @@ logger.addHandler(stream_handler)
 def main():
 
     t = time.time()
+    user_input = sys.argv[1:]
 
     # Paths of both the new and old historical data files.  
-    new_historicalData = "C:\\Users\\lucas\\Downloads\\bitstampUSD.csv.gz"
-    old_historicalData = "C:\\Users\\lucas\\code\\projects\\ta_machine\\builders\\warehouse\\historical_data\\bitstampUSD.csv"
+    if user_input == "lucas":
+        new_historicalData = "C:\\Users\\lucas\\Downloads\\bitstampUSD.csv.gz"
+        old_historicalData = "C:\\Users\\lucas\\code\\projects\\ta_machine\\builders\\warehouse\\historical_data\\bitstampUSD.csv"
+        chromedriver_path = "C:\\Users\\lucas\\code\\chromedriver"
+    
+    if user_input == "kenji":
+        new_historicalData = "C:\\Users\\Danil\\Downloads\\bitstampUSD.csv.gz"
+        old_historicalData = "C:\\Users\\Danil\\Desktop\\ta_machine\\builders\\warehouse\\historical_data\\bitstampUSD.csv"
+        chromedriver_path = "C:\\Users\\Danil\\Desktop\\code\\chromedriver"
     
     # Delete compressed bitstampUSD file if it is in Downloads directory. 
     if os.path.exists(new_historicalData):
         os.remove(new_historicalData)
         logger.info("Deleting {}.".format(new_historicalData))
 
-    chromedriver_path = "C:\\Users\\lucas\\code\\chromedriver"
 
     download_file(chromedriver_path)
     t0 = time.time()
