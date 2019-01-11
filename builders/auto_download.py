@@ -1,3 +1,5 @@
+# The script updates bitstampUSD.csv automatically.
+
 from selenium import webdriver
 import os,time,logging,csv,warnings,sys
 import pandas as pd
@@ -48,7 +50,7 @@ def main():
     df = df[df.timestamp != 1466685414]
 
     # Write the df dataframe in csv format, in the file with path "old_historicalData"   
-    with open(old_historicalData, 'a') as f:
+    with open(old_historicalData, 'w') as f:
         t2 = time.time()
         logger.info("Starting to write dataframe into csv format.")
         df.to_csv(f, index=False, header=False)
