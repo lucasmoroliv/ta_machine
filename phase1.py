@@ -32,7 +32,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(2048)
+    engines_door(2433)
     
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
@@ -95,6 +95,7 @@ def pattern2(p,goodtimes):
         for i in range(mini_td.shape[0]):
             if mini_td[i,1]==td_s:
                 units_list.append({'0': {'ts': mini_td[i,0]}})
+    units_list = fix_units_list(units_list)
     return units_list
 
 def pattern3(p,goodtimes):
@@ -632,6 +633,17 @@ def find_close_of_candle(candle_ts,candle_file):
     df = get_dataframe(candle_file)
     # return float(df[df.timestamp == candle_ts]["close"])
     return float(df.loc[candle_ts]["close"])
+
+def fix_units_list(units_list):
+# This function deletes any candle_0 that happens to be between timestamps 1420449145 and 1420837504, which is a period with any historical data.
+    index = 0
+    to_remove = []
+    for unit in units_list:
+        if unit["0"]["ts"] > 1420449145 and unit["0"]["ts"] < 1420837504:
+            to_remove.append(unit)
+    for item in to_remove:
+        units_list.remove(item)
+    return units_list
 
 if __name__ == '__main__':
     time1 = time.time()
