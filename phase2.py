@@ -14,13 +14,13 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
 def main():
-    engines_door(1026)
+    engines_door(4058)
 
 def engines_door(case_id):
     logger.info("Running case_id {}".format(case_id))
     time1 = time.time()
     p = get_parameters(case_id)
-    units_list = get_units_list(p)
+    units_list = get_units_list(p)  
     triplets_list = get_triplets_list(p,units_list) 
     raw_df = get_raw(p)
     testedSetups = get_testedSetups(p,raw_df,units_list,triplets_list)
@@ -52,6 +52,7 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
     candle,moment = translate_order('buy',p['buy'])
     
     for triplet in triplets_list:
+        
         target = triplet[0]
         stop = triplet[1]
         buy_stop = triplet[2]
@@ -129,7 +130,7 @@ def get_testedSetups(p,raw_df,units_list,triplets_list):
                 
         for key in set(aux_list):
             setup[key] = aux_list.count(key)
-            
+
         if len(last_price_list) == 0:
             setup['last_price'] = None
         else:
@@ -167,7 +168,7 @@ def get_setup(setup_file):
 def get_units_list(p):
     engine = sqlalchemy.create_engine("postgresql://postgres:spectrum@localhost/postgres")
     query = "SELECT * FROM phase1 WHERE ph1 = '{}'".format(p["ph1"])
-    df = pd.read_sql_query(query,engine) 
+    df = pd.read_sql_query(query,engine)
     units_dict = df.to_dict("index")
     return [value for (key,value) in units_dict.items()]
 
